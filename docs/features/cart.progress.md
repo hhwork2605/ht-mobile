@@ -12,7 +12,7 @@ Cổng hiện tại: 5
 - [x] 5. Review subagent — DONE (không Critical; xem Vấn đề mở)
 - [x] 6. Review tay       — DONE (duyệt: làm migration + test CartService)
 - [x] 7. Test (green)     — DONE (19 unit + 5 integration pass)
-- [ ] 8. Commit           — IN_PROGRESS
+- [x] 8. Commit           — DONE (b781522)
 - [ ] 6. Review tay      — TODO
 - [ ] 7. Test (green)    — TODO
 - [ ] 8. Commit          — TODO
@@ -63,6 +63,10 @@ Cổng hiện tại: 5
 - [L2] Add dùng [FromForm]. [H2/H3] SalesConfigurations + migration CartUniqueIndexes (CHƯA apply).
 - Test: +5 integration test CartService (EF InMemory).
 
+## Hoàn tất
+- Migration CartUniqueIndexes ĐÃ apply lên DB Supabase.
+- Smoke-test runtime OK: add→302+cookie+giỏ hiện SP; inc htmx→200 partial, qty 1→2; badge header=2;
+  dec 2→0 xoá dòng→empty state. Antiforgery (form+header) hoạt động.
+
 ## Next action
-- CHỜ DUYỆT: apply migration CartUniqueIndexes lên DB (scripts/migrate.ps1 update) — side-effect ngoài repo.
-- Sau khi apply: chạy app smoke-test luồng giỏ (thêm/sửa/xóa/badge). App dev tự MigrateAsync nên chạy app = apply.
+- XONG feature giỏ hàng. Phase 2 còn: Checkout (P2-02), Auth, Tài khoản, Pricing engine đầy đủ.
