@@ -9,7 +9,7 @@
 ## Database (PostgreSQL / Supabase)
 - **PascalCase** toàn bộ bảng/cột — mặc định EF Core (theo tên CLR), **không** áp naming convention (đã bỏ `UseSnakeCaseNamingConvention()`). Định danh được EF trích dẫn (`"Products"`, `"CreatedAt"`).
 - Khóa chính `long` (bigint identity). FK cùng kiểu `long`.
-- Cột JSON (`specs_json`, `conditions_json`) map sang **`jsonb`**.
+- Cột JSON (`SpecsJson`, `ConditionsJson`) map sang **`jsonb`**.
 - Tiền tệ: `decimal(18,2)`. Thời gian: `DateTime` **giờ server** (`DateTime.Now`, qua `IDateTime`) → cột `timestamp` (without time zone); set qua interceptor `CreatedAt/UpdatedAt`. Bật `Npgsql.EnableLegacyTimestampBehavior` ở `AddInfrastructure` để map `DateTime`↔`timestamp` và bỏ kiểm tra `DateTimeKind`. (Riêng `lockout_end` của Identity vẫn là `timestamptz` do framework.)
 - Mỗi entity có 1 `IEntityTypeConfiguration<>` riêng trong `Infrastructure/Persistence/Configurations`.
 
@@ -25,6 +25,21 @@
 - Mobile-first, Tailwind utility. Component tái dùng = ViewComponent (SPEC §9).
 - Tương tác động: htmx trả **partial view**; state nhỏ dùng Alpine. Hạn chế JS rời rạc.
 - URL khách = slug (không lộ id). Resolve qua `ISlugResolver`.
+
+## SEO (bắt buộc khi gen trang/HTML)
+Mọi trang SSR phải render chuẩn SEO **ngay khi sinh code** — đích: rich result + Core Web Vitals tốt, dễ lên top.
+
+- **HTML ngữ nghĩa**: dùng landmark `<header> <nav> <main> <article> <section> <footer>`; **đúng 1 `<h1>` mỗi trang**, phân cấp `h1 → h2 → h3` hợp lý; điều hướng bằng `<a href>` thật (không `<div onclick>`).
+- **Thẻ `<head>` theo từng trang** (qua `ViewData`/section trong `_Layout`): `<title>` duy nhất (≤ 60 ký tự) + `<meta name="description">` (≤ 160) + `<link rel="canonical">`. PDP canonical về **1 URL chuẩn** để tránh trùng nội dung do nhiều variant slug. Thêm Open Graph (`og:title/description/image/type/url`) + Twitter Card.
+- **Structured data JSON-LD (schema.org)** theo loại trang:
+  - PDP → `Product` + `offers` (`priceCurrency:"VND"`, `price`, `availability`) + `aggregateRating` (nếu có review).
+  - Trang danh mục → `ItemList`; **mọi trang** → `BreadcrumbList`; `_Layout` → `Organization` + `WebSite` (kèm `SearchAction`).
+  - Bài viết → `Article`.
+- **Ảnh**: `alt` mô tả thật; **luôn set `width`/`height`** (chống CLS); `loading="lazy"` cho ảnh dưới màn đầu; URL/tên file có nghĩa.
+- **Đa ngôn ngữ**: `<html lang="...">` đúng + `<link rel="alternate" hreflang>` cho VI/EN.
+- **Crawlable**: nội dung chính phải nằm trong **HTML server-render ban đầu**; htmx chỉ để *enhance* (gợi ý, lọc, phân trang), **không** dùng để render nội dung chính (bot không chạy JS). Trang thiếu trả đúng **404**; có `robots.txt` + `sitemap.xml`; internal link có anchor mô tả.
+- **Core Web Vitals**: SSR nhanh, tránh layout shift (khung/ảnh có kích thước cố định), defer JS không thiết yếu, mobile-first.
+- URL theo **slug** sạch (đã có ở mục Web/UI) — tránh tham số rác, không lộ id.
 
 ## Đa ngôn ngữ
 - Chuỗi UI: `.resx` trong `Web/Resources` + `IStringLocalizer`.

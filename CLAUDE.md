@@ -87,6 +87,7 @@ dotnet test
 
 - DB **PascalCase** (mặc định EF Core theo tên CLR; không áp naming convention). Khóa chính `long`. JSON dùng `jsonb`.
 - URL SEO theo **slug** (`/iphone`, `/dien-thoai-...-256gb`) → `ISlugResolver`.
+- **SEO bắt buộc khi gen UI/HTML**: HTML ngữ nghĩa (đúng 1 `<h1>` + landmark), `<title>`/`<meta description>`/`<link canonical>` riêng từng trang, **JSON-LD schema.org** (`Product`/`BreadcrumbList`/`ItemList`…), Open Graph, `alt` + `width/height` cho ảnh, `hreflang` VI/EN, và **nội dung chính phải server-render** (htmx chỉ enhance — bot không chạy JS). Chi tiết & checklist: [docs/conventions.md](docs/conventions.md) §SEO.
 - Đa ngôn ngữ VI/EN: chuỗi UI qua `.resx`; nội dung DB qua entity `Translation`.
 - Giá: **luôn** qua `IPricingService` (giá theo vùng + khuyến mãi), không tính tay trong controller.
 - Secrets (connection string Supabase, Redis): để ở **user-secrets**, không commit. Xem [docs/setup.md](docs/setup.md).
