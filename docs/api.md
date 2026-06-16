@@ -12,6 +12,18 @@ GET  /api/variants/{slug}                 # chi tiết + giá hiệu lực
 GET  /api/search/suggest?q=               # autocomplete (keyword + products)
 ```
 
+## Storefront (SSR — HTML, không phải JSON)
+Route phẳng theo slug + trang SEO. Controller ở `Areas/Storefront`.
+```
+GET  /                       # Trang chủ (banner, danh mục, SP nổi bật)
+GET  /{slug}                 # ISlugResolver → Category | PDP (variant) | 404
+GET  /search?q=              # Trang kết quả tìm kiếm (server-render, <meta robots=noindex>)
+GET  /search/suggest?q=      # Partial HTML cho htmx autocomplete (gợi ý SP + "xem tất cả")
+GET  /sitemap.xml            # Sitemap (danh mục + variant chuẩn mỗi SP)
+GET  /robots.txt             # Tĩnh ở wwwroot, trỏ tới /sitemap.xml
+```
+> SEO bắt buộc mỗi trang (xem [conventions.md](conventions.md) §SEO): `_Layout` sinh `<title>`/`description`/canonical/OG/hreflang + JSON-LD `Organization`/`WebSite`; mỗi trang bổ sung JSON-LD qua section `Head` (Category → `ItemList`+`BreadcrumbList`; PDP → `Product`+`offers`(+`aggregateRating`)+`BreadcrumbList`). Helper: `Web/Infrastructure/Seo/JsonLd`.
+
 ## Pricing
 ```
 GET  /api/variants/{id}/price

@@ -1,0 +1,54 @@
+@model SearchPageDto
+@{
+    var hasQuery = !string.IsNullOrWhiteSpace(Model.Query);
+    ViewData["Title"] = hasQuery ? $"Tìm kiếm: {Model.Query}" : "Tìm kiếm";
+    ViewData["MetaDescription"] = "Tìm sản phẩm Apple chính hãng tại HtMobile.";
+}
+
+@section Head {
+    @* Trang kết quả tìm kiếm không nên được index (tránh nội dung mỏng/trùng). *@
+    <meta name="robots" content="noindex, follow" />
+}
+
+<div class="mx-auto max-w-[1180px] px-4 sm:px-6 py-6">
+    <header class="mb-6">
+        <h1 class="text-[26px] font-bold tracking-tight text-ink">
+            @(hasQuery ? $"Kết quả cho “{Model.Query}”" : "Tìm kiếm sản phẩm")
+        </h1>
+        @if (hasQuery)
+        {
+            <p class="mt-1 text-[15px] text-ink2">@Model.Products.Count sản phẩm</p>
+        }
+    </header>
+
+    <form action="/search" method="get" class="mb-8" autocomplete="off">
+        <div class="flex max-w-xl items-center gap-2 rounded-full border border-line bg-white px-4 py-2.5">
+            <i class="fa-solid fa-magnifying-glass text-ink2"></i>
+            <input type="search" name="q" value="@Model.Query" placeholder="Tìm iPhone, iPad, Mac..."
+                   class="w-full border-0 bg-transparent text-[15px] text-ink outline-none" aria-label="Từ khóa tìm kiếm" />
+            <button type="submit" class="rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-white hover:bg-accent-press">Tìm</button>
+        </div>
+    </form>
+
+    @if (!hasQuery)
+    {
+        <p class="text-ink2">Nhập từ khóa để tìm sản phẩm.</p>
+    }
+    else if (Model.Products.Count == 0)
+    {
+        <div class="rounded-card bg-surface2 p-10 text-center">
+            <i class="fa-solid fa-magnifying-glass mb-3 text-3xl text-ink2/50"></i>
+            <p class="text-ink">Không tìm thấy sản phẩm nào khớp với “<span class="font-semibold">@Model.Query</span>”.</p>
+            <p class="mt-1 text-sm text-ink2">Thử từ khóa khác hoặc xem các danh mục trên thanh menu.</p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            @foreach (var p in Model.Products)
+            {
+                <vc:product-card product="p"></vc:product-card>
+            }
+        </div>
+    }
+</div>

@@ -73,6 +73,44 @@ public class CatalogService
         };
     }
 
+    /// <summary>Danh sách URL cho sitemap.xml: danh mục + variant chuẩn (mặc định) của mỗi sản phẩm.</summary>
+    public async Task<IReadOnlyList<SitemapEntryDto>> GetSitemapEntriesAsync(CancellationToken ct = default)
+    {
+        var categories = await _db.Categories
+            .AsNoTracking()
+            .OrderBy(c => c.SortOrder)
+            .Select(c => new SitemapEntryDto(c.Slug, c.UpdatedAt ?? c.CreatedAt))
+            .ToListAsync(ct);
+
+        var products = await _db.Products
+            .AsNoTracking()
+            .Select(p => new
+            {
+                Slug = p.Variants.OrderBy(v => v.Id).Select(v => v.Slug).FirstOrDefault(),
+                Modified = p.UpdatedAt ?? p.CreatedAt
+            })
+            .ToListAsync(ct);
+
+        var entries = new List<SitemapEntryDto>(categories);
+        entries.AddRange(products
+            .Where(p => !string.IsNullOrEmpty(p.Slug))
+            .Select(p => new SitemapEntryDto(p.Slug!, p.Modified)));
+        return entries;
+    }
+
+    /// <summary>Trang kết quả tìm kiếm theo từ khóa (khớp tên sản phẩm).</summary>
+    public async Task<SearchPageDto> SearchAsync(string query, int take = 24, CancellationToken ct = default)
+    {
+        query = query?.Trim() ?? string.Empty;
+        if (query.Length < 2)
+            return new SearchPageDto { Query = query };
+
+        // Provider-agnostic (Application không ref Npgsql): EF dịch sang lower(Name) LIKE '%q%'.
+        var q = query.ToLower();
+        var products = await BuildCardsAsync(p => p.Name.ToLower().Contains(q), take, ct);
+        return new SearchPageDto { Query = query, Products = products };
+    }
+
     /// <summary>PDP theo slug của 1 biến thể (URL riêng cho mỗi variant).</summary>
     public async Task<ProductDetailDto?> GetByVariantSlugAsync(string variantSlug, CancellationToken ct = default)
     {
@@ -104,15 +142,30 @@ public class CatalogService
 
     private async Task<ProductDetailDto?> BuildDetailAsync(long productId, long selectedVariantId, CancellationToken ct)
     {
+        var now = DateTime.Now;
+
         var product = await _db.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == productId, ct);
         if (product is null) return null;
 
-        var variants = await _db.ProductVariants
+        var category = await _db.Categories
+            .AsNoTracking()
+            .Where(c => c.Id == product.CategoryId)
+            .Select(c => new { c.Name, c.Slug })
+            .FirstOrDefaultAsync(ct);
+
+        var variantRows = await _db.ProductVariants
             .AsNoTracking()
             .Where(v => v.ProductId == productId)
             .OrderBy(v => v.Id)
-            .Select(v => new VariantOptionDto(v.Id, v.Slug, v.Storage, v.Color, v.Sku, v.Id == selectedVariantId))
+            .Select(v => new { v.Id, v.Slug, v.Storage, v.Color, v.Sku, v.Status })
             .ToListAsync(ct);
+
+        var variants = variantRows
+            .Select(v => new VariantOptionDto(v.Id, v.Slug, v.Storage, v.Color, v.Sku, v.Id == selectedVariantId))
+            .ToList();
+
+        var selected = variantRows.FirstOrDefault(v => v.Id == selectedVariantId);
+        var canonicalSlug = variantRows.FirstOrDefault()?.Slug ?? product.Slug;
 
         var images = await _db.ProductImages
             .AsNoTracking()
@@ -127,6 +180,27 @@ public class CatalogService
             .Select(v => v.YoutubeUrl)
             .ToListAsync(ct);
 
+        var offers = await _db.Promotions
+            .AsNoTracking()
+            .Where(p => p.StartsAt <= now && p.EndsAt >= now)
+            .OrderBy(p => p.EndsAt)
+            .Select(p => new OfferDto(p.Name, p.EndsAt))
+            .ToListAsync(ct);
+
+        var paymentOffers = await _db.PaymentPromotions
+            .AsNoTracking()
+            .Where(p => p.StartsAt <= now && p.EndsAt >= now)
+            .OrderBy(p => p.EndsAt)
+            .Select(p => new PaymentOfferDto(p.Bank, p.Title, p.Description, p.EndsAt))
+            .ToListAsync(ct);
+
+        var reviewStats = await _db.Reviews
+            .AsNoTracking()
+            .Where(r => r.Variant.ProductId == productId)
+            .GroupBy(_ => 1)
+            .Select(g => new { Count = g.Count(), Avg = (double?)g.Average(x => x.Rating) })
+            .FirstOrDefaultAsync(ct);
+
         var price = await _pricing.GetEffectivePriceAsync(selectedVariantId, ct);
 
         return new ProductDetailDto
@@ -134,13 +208,26 @@ public class CatalogService
             ProductId = product.Id,
             Name = product.Name,
             ProductSlug = product.Slug,
+            Tagline = product.Tagline,
+            Brand = product.Brand,
             Description = product.Description,
             SpecsJson = product.SpecsJson,
+            CategoryName = category?.Name ?? string.Empty,
+            CategorySlug = category?.Slug ?? string.Empty,
             SelectedVariantId = selectedVariantId,
+            CanonicalSlug = canonicalSlug,
+            SelectedStorage = selected?.Storage,
+            SelectedColor = selected?.Color,
+            SelectedSku = selected?.Sku ?? string.Empty,
+            InStock = selected?.Status == Domain.Enums.VariantStatus.Active,
             Price = price,
             Variants = variants,
             Images = images,
-            YoutubeUrls = videos
+            YoutubeUrls = videos,
+            Offers = offers,
+            PaymentOffers = paymentOffers,
+            ReviewCount = reviewStats?.Count ?? 0,
+            AverageRating = reviewStats?.Avg
         };
     }
 
@@ -183,7 +270,8 @@ public class CatalogService
                 FinalPrice = price.FinalPrice,
                 CompareAtPrice = price.CompareAtPrice,
                 DiscountPercent = price.DiscountPercent,
-                IsNew = CatalogBadge.IsNew(p.CreatedAt, now)
+                IsNew = CatalogBadge.IsNew(p.CreatedAt, now),
+                Series = CatalogBadge.Series(p.Name)
             });
         }
         return cards;

@@ -1,31 +1,105 @@
 @model CategoryPageDto
 @{
     ViewData["Title"] = Model.Name;
+    ViewData["MetaDescription"] = string.IsNullOrWhiteSpace(Model.SeoContent)
+        ? $"Mua {Model.Name} chính hãng tại HtMobile — giá tốt, trả góp 0%, thu cũ đổi mới, giao nhanh toàn quốc."
+        : System.Text.RegularExpressions.Regex.Replace(Model.SeoContent, "<.*?>", " ").Trim();
+
+    var req = Context.Request;
+    var baseUrl = $"{req.Scheme}://{req.Host}";
+    var canonical = $"{baseUrl}/{Model.Slug}";
+
+    // Tab lọc series (dòng máy) — server-render đủ chip, Alpine chỉ ẩn/hiện (htmx-enhance, bot vẫn thấy mọi SP).
+    var seriesList = Model.Products
+        .Select(p => p.Series)
+        .Where(s => !string.IsNullOrWhiteSpace(s))
+        .Distinct()
+        .ToList();
+    var showTabs = seriesList.Count > 1;
 }
 
-<nav class="mb-4 text-sm text-gray-500">
-    <a href="/" class="hover:text-blue-600">Trang chủ</a> / <span class="text-gray-700">@Model.Name</span>
-</nav>
-
-<h1 class="mb-4 text-2xl font-bold">@Model.Name</h1>
-
-@if (Model.Products.Count == 0)
-{
-    <p class="text-gray-500">Danh mục này chưa có sản phẩm.</p>
-}
-else
-{
-    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        @foreach (var p in Model.Products)
+@section Head {
+    <script type="application/ld+json">@Html.Raw(JsonLd.Breadcrumb(new[]
+    {
+        ("Trang chủ", baseUrl),
+        (Model.Name, canonical)
+    }))</script>
+    @if (Model.Products.Count > 0)
+    {
+        <script type="application/ld+json">@Html.Raw(JsonLd.Serialize(new Dictionary<string, object?>
         {
-            <vc:product-card product="p"></vc:product-card>
-        }
-    </div>
+            ["@context"] = "https://schema.org",
+            ["@type"] = "ItemList",
+            ["name"] = Model.Name,
+            ["numberOfItems"] = Model.Products.Count,
+            ["itemListElement"] = Model.Products.Select((p, idx) => new Dictionary<string, object?>
+            {
+                ["@type"] = "ListItem",
+                ["position"] = idx + 1,
+                ["url"] = $"{baseUrl}/{p.VariantSlug}",
+                ["name"] = p.Name
+            }).ToList()
+        }))</script>
+    }
 }
 
-@if (!string.IsNullOrWhiteSpace(Model.SeoContent))
-{
-    <section class="prose mt-10 max-w-none rounded-lg bg-white p-6 text-sm">
-        @Html.Raw(Model.SeoContent)
-    </section>
-}
+<div class="mx-auto max-w-[1180px] px-4 sm:px-6 py-6" x-data="{ series: 'all' }">
+
+    <nav aria-label="Breadcrumb" class="mb-4 text-[13px] text-ink2">
+        <ol class="flex flex-wrap items-center gap-1.5">
+            <li><a href="/" class="hover:text-accent">Trang chủ</a></li>
+            <li aria-hidden="true">/</li>
+            <li><span class="text-ink" aria-current="page">@Model.Name</span></li>
+        </ol>
+    </nav>
+
+    <header class="mb-6">
+        <h1 class="text-[28px] font-bold tracking-tight text-ink">@Model.Name</h1>
+        <p class="mt-1 text-[15px] text-ink2">@Model.Products.Count sản phẩm</p>
+    </header>
+
+    @if (showTabs)
+    {
+        <div class="mb-6 flex flex-wrap gap-2" role="tablist" aria-label="Lọc theo dòng máy">
+            <button type="button" role="tab" @@click="series = 'all'"
+                    :class="series === 'all' ? 'bg-accent text-white' : 'bg-surface2 text-ink hover:bg-line'"
+                    class="rounded-full px-4 py-2 text-sm font-semibold transition">Tất cả</button>
+            @foreach (var s in seriesList)
+            {
+                <button type="button" role="tab" @@click="series = '@s'"
+                        :class="series === '@s' ? 'bg-accent text-white' : 'bg-surface2 text-ink hover:bg-line'"
+                        class="rounded-full px-4 py-2 text-sm font-semibold transition">@s</button>
+            }
+        </div>
+    }
+
+    @if (Model.Products.Count == 0)
+    {
+        <p class="rounded-card bg-surface2 p-8 text-center text-ink2">Danh mục này chưa có sản phẩm.</p>
+    }
+    else
+    {
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            @foreach (var p in Model.Products)
+            {
+                @if (showTabs)
+                {
+                    <div x-show="series === 'all' || series === '@p.Series'" x-transition.opacity>
+                        <vc:product-card product="p"></vc:product-card>
+                    </div>
+                }
+                else
+                {
+                    <vc:product-card product="p"></vc:product-card>
+                }
+            }
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.SeoContent))
+    {
+        <section class="prose mt-10 max-w-none rounded-card bg-surface2 p-6 text-sm text-ink2">
+            @Html.Raw(Model.SeoContent)
+        </section>
+    }
+</div>

@@ -24,7 +24,16 @@ public class CatalogController : Controller
     public async Task<IActionResult> Suggest(string? q, CancellationToken ct)
     {
         var result = await _search.SuggestAsync(q ?? string.Empty, 8, ct);
+        ViewData["q"] = q?.Trim();
         return PartialView("_SearchSuggest", result);
+    }
+
+    /// <summary>Trang kết quả tìm kiếm (server-render để bot index được).</summary>
+    [HttpGet("/search")]
+    public async Task<IActionResult> Search(string? q, CancellationToken ct)
+    {
+        var page = await _catalog.SearchAsync(q ?? string.Empty, 24, ct);
+        return View("Search", page);
     }
 
     /// <summary>URL SEO phẳng: phân giải slug → trang danh mục hoặc PDP.</summary>

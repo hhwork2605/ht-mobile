@@ -13,17 +13,18 @@
 
 ## Phase 1 — Catalog & tìm kiếm  → `phase-1-catalog/`
 - [x] Trang chủ: banner slider + tile danh mục + lưới SP nổi bật + bento + trust bar (P1-01)
-- [ ] Trang danh mục: tab lọc series + lưới SP + block SEO + breadcrumb
-- [ ] PDP đầy đủ: gallery, video, VariantSelector, OfferList, cam kết, mô tả, review
-- [ ] Search autocomplete (Postgres FTS): keyword + product suggestions
+- [x] Trang danh mục: tab lọc series (client-side) + lưới SP + block SEO + breadcrumb + JSON-LD ItemList/BreadcrumbList
+- [x] PDP đầy đủ: gallery+thumbnail, video, VariantSelector, OfferList + ưu đãi thanh toán, cam kết, mô tả, review summary + JSON-LD Product
+- [x] Search: trang kết quả /search (server-render, noindex) + autocomplete partial + sitemap.xml/robots.txt
 - [x] ProductCard (badge giảm %, mới, giá gạch) + ViewComponent tái dùng (P1-01)
+- [x] Nền SEO: _Layout (canonical/OG/hreflang/JSON-LD Organization+WebSite) + helper JsonLd
 
 ## Phase 2 — Mua hàng  → `phase-2-cart-checkout/`
 - [ ] Giỏ hàng (guest theo session + user) + cập nhật SL + empty state
 - [ ] Checkout: thông tin nhận hàng + phương thức giao + thanh toán
 - [ ] Đăng ký / Đăng nhập / Quên mật khẩu / Nhớ đăng nhập (Identity)
 - [ ] Tài khoản + lịch sử đơn hàng
-- [ ] Pricing engine đầy đủ: giá theo vùng + khuyến mãi nhiều tầng + cache Redis
+- [ ] Pricing engine đầy đủ: khuyến mãi nhiều tầng + điều kiện (ConditionsJson) + cache Redis (giá một mức toàn quốc — ADR-0002)
 
 ## Phase 3 — Nghiệp vụ đặc thù  → `phase-3-business/`
 - [ ] Bundle "mua kèm phụ kiện" (tổng tiết kiệm)
@@ -40,7 +41,7 @@
 - [ ] Định vị cửa hàng + check IMEI + tra cứu hoá đơn
 
 ## Phase 5 — Hoàn thiện  → `phase-5-admin-polish/`
-- [ ] Admin: danh mục/SP/biến thể/tồn kho theo cửa hàng & vùng
+- [ ] Admin: danh mục/SP/biến thể/tồn kho theo cửa hàng
 - [ ] Admin: khuyến mãi/campaign + đơn hàng + người dùng & phân quyền + CMS
 - [ ] Báo cáo doanh thu / đơn hàng
 - [ ] SEO nâng cao (structured data) + tối ưu hiệu năng + kiểm thử bảo mật

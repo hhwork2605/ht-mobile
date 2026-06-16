@@ -1,10 +1,71 @@
 @inject HtMobile.Application.Common.Interfaces.ICurrentUser CurrentUser
+@{
+    // ===== SEO per-page (docs/conventions.md §SEO) =====
+    var req = Context.Request;
+    var baseUrl = $"{req.Scheme}://{req.Host}";
+    // Canonical mặc định = URL hiện tại không kèm query; trang đặt ViewData["Canonical"] để ghi đè
+    // (vd PDP gom mọi variant slug về 1 URL chuẩn).
+    var canonical = ViewData["Canonical"] as string ?? $"{baseUrl}{req.Path}";
+    var pageTitle = ViewData["Title"] as string;
+    var fullTitle = string.IsNullOrWhiteSpace(pageTitle) ? "HtMobile — Apple chính hãng" : $"{pageTitle} - HtMobile";
+    var metaDescription = ViewData["MetaDescription"] as string
+        ?? "HtMobile — hệ thống bán lẻ sản phẩm Apple chính hãng: iPhone, iPad, Mac, Apple Watch, phụ kiện. Trả góp 0%, thu cũ đổi mới, giao nhanh toàn quốc.";
+    var ogImage = ViewData["OgImage"] as string ?? $"{baseUrl}/images/placeholder.svg";
+    var ogType = ViewData["OgType"] as string ?? "website";
+}
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - HtMobile</title>
+    <title>@fullTitle</title>
+    <meta name="description" content="@metaDescription" />
+    <link rel="canonical" href="@canonical" />
+    @* Đa ngôn ngữ: VI hiện hành; routing /en sẽ thêm ở Phase 4 (CMS) nên chưa khai báo hreflang en để tránh trỏ URL 404. *@
+    <link rel="alternate" hreflang="vi" href="@canonical" />
+    <link rel="alternate" hreflang="x-default" href="@canonical" />
+
+    @* Open Graph + Twitter Card *@
+    <meta property="og:site_name" content="HtMobile" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:type" content="@ogType" />
+    <meta property="og:title" content="@fullTitle" />
+    <meta property="og:description" content="@metaDescription" />
+    <meta property="og:url" content="@canonical" />
+    <meta property="og:image" content="@ogImage" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@fullTitle" />
+    <meta name="twitter:description" content="@metaDescription" />
+    <meta name="twitter:image" content="@ogImage" />
+
+    @* JSON-LD toàn site: Organization + WebSite (kèm SearchAction) *@
+    <script type="application/ld+json">@Html.Raw(JsonLd.Serialize(new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "Organization",
+        ["name"] = "HtMobile",
+        ["url"] = baseUrl,
+        ["logo"] = $"{baseUrl}/favicon.ico"
+    }))</script>
+    <script type="application/ld+json">@Html.Raw(JsonLd.Serialize(new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "WebSite",
+        ["name"] = "HtMobile",
+        ["url"] = baseUrl,
+        ["potentialAction"] = new Dictionary<string, object?>
+        {
+            ["@type"] = "SearchAction",
+            ["target"] = new Dictionary<string, object?>
+            {
+                ["@type"] = "EntryPoint",
+                ["urlTemplate"] = $"{baseUrl}/search?q={{search_term_string}}"
+            },
+            ["query-input"] = "required name=search_term_string"
+        }
+    }))</script>
+
+    @await RenderSectionAsync("Head", required: false)
 
     @* Theme tokens (luôn có ở cả dev & prod). Đổi giá trị ở đây hoặc app.css để đổi theme. *@
     <style>

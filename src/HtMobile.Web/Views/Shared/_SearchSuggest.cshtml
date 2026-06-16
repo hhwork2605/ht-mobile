@@ -1,18 +1,28 @@
 @model HtMobile.Application.Common.Interfaces.SearchSuggestResult
+@{
+    var q = ViewData["q"] as string;
+}
 
 @if (Model.Products.Count == 0)
 {
     return;
 }
 
-<div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+<div class="overflow-hidden rounded-card border border-line bg-white shadow-lg">
     @foreach (var p in Model.Products)
     {
-        <a href="/@p.Slug" class="flex items-center gap-3 px-3 py-2 hover:bg-blue-50">
+        <a href="/@p.Slug" class="flex items-center gap-3 px-3 py-2 hover:bg-surface2">
             <img src="@(string.IsNullOrEmpty(p.ThumbnailUrl) ? "/images/placeholder.svg" : p.ThumbnailUrl)"
-                 alt="@p.Name" class="h-10 w-10 object-contain" />
-            <span class="flex-1 text-sm">@p.Name</span>
-            <span class="text-sm font-semibold text-red-600">@p.Price.ToString("#,##0")₫</span>
+                 alt="@p.Name" width="40" height="40" loading="lazy" class="h-10 w-10 object-contain" />
+            <span class="flex-1 text-sm text-ink">@p.Name</span>
+            <span class="text-sm font-semibold text-accent">@p.Price.ToString("#,##0")₫</span>
+        </a>
+    }
+    @if (!string.IsNullOrWhiteSpace(q))
+    {
+        <a href="/search?q=@Uri.EscapeDataString(q)"
+           class="block border-t border-line px-3 py-2 text-center text-[13px] font-semibold text-accent hover:bg-surface2">
+            Xem tất cả kết quả cho “@q” ›
         </a>
     }
 </div>

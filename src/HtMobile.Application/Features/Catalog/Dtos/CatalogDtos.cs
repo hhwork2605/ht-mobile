@@ -17,6 +17,9 @@ public record ProductCardDto
     public decimal? CompareAtPrice { get; init; }
     public int DiscountPercent { get; init; }
     public bool IsNew { get; init; }
+
+    /// <summary>Dòng máy (series) để lọc trên trang danh mục, vd "iPhone 17". Suy ra từ tên sản phẩm.</summary>
+    public string Series { get; init; } = string.Empty;
 }
 
 /// <summary>Slide banner cho carousel trang chủ.</summary>
@@ -28,6 +31,16 @@ public record HomePageDto
     public IReadOnlyList<BannerDto> Banners { get; init; } = Array.Empty<BannerDto>();
     public IReadOnlyList<CategoryDto> Categories { get; init; } = Array.Empty<CategoryDto>();
     public IReadOnlyList<ProductCardDto> Featured { get; init; } = Array.Empty<ProductCardDto>();
+}
+
+/// <summary>Một URL trong sitemap.xml (slug gốc + lần sửa cuối).</summary>
+public record SitemapEntryDto(string Slug, DateTime? LastModified);
+
+/// <summary>Trang kết quả tìm kiếm: từ khóa + lưới sản phẩm khớp.</summary>
+public record SearchPageDto
+{
+    public string Query { get; init; } = string.Empty;
+    public IReadOnlyList<ProductCardDto> Products { get; init; } = Array.Empty<ProductCardDto>();
 }
 
 /// <summary>Trang danh mục: thông tin danh mục + lưới sản phẩm + block SEO.</summary>
