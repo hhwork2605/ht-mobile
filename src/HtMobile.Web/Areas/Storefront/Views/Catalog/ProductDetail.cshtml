@@ -145,7 +145,13 @@
 
             @* Hành động mua (SPEC §5) *@
             <div class="mt-6 grid gap-2.5 sm:grid-cols-2">
-                <button class="rounded-full bg-accent px-4 py-3 font-semibold text-white transition hover:bg-accent-press">MUA NGAY</button>
+                <form method="post" action="/cart/items" class="contents">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="variantId" value="@Model.SelectedVariantId" />
+                    <button type="submit" class="rounded-full bg-accent px-4 py-3 font-semibold text-white transition hover:bg-accent-press">
+                        <i class="fa-solid fa-cart-shopping mr-1.5"></i>MUA NGAY
+                    </button>
+                </form>
                 <button class="rounded-full border-[1.5px] border-accent px-4 py-3 font-semibold text-accent transition hover:bg-accent/5">Trả góp 0%</button>
                 <button class="rounded-full border border-line px-4 py-3 text-sm text-ink transition hover:bg-surface2">Trả góp qua thẻ</button>
                 <button class="rounded-full border border-line px-4 py-3 text-sm text-ink transition hover:bg-surface2">Thu cũ đổi mới</button>

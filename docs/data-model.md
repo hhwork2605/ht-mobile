@@ -162,7 +162,7 @@ Quan hệ: `Items` (CartItem). Lưu ý: giỏ khách vãng lai có thể cache �
 | `CartId` | `long` | FK → `Carts.Id` | Giỏ chứa dòng. |
 | `VariantId` | `long` | FK → `ProductVariants.Id` | Biến thể được thêm. |
 | `Quantity` | `int` | | Số lượng. |
-| `UnitPrice` | `decimal(18,2)` | | Đơn giá tại thời điểm thêm (snapshot). |
+| `UnitPrice` | `decimal(18,2)` | | Đơn giá snapshot lúc thêm. **Hiển thị giỏ dùng giá hiệu lực hiện tại qua `IPricingService`** (phản ánh KM đang chạy), không tin cột này — tránh giá cũ. Chốt cứng khi đặt hàng (`OrderItem.UnitPrice`). |
 
 ### `Orders` ✅ Audit — đơn hàng
 

@@ -11,6 +11,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSession();
 
+// Antiforgery: cho phép htmx gửi token qua header (xem _Layout htmx:configRequest).
+builder.Services.AddAntiforgery(o => o.HeaderName = "RequestVerificationToken");
+
 // Clean Architecture: nối các lớp tại composition root
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -18,6 +21,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // Adapter mức Web cho interface khai báo ở Application
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddScoped<ISlugResolver, SlugResolver>();
+builder.Services.AddScoped<HtMobile.Web.Infrastructure.CartContext>();
 
 var app = builder.Build();
 

@@ -1,0 +1,83 @@
+@model HtMobile.Application.Features.Cart.Dtos.CartDto
+
+<div id="cart-body">
+    @if (Model.IsEmpty)
+    {
+        <div class="rounded-card border border-line py-16 text-center">
+            <i class="fa-solid fa-cart-shopping text-[46px] text-ink2 opacity-40"></i>
+            <p class="mx-0 my-4 text-base text-ink2">Giỏ hàng của bạn đang trống.</p>
+            <a href="/" class="inline-block rounded-xl bg-accent px-7 py-3 text-[15px] font-semibold text-white transition hover:bg-accent-press">Tiếp tục mua sắm</a>
+        </div>
+    }
+    else
+    {
+        <div class="flex flex-wrap items-start gap-7">
+            @* ===== Danh sách dòng giỏ ===== *@
+            <div class="flex min-w-[280px] flex-1 flex-col gap-3.5">
+                @foreach (var it in Model.Items)
+                {
+                    <div class="flex items-center gap-4 rounded-2xl border border-line p-3.5">
+                        <a href="/@it.VariantSlug" class="flex h-[74px] w-[74px] flex-none items-center justify-center rounded-xl bg-surface2">
+                            <img src="@(string.IsNullOrEmpty(it.ThumbnailUrl) ? "/images/placeholder.svg" : it.ThumbnailUrl)"
+                                 alt="@it.ProductName" width="74" height="74" loading="lazy" class="h-full w-full object-contain p-1.5" />
+                        </a>
+                        <div class="min-w-0 flex-1">
+                            <a href="/@it.VariantSlug" class="text-[15px] font-semibold text-ink hover:text-accent">@it.ProductName</a>
+                            @if (!string.IsNullOrWhiteSpace(it.VariantText))
+                            {
+                                <div class="mt-0.5 text-[12.5px] text-ink2">@it.VariantText</div>
+                            }
+                            <div class="mt-1.5 text-[15px] font-bold text-sale">@it.UnitPrice.ToString("#,##0")₫</div>
+                        </div>
+                        <div class="flex flex-col items-end gap-2.5">
+                            <button hx-post="/cart/items/@it.Id/remove" hx-target="#cart-body" hx-swap="outerHTML"
+                                    class="cursor-pointer border-0 bg-transparent text-ink2 hover:text-sale" aria-label="Xoá @it.ProductName">
+                                <i class="fa-regular fa-trash-can text-[15px]"></i>
+                            </button>
+                            <div class="flex items-center overflow-hidden rounded-[10px] border border-line">
+                                <button hx-post="/cart/items/@it.Id/dec" hx-target="#cart-body" hx-swap="outerHTML"
+                                        class="h-8 w-8 cursor-pointer border-0 bg-white text-base text-ink hover:bg-surface2" aria-label="Giảm số lượng">−</button>
+                                <span class="w-[34px] text-center text-sm font-semibold text-ink" aria-live="polite">@it.Quantity</span>
+                                <button hx-post="/cart/items/@it.Id/inc" hx-target="#cart-body" hx-swap="outerHTML"
+                                        class="h-8 w-8 cursor-pointer border-0 bg-white text-base text-ink hover:bg-surface2" aria-label="Tăng số lượng">+</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @* ===== Tóm tắt đơn hàng ===== *@
+            <aside class="w-[340px] max-w-full flex-none rounded-2xl border border-line p-5">
+                <h2 class="mb-4 text-[17px] font-bold text-ink">Tóm tắt đơn hàng</h2>
+                <div class="mb-2.5 flex justify-between text-sm text-ink2">
+                    <span>Tạm tính (@Model.Count sản phẩm)</span>
+                    <span class="font-semibold text-ink">@Model.Subtotal.ToString("#,##0")₫</span>
+                </div>
+                <div class="mb-1 flex justify-between text-sm text-ink2">
+                    <span>Phí vận chuyển</span>
+                    <span class="font-semibold text-green-600">Miễn phí</span>
+                </div>
+
+                @* Mã giảm giá: UI có sẵn nhưng logic để Phase promotions (chưa xử lý). *@
+                <div class="my-3.5 flex gap-2">
+                    <input placeholder="Mã giảm giá" disabled
+                           class="flex-1 rounded-[10px] border border-line px-3 py-2.5 text-[13.5px] text-ink outline-none disabled:bg-surface2 disabled:text-ink2" />
+                    <button type="button" disabled title="Sắp có"
+                            class="cursor-not-allowed rounded-[10px] bg-surface2 px-4 text-[13.5px] font-semibold text-ink2">Áp dụng</button>
+                </div>
+
+                <div class="mt-1.5 flex items-baseline justify-between border-t border-line pt-3.5">
+                    <span class="text-[15px] font-bold text-ink">Tổng cộng</span>
+                    <span class="text-[22px] font-bold text-sale">@Model.Total.ToString("#,##0")₫</span>
+                </div>
+
+                @* Checkout là P2-02 (ngoài phạm vi feature giỏ) → tạm khoá. *@
+                <button type="button" disabled title="Thanh toán sẽ có ở bước sau (P2-02)"
+                        class="mt-4 w-full cursor-not-allowed rounded-xl bg-accent/50 py-3.5 text-base font-bold text-white">
+                    Tiến hành thanh toán
+                </button>
+                <a href="/" class="mt-2.5 block w-full text-center text-sm text-accent hover:underline">Tiếp tục mua sắm</a>
+            </aside>
+        </div>
+    }
+</div>

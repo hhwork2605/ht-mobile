@@ -22,6 +22,19 @@ GET  /search/suggest?q=      # Partial HTML cho htmx autocomplete (gợi ý SP +
 GET  /sitemap.xml            # Sitemap (danh mục + variant chuẩn mỗi SP)
 GET  /robots.txt             # Tĩnh ở wwwroot, trỏ tới /sitemap.xml
 ```
+
+### Giỏ hàng (MVC + htmx — partial HTML, không phải REST JSON)
+Giỏ gắn `CustomerId` (user) hoặc `SessionId` = cookie GUID `htm_cart` (guest). Mọi POST có antiforgery token.
+```
+GET  /cart                       # Trang giỏ (server-render: list item + tóm tắt | empty state)
+POST /cart/items                 # body: variantId, quantity=1 → thêm; redirect về /cart
+POST /cart/items/{id}/inc        # +1 → trả partial _CartBody (htmx)
+POST /cart/items/{id}/dec        # -1 (về 0 thì xoá dòng) → partial _CartBody (htmx)
+POST /cart/items/{id}/remove     # xoá dòng → partial _CartBody (htmx)
+```
+> Badge số lượng ở header: ViewComponent `CartBadge`. Đơn giá mỗi dòng = giá hiệu lực qua `IPricingService`.
+> Merge giỏ guest→user: `ICartService.MergeAsync` (gọi sau khi đăng nhập — nối ở feature auth P2).
+> REST `/api/cart/*` (SPEC §8) để dành cho đối tác/app sau; storefront dùng route MVC trên.
 > SEO bắt buộc mỗi trang (xem [conventions.md](conventions.md) §SEO): `_Layout` sinh `<title>`/`description`/canonical/OG/hreflang + JSON-LD `Organization`/`WebSite`; mỗi trang bổ sung JSON-LD qua section `Head` (Category → `ItemList`+`BreadcrumbList`; PDP → `Product`+`offers`(+`aggregateRating`)+`BreadcrumbList`). Helper: `Web/Infrastructure/Seo/JsonLd`.
 
 ## Pricing

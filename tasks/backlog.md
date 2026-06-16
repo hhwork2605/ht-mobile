@@ -20,7 +20,7 @@
 - [x] Nền SEO: _Layout (canonical/OG/hreflang/JSON-LD Organization+WebSite) + helper JsonLd
 
 ## Phase 2 — Mua hàng  → `phase-2-cart-checkout/`
-- [ ] Giỏ hàng (guest theo session + user) + cập nhật SL + empty state
+- [x] Giỏ hàng (guest theo session + user) + cập nhật SL + empty state (P2-01) — *migration CartUniqueIndexes chờ apply*
 - [ ] Checkout: thông tin nhận hàng + phương thức giao + thanh toán
 - [ ] Đăng ký / Đăng nhập / Quên mật khẩu / Nhớ đăng nhập (Identity)
 - [ ] Tài khoản + lịch sử đơn hàng

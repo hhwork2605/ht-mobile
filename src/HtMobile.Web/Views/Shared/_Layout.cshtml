@@ -1,5 +1,9 @@
 @inject HtMobile.Application.Common.Interfaces.ICurrentUser CurrentUser
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
+    // Token antiforgery cho mọi POST của htmx (giỏ hàng…). Header khớp AddAntiforgery ở Program.cs.
+    var xsrfToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+
     // ===== SEO per-page (docs/conventions.md §SEO) =====
     var req = Context.Request;
     var baseUrl = $"{req.Scheme}://{req.Host}";
@@ -18,6 +22,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="xsrf-token" content="@xsrfToken" />
     <title>@fullTitle</title>
     <meta name="description" content="@metaDescription" />
     <link rel="canonical" href="@canonical" />
@@ -137,8 +142,9 @@
                class="flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5" aria-label="Tài khoản">
                 <i class="fa-regular fa-circle-user text-lg"></i>
             </a>
-            <a href="/cart" class="flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5" aria-label="Giỏ hàng">
+            <a href="/cart" class="relative flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5" aria-label="Giỏ hàng">
                 <i class="fa-solid fa-cart-shopping text-lg"></i>
+                <vc:cart-badge></vc:cart-badge>
             </a>
         </div>
     </header>
@@ -208,6 +214,13 @@
 
     <script src="https://unpkg.com/htmx.org@2.0.3"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        // Gắn token antiforgery vào mọi request htmx (POST giỏ hàng…).
+        document.body.addEventListener('htmx:configRequest', function (e) {
+            var m = document.querySelector('meta[name="xsrf-token"]');
+            if (m) e.detail.headers['RequestVerificationToken'] = m.getAttribute('content');
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
