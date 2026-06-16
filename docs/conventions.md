@@ -7,7 +7,7 @@
 - ViewComponent: `XViewComponent` + View `Components/X/Default.cshtml`.
 
 ## Database (PostgreSQL / Supabase)
-- **snake_case** toàn bộ bảng/cột — tự động qua `EFCore.NamingConventions` (cấu hình ở `AppDbContext`).
+- **PascalCase** toàn bộ bảng/cột — mặc định EF Core (theo tên CLR), **không** áp naming convention (đã bỏ `UseSnakeCaseNamingConvention()`). Định danh được EF trích dẫn (`"Products"`, `"CreatedAt"`).
 - Khóa chính `long` (bigint identity). FK cùng kiểu `long`.
 - Cột JSON (`specs_json`, `conditions_json`) map sang **`jsonb`**.
 - Tiền tệ: `decimal(18,2)`. Thời gian: `DateTime` **giờ server** (`DateTime.Now`, qua `IDateTime`) → cột `timestamp` (without time zone); set qua interceptor `CreatedAt/UpdatedAt`. Bật `Npgsql.EnableLegacyTimestampBehavior` ở `AddInfrastructure` để map `DateTime`↔`timestamp` và bỏ kiểm tra `DateTimeKind`. (Riêng `lockout_end` của Identity vẫn là `timestamptz` do framework.)

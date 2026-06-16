@@ -85,7 +85,7 @@ dotnet test
 
 ## Quy ước
 
-- DB **snake_case** (qua `EFCore.NamingConventions`). Khóa chính `long`. JSON dùng `jsonb`.
+- DB **PascalCase** (mặc định EF Core theo tên CLR; không áp naming convention). Khóa chính `long`. JSON dùng `jsonb`.
 - URL SEO theo **slug** (`/iphone`, `/dien-thoai-...-256gb`) → `ISlugResolver`.
 - Đa ngôn ngữ VI/EN: chuỗi UI qua `.resx`; nội dung DB qua entity `Translation`.
 - Giá: **luôn** qua `IPricingService` (giá theo vùng + khuyến mãi), không tính tay trong controller.

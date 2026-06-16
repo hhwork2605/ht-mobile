@@ -18,7 +18,7 @@ namespace HtMobile.Infrastructure.Persistence;
 
 /// <summary>
 /// DbContext gốc: kết hợp ASP.NET Identity (khóa <see cref="long"/>) và <see cref="IApplicationDbContext"/>.
-/// snake_case áp dụng ở tầng DI qua <c>UseSnakeCaseNamingConvention()</c>.
+/// Tên bảng/cột theo <b>PascalCase</b> (mặc định EF Core, theo tên CLR) — không áp naming convention.
 /// </summary>
 public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<long>, long>, IApplicationDbContext
 {

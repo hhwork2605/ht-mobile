@@ -1,6 +1,6 @@
 # Data model (tham chiếu — nguồn gốc SPEC §7)
 
-Khóa chính `long`. JSON → `jsonb`. snake_case. Khách hàng = `ApplicationUser : IdentityUser<long>`
+Khóa chính `long`. JSON → `jsonb`. Tên bảng/cột **PascalCase** (mặc định EF Core). Khách hàng = `ApplicationUser : IdentityUser<long>`
 (Infrastructure/Identity) — gộp các field của `Customer` trong SPEC.
 
 ## Catalog (`Domain/Entities/Catalog`)

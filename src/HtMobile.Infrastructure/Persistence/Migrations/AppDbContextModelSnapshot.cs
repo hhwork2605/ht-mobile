@@ -27,1331 +27,1062 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("name");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<long?>("ParentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("parent_id");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("SeoContent")
-                        .HasColumnType("text")
-                        .HasColumnName("seo_content");
+                        .HasColumnType("text");
 
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("slug");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int>("SortOrder")
-                        .HasColumnType("integer")
-                        .HasColumnName("sort_order");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_categories");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ParentId")
-                        .HasDatabaseName("ix_categories_parent_id");
+                    b.HasIndex("ParentId");
 
                     b.HasIndex("Slug")
-                        .IsUnique()
-                        .HasDatabaseName("ix_categories_slug");
+                        .IsUnique();
 
-                    b.ToTable("categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.Product", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Brand")
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("brand");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<long>("CategoryId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("category_id");
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("character varying(300)")
-                        .HasColumnName("name");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("character varying(300)")
-                        .HasColumnName("slug");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<string>("SpecsJson")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("specs_json");
+                        .HasColumnType("jsonb");
 
                     b.Property<string>("Tagline")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("tagline");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_products");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CategoryId")
-                        .HasDatabaseName("ix_products_category_id");
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("Slug")
-                        .IsUnique()
-                        .HasDatabaseName("ix_products_slug");
+                        .IsUnique();
 
-                    b.ToTable("products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.ProductImage", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("ProductId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("product_id");
+                        .HasColumnType("bigint");
 
                     b.Property<int>("SortOrder")
-                        .HasColumnType("integer")
-                        .HasColumnName("sort_order");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("url");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<long?>("VariantId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("variant_id");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("Id")
-                        .HasName("pk_product_images");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ProductId")
-                        .HasDatabaseName("ix_product_images_product_id");
+                    b.HasIndex("ProductId");
 
-                    b.HasIndex("VariantId")
-                        .HasDatabaseName("ix_product_images_variant_id");
+                    b.HasIndex("VariantId");
 
-                    b.ToTable("product_images", (string)null);
+                    b.ToTable("ProductImages");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.ProductVariant", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("BasePrice")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("base_price");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<string>("Color")
                         .HasMaxLength(60)
-                        .HasColumnType("character varying(60)")
-                        .HasColumnName("color");
+                        .HasColumnType("character varying(60)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long>("ProductId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("product_id");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Sku")
                         .IsRequired()
                         .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("sku");
+                        .HasColumnType("character varying(80)");
 
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(320)
-                        .HasColumnType("character varying(320)")
-                        .HasColumnName("slug");
+                        .HasColumnType("character varying(320)");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Storage")
                         .HasMaxLength(40)
-                        .HasColumnType("character varying(40)")
-                        .HasColumnName("storage");
+                        .HasColumnType("character varying(40)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_product_variants");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ProductId")
-                        .HasDatabaseName("ix_product_variants_product_id");
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("Sku")
-                        .IsUnique()
-                        .HasDatabaseName("ix_product_variants_sku");
+                        .IsUnique();
 
                     b.HasIndex("Slug")
-                        .IsUnique()
-                        .HasDatabaseName("ix_product_variants_slug");
+                        .IsUnique();
 
-                    b.ToTable("product_variants", (string)null);
+                    b.ToTable("ProductVariants");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.ProductVideo", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("ProductId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("product_id");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("YoutubeUrl")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("youtube_url");
+                        .HasColumnType("text");
 
-                    b.HasKey("Id")
-                        .HasName("pk_product_videos");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ProductId")
-                        .HasDatabaseName("ix_product_videos_product_id");
+                    b.HasIndex("ProductId");
 
-                    b.ToTable("product_videos", (string)null);
+                    b.ToTable("ProductVideos");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Cms.Article", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Body")
-                        .HasColumnType("text")
-                        .HasColumnName("body");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("PublishedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("published_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("character varying(300)")
-                        .HasColumnName("slug");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("character varying(300)")
-                        .HasColumnName("title");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_articles");
+                    b.HasKey("Id");
 
                     b.HasIndex("Slug")
-                        .IsUnique()
-                        .HasDatabaseName("ix_articles_slug");
+                        .IsUnique();
 
-                    b.ToTable("articles", (string)null);
+                    b.ToTable("Articles");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Cms.Banner", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CtaText")
                         .HasMaxLength(60)
-                        .HasColumnType("character varying(60)")
-                        .HasColumnName("cta_text");
+                        .HasColumnType("character varying(60)");
 
                     b.Property<DateTime?>("EndsAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("ends_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Eyebrow")
                         .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("eyebrow");
+                        .HasColumnType("character varying(80)");
 
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("image_url");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_active");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("LinkUrl")
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("link_url");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<int>("SortOrder")
-                        .HasColumnType("integer")
-                        .HasColumnName("sort_order");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("StartsAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("starts_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Subtitle")
                         .HasMaxLength(300)
-                        .HasColumnType("character varying(300)")
-                        .HasColumnName("subtitle");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("title");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_banners");
+                    b.HasKey("Id");
 
-                    b.HasIndex("IsActive", "SortOrder")
-                        .HasDatabaseName("ix_banners_is_active_sort_order");
+                    b.HasIndex("IsActive", "SortOrder");
 
-                    b.ToTable("banners", (string)null);
+                    b.ToTable("Banners");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Cms.Page", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Body")
-                        .HasColumnType("text")
-                        .HasColumnName("body");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("slug");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("character varying(300)")
-                        .HasColumnName("title");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_pages");
+                    b.HasKey("Id");
 
                     b.HasIndex("Slug")
-                        .IsUnique()
-                        .HasDatabaseName("ix_pages_slug");
+                        .IsUnique();
 
-                    b.ToTable("pages", (string)null);
+                    b.ToTable("Pages");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Customers.Address", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("AddressLine")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("address_line");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long>("CustomerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("customer_id");
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsDefault")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_default");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("phone");
+                        .HasColumnType("text");
 
                     b.Property<string>("Recipient")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("recipient");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_addresses");
+                    b.HasKey("Id");
 
-                    b.ToTable("addresses", (string)null);
+                    b.ToTable("Addresses");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Inventory.Inventory", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("quantity");
+                        .HasColumnType("integer");
 
                     b.Property<long>("StoreId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("store_id");
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long>("VariantId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("variant_id");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("Id")
-                        .HasName("pk_inventories");
+                    b.HasKey("Id");
 
-                    b.HasIndex("StoreId")
-                        .HasDatabaseName("ix_inventories_store_id");
+                    b.HasIndex("StoreId");
 
-                    b.HasIndex("VariantId")
-                        .HasDatabaseName("ix_inventories_variant_id");
+                    b.HasIndex("VariantId");
 
-                    b.ToTable("inventories", (string)null);
+                    b.ToTable("Inventories");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Inventory.Store", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Address")
-                        .HasColumnType("text")
-                        .HasColumnName("address");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<double?>("Lat")
-                        .HasColumnType("double precision")
-                        .HasColumnName("lat");
+                        .HasColumnType("double precision");
 
                     b.Property<double?>("Lng")
-                        .HasColumnType("double precision")
-                        .HasColumnName("lng");
+                        .HasColumnType("double precision");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
+                        .HasColumnType("text");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("text")
-                        .HasColumnName("phone");
+                        .HasColumnType("text");
 
                     b.Property<long?>("RegionId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("region_id");
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_stores");
+                    b.HasKey("Id");
 
-                    b.ToTable("stores", (string)null);
+                    b.ToTable("Stores");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Localization.Translation", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Entity")
                         .IsRequired()
                         .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("entity");
+                        .HasColumnType("character varying(80)");
 
                     b.Property<long>("EntityId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("entity_id");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Field")
                         .IsRequired()
                         .HasMaxLength(80)
-                        .HasColumnType("character varying(80)")
-                        .HasColumnName("field");
+                        .HasColumnType("character varying(80)");
 
                     b.Property<string>("Lang")
                         .IsRequired()
                         .HasMaxLength(8)
-                        .HasColumnType("character varying(8)")
-                        .HasColumnName("lang");
+                        .HasColumnType("character varying(8)");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("value");
+                        .HasColumnType("text");
 
-                    b.HasKey("Id")
-                        .HasName("pk_translations");
+                    b.HasKey("Id");
 
                     b.HasIndex("Entity", "EntityId", "Lang", "Field")
-                        .IsUnique()
-                        .HasDatabaseName("ix_translations_entity_entity_id_lang_field");
+                        .IsUnique();
 
-                    b.ToTable("translations", (string)null);
+                    b.ToTable("Translations");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Pricing.PaymentPromotion", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Bank")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("bank");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("EndsAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("ends_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("StartsAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("starts_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("character varying(300)")
-                        .HasColumnName("title");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_payment_promotions");
+                    b.HasKey("Id");
 
-                    b.ToTable("payment_promotions", (string)null);
+                    b.ToTable("PaymentPromotions");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Pricing.PriceByRegion", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<decimal?>("CompareAtPrice")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("compare_at_price");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("price");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<long>("RegionId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("region_id");
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long>("VariantId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("variant_id");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("Id")
-                        .HasName("pk_prices_by_region");
+                    b.HasKey("Id");
 
-                    b.HasIndex("RegionId")
-                        .HasDatabaseName("ix_prices_by_region_region_id");
+                    b.HasIndex("RegionId");
 
                     b.HasIndex("VariantId", "RegionId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_prices_by_region_variant_id_region_id");
+                        .IsUnique();
 
-                    b.ToTable("prices_by_region", (string)null);
+                    b.ToTable("PricesByRegion");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Pricing.Promotion", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("ConditionsJson")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("conditions_json");
+                        .HasColumnType("jsonb");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("EndsAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("ends_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("name");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime>("StartsAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("starts_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Type")
-                        .HasColumnType("integer")
-                        .HasColumnName("type");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("Value")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("value");
+                        .HasColumnType("numeric(18,2)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_promotions");
+                    b.HasKey("Id");
 
-                    b.HasIndex("StartsAt", "EndsAt")
-                        .HasDatabaseName("ix_promotions_starts_at_ends_at");
+                    b.HasIndex("StartsAt", "EndsAt");
 
-                    b.ToTable("promotions", (string)null);
+                    b.ToTable("Promotions");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Pricing.Region", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(40)
-                        .HasColumnType("character varying(40)")
-                        .HasColumnName("code");
+                        .HasColumnType("character varying(40)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("name");
+                        .HasColumnType("character varying(100)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_regions");
+                    b.HasKey("Id");
 
                     b.HasIndex("Code")
-                        .IsUnique()
-                        .HasDatabaseName("ix_regions_code");
+                        .IsUnique();
 
-                    b.ToTable("regions", (string)null);
+                    b.ToTable("Regions");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Reviews.Review", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Content")
-                        .HasColumnType("text")
-                        .HasColumnName("content");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long?>("CustomerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("customer_id");
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Rating")
-                        .HasColumnType("integer")
-                        .HasColumnName("rating");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long>("VariantId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("variant_id");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("Id")
-                        .HasName("pk_reviews");
+                    b.HasKey("Id");
 
-                    b.HasIndex("VariantId")
-                        .HasDatabaseName("ix_reviews_variant_id");
+                    b.HasIndex("VariantId");
 
-                    b.ToTable("reviews", (string)null);
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Sales.Bundle", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long>("MainProductId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("main_product_id");
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_bundles");
+                    b.HasKey("Id");
 
-                    b.HasIndex("MainProductId")
-                        .HasDatabaseName("ix_bundles_main_product_id");
+                    b.HasIndex("MainProductId");
 
-                    b.ToTable("bundles", (string)null);
+                    b.ToTable("Bundles");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Sales.BundleItem", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("AccessoryVariantId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("accessory_variant_id");
+                        .HasColumnType("bigint");
 
                     b.Property<long>("BundleId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("bundle_id");
+                        .HasColumnType("bigint");
 
                     b.Property<decimal>("BundlePrice")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("bundle_price");
+                        .HasColumnType("numeric(18,2)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_bundle_items");
+                    b.HasKey("Id");
 
-                    b.HasIndex("AccessoryVariantId")
-                        .HasDatabaseName("ix_bundle_items_accessory_variant_id");
+                    b.HasIndex("AccessoryVariantId");
 
-                    b.HasIndex("BundleId")
-                        .HasDatabaseName("ix_bundle_items_bundle_id");
+                    b.HasIndex("BundleId");
 
-                    b.ToTable("bundle_items", (string)null);
+                    b.ToTable("BundleItems");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Sales.Cart", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long?>("CustomerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("customer_id");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("SessionId")
-                        .HasColumnType("text")
-                        .HasColumnName("session_id");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_carts");
+                    b.HasKey("Id");
 
-                    b.ToTable("carts", (string)null);
+                    b.ToTable("Carts");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Sales.CartItem", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("CartId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("cart_id");
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("quantity");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("unit_price");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<long>("VariantId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("variant_id");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("Id")
-                        .HasName("pk_cart_items");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CartId")
-                        .HasDatabaseName("ix_cart_items_cart_id");
+                    b.HasIndex("CartId");
 
-                    b.HasIndex("VariantId")
-                        .HasDatabaseName("ix_cart_items_variant_id");
+                    b.HasIndex("VariantId");
 
-                    b.ToTable("cart_items", (string)null);
+                    b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Sales.Order", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long>("CustomerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("customer_id");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("PaymentMethod")
-                        .HasColumnType("text")
-                        .HasColumnName("payment_method");
+                        .HasColumnType("text");
 
                     b.Property<long?>("RegionId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("region_id");
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("Total")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("total");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_orders");
+                    b.HasKey("Id");
 
-                    b.ToTable("orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Sales.OrderItem", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("OrderId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("order_id");
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("quantity");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("unit_price");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<long>("VariantId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("variant_id");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("Id")
-                        .HasName("pk_order_items");
+                    b.HasKey("Id");
 
-                    b.HasIndex("OrderId")
-                        .HasDatabaseName("ix_order_items_order_id");
+                    b.HasIndex("OrderId");
 
-                    b.HasIndex("VariantId")
-                        .HasDatabaseName("ix_order_items_variant_id");
+                    b.HasIndex("VariantId");
 
-                    b.ToTable("order_items", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Sales.Payment", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("amount");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long>("OrderId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("order_id");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Provider")
-                        .HasColumnType("text")
-                        .HasColumnName("provider");
+                        .HasColumnType("text");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                        .HasColumnType("integer");
 
                     b.Property<string>("TxnRef")
-                        .HasColumnType("text")
-                        .HasColumnName("txn_ref");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_payments");
+                    b.HasKey("Id");
 
-                    b.HasIndex("OrderId")
-                        .HasDatabaseName("ix_payments_order_id");
+                    b.HasIndex("OrderId");
 
-                    b.ToTable("payments", (string)null);
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Sales.Shipment", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Address")
-                        .HasColumnType("text")
-                        .HasColumnName("address");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long>("OrderId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("order_id");
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                        .HasColumnType("integer");
 
                     b.Property<string>("TrackingNo")
-                        .HasColumnType("text")
-                        .HasColumnName("tracking_no");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_shipments");
+                    b.HasKey("Id");
 
                     b.HasIndex("OrderId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_shipments_order_id");
+                        .IsUnique();
 
-                    b.ToTable("shipments", (string)null);
+                    b.ToTable("Shipments");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Services.ServicePackage", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
+                        .HasColumnType("text");
 
                     b.Property<int>("DurationMonths")
-                        .HasColumnType("integer")
-                        .HasColumnName("duration_months");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("price");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("type");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_service_packages");
+                    b.HasKey("Id");
 
-                    b.ToTable("service_packages", (string)null);
+                    b.ToTable("ServicePackages");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Services.StockNotification", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Contact")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("contact");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("Notified")
-                        .HasColumnType("boolean")
-                        .HasColumnName("notified");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long>("VariantId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("variant_id");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("Id")
-                        .HasName("pk_stock_notifications");
+                    b.HasKey("Id");
 
-                    b.HasIndex("VariantId")
-                        .HasDatabaseName("ix_stock_notifications_variant_id");
+                    b.HasIndex("VariantId");
 
-                    b.ToTable("stock_notifications", (string)null);
+                    b.ToTable("StockNotifications");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Services.TradeInRequest", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Condition")
-                        .HasColumnType("text")
-                        .HasColumnName("condition");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long?>("CustomerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("customer_id");
+                        .HasColumnType("bigint");
 
                     b.Property<decimal?>("EstimatedPrice")
                         .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)")
-                        .HasColumnName("estimated_price");
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<string>("Model")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("model");
+                        .HasColumnType("text");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_trade_in_requests");
+                    b.HasKey("Id");
 
-                    b.ToTable("trade_in_requests", (string)null);
+                    b.ToTable("TradeInRequests");
                 });
 
             modelBuilder.Entity("HtMobile.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("access_failed_count");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("text")
-                        .HasColumnName("concurrency_stamp");
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("email");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("boolean")
-                        .HasColumnName("email_confirmed");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("FullName")
-                        .HasColumnType("text")
-                        .HasColumnName("full_name");
+                        .HasColumnType("text");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("lockout_enabled");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("lockout_end");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("normalized_email");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("normalized_user_name");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("text")
-                        .HasColumnName("password_hash");
+                        .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("text")
-                        .HasColumnName("phone_number");
+                        .HasColumnType("text");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("boolean")
-                        .HasColumnName("phone_number_confirmed");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("text")
-                        .HasColumnName("security_stamp");
+                        .HasColumnType("text");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("two_factor_enabled");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("user_name");
+                        .HasColumnType("character varying(256)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_asp_net_users");
+                    b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -1367,28 +1098,23 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("text")
-                        .HasColumnName("concurrency_stamp");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("name");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("normalized_name");
+                        .HasColumnType("character varying(256)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_asp_net_roles");
+                    b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
@@ -1401,28 +1127,22 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
+                        .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("text")
-                        .HasColumnName("claim_type");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("text")
-                        .HasColumnName("claim_value");
+                        .HasColumnType("text");
 
                     b.Property<long>("RoleId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("role_id");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("Id")
-                        .HasName("pk_asp_net_role_claims");
+                    b.HasKey("Id");
 
-                    b.HasIndex("RoleId")
-                        .HasDatabaseName("ix_asp_net_role_claims_role_id");
+                    b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
@@ -1431,28 +1151,22 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
+                        .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("text")
-                        .HasColumnName("claim_type");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("text")
-                        .HasColumnName("claim_value");
+                        .HasColumnType("text");
 
                     b.Property<long>("UserId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("user_id");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("Id")
-                        .HasName("pk_asp_net_user_claims");
+                    b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_asp_net_user_claims_user_id");
+                    b.HasIndex("UserId");
 
                     b.ToTable("AspNetUserClaims", (string)null);
                 });
@@ -1460,26 +1174,20 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<long>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("text")
-                        .HasColumnName("login_provider");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("text")
-                        .HasColumnName("provider_key");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("text")
-                        .HasColumnName("provider_display_name");
+                        .HasColumnType("text");
 
                     b.Property<long>("UserId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("user_id");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("LoginProvider", "ProviderKey")
-                        .HasName("pk_asp_net_user_logins");
+                    b.HasKey("LoginProvider", "ProviderKey");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_asp_net_user_logins_user_id");
+                    b.HasIndex("UserId");
 
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
@@ -1487,18 +1195,14 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<long>", b =>
                 {
                     b.Property<long>("UserId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("user_id");
+                        .HasColumnType("bigint");
 
                     b.Property<long>("RoleId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("role_id");
+                        .HasColumnType("bigint");
 
-                    b.HasKey("UserId", "RoleId")
-                        .HasName("pk_asp_net_user_roles");
+                    b.HasKey("UserId", "RoleId");
 
-                    b.HasIndex("RoleId")
-                        .HasDatabaseName("ix_asp_net_user_roles_role_id");
+                    b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
@@ -1506,23 +1210,18 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<long>", b =>
                 {
                     b.Property<long>("UserId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("user_id");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("text")
-                        .HasColumnName("login_provider");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text")
-                        .HasColumnName("name");
+                        .HasColumnType("text");
 
                     b.Property<string>("Value")
-                        .HasColumnType("text")
-                        .HasColumnName("value");
+                        .HasColumnType("text");
 
-                    b.HasKey("UserId", "LoginProvider", "Name")
-                        .HasName("pk_asp_net_user_tokens");
+                    b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
@@ -1532,8 +1231,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                     b.HasOne("HtMobile.Domain.Entities.Catalog.Category", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_categories_categories_parent_id");
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Parent");
                 });
@@ -1544,8 +1242,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_products_categories_category_id");
+                        .IsRequired();
 
                     b.Navigation("Category");
                 });
@@ -1556,14 +1253,12 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany("Images")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_product_images_products_product_id");
+                        .IsRequired();
 
                     b.HasOne("HtMobile.Domain.Entities.Catalog.ProductVariant", "Variant")
                         .WithMany("Images")
                         .HasForeignKey("VariantId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_product_images_product_variants_variant_id");
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Product");
 
@@ -1576,8 +1271,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany("Variants")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_product_variants_products_product_id");
+                        .IsRequired();
 
                     b.Navigation("Product");
                 });
@@ -1588,8 +1282,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany("Videos")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_product_videos_products_product_id");
+                        .IsRequired();
 
                     b.Navigation("Product");
                 });
@@ -1600,15 +1293,13 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany("Inventories")
                         .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_inventories_stores_store_id");
+                        .IsRequired();
 
                     b.HasOne("HtMobile.Domain.Entities.Catalog.ProductVariant", "Variant")
                         .WithMany("Inventories")
                         .HasForeignKey("VariantId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_inventories_product_variants_variant_id");
+                        .IsRequired();
 
                     b.Navigation("Store");
 
@@ -1621,15 +1312,13 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany("Prices")
                         .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_prices_by_region_regions_region_id");
+                        .IsRequired();
 
                     b.HasOne("HtMobile.Domain.Entities.Catalog.ProductVariant", "Variant")
                         .WithMany("Prices")
                         .HasForeignKey("VariantId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_prices_by_region_product_variants_variant_id");
+                        .IsRequired();
 
                     b.Navigation("Region");
 
@@ -1642,8 +1331,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("VariantId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_reviews_product_variants_variant_id");
+                        .IsRequired();
 
                     b.Navigation("Variant");
                 });
@@ -1654,8 +1342,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("MainProductId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_bundles_products_main_product_id");
+                        .IsRequired();
 
                     b.Navigation("MainProduct");
                 });
@@ -1666,15 +1353,13 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("AccessoryVariantId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_bundle_items_product_variants_accessory_variant_id");
+                        .IsRequired();
 
                     b.HasOne("HtMobile.Domain.Entities.Sales.Bundle", "Bundle")
                         .WithMany("Items")
                         .HasForeignKey("BundleId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_bundle_items_bundles_bundle_id");
+                        .IsRequired();
 
                     b.Navigation("AccessoryVariant");
 
@@ -1687,15 +1372,13 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany("Items")
                         .HasForeignKey("CartId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_cart_items_carts_cart_id");
+                        .IsRequired();
 
                     b.HasOne("HtMobile.Domain.Entities.Catalog.ProductVariant", "Variant")
                         .WithMany()
                         .HasForeignKey("VariantId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_cart_items_product_variants_variant_id");
+                        .IsRequired();
 
                     b.Navigation("Cart");
 
@@ -1708,15 +1391,13 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_order_items_orders_order_id");
+                        .IsRequired();
 
                     b.HasOne("HtMobile.Domain.Entities.Catalog.ProductVariant", "Variant")
                         .WithMany()
                         .HasForeignKey("VariantId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_order_items_product_variants_variant_id");
+                        .IsRequired();
 
                     b.Navigation("Order");
 
@@ -1729,8 +1410,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany("Payments")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_payments_orders_order_id");
+                        .IsRequired();
 
                     b.Navigation("Order");
                 });
@@ -1741,8 +1421,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithOne("Shipment")
                         .HasForeignKey("HtMobile.Domain.Entities.Sales.Shipment", "OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_shipments_orders_order_id");
+                        .IsRequired();
 
                     b.Navigation("Order");
                 });
@@ -1753,8 +1432,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("VariantId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_stock_notifications_product_variants_variant_id");
+                        .IsRequired();
 
                     b.Navigation("Variant");
                 });
@@ -1765,8 +1443,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_asp_net_role_claims_asp_net_roles_role_id");
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<long>", b =>
@@ -1775,8 +1452,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_asp_net_user_claims_asp_net_users_user_id");
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<long>", b =>
@@ -1785,8 +1461,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_asp_net_user_logins_asp_net_users_user_id");
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<long>", b =>
@@ -1795,15 +1470,13 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_asp_net_user_roles_asp_net_roles_role_id");
+                        .IsRequired();
 
                     b.HasOne("HtMobile.Infrastructure.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_asp_net_user_roles_asp_net_users_user_id");
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<long>", b =>
@@ -1812,8 +1485,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_asp_net_user_tokens_asp_net_users_user_id");
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.Category", b =>
