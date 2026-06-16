@@ -33,7 +33,7 @@ public class CatalogService
     /// <summary>Trang chủ: banner slider + tile/nav danh mục + lưới sản phẩm nổi bật.</summary>
     public async Task<HomePageDto> GetHomePageAsync(long regionId, int featuredCount = 8, CancellationToken ct = default)
     {
-        var now = DateTime.UtcNow;
+        var now = DateTime.Now;
 
         var activeBanners = await _db.Banners
             .AsNoTracking()
@@ -148,7 +148,7 @@ public class CatalogService
     private async Task<IReadOnlyList<ProductCardDto>> BuildCardsAsync(
         System.Linq.Expressions.Expression<Func<Product, bool>> filter, long regionId, int take, CancellationToken ct)
     {
-        var now = DateTime.UtcNow;
+        var now = DateTime.Now;
         var products = await _db.Products
             .AsNoTracking()
             .Where(filter)

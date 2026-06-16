@@ -19,7 +19,7 @@ public interface ICurrentRegion
     long RegionId { get; }
 }
 
-/// <summary>Đồng hồ hệ thống — tách ra để test được logic phụ thuộc thời gian. Trả UTC.</summary>
+/// <summary>Đồng hồ hệ thống — tách ra để test được logic phụ thuộc thời gian. Trả giờ server (DateTime.Now).</summary>
 public interface IDateTime
 {
     DateTime Now { get; }

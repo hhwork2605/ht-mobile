@@ -10,7 +10,7 @@
 - **snake_case** toàn bộ bảng/cột — tự động qua `EFCore.NamingConventions` (cấu hình ở `AppDbContext`).
 - Khóa chính `long` (bigint identity). FK cùng kiểu `long`.
 - Cột JSON (`specs_json`, `conditions_json`) map sang **`jsonb`**.
-- Tiền tệ: `decimal(18,2)`. Thời gian: `DateTime` (UTC) → cột `timestamp` (without time zone); set qua interceptor `CreatedAt/UpdatedAt`. Bật `Npgsql.EnableLegacyTimestampBehavior` ở `AddInfrastructure` để map `DateTime`↔`timestamp` và bỏ kiểm tra `DateTimeKind`. (Riêng `lockout_end` của Identity vẫn là `timestamptz` do framework.)
+- Tiền tệ: `decimal(18,2)`. Thời gian: `DateTime` **giờ server** (`DateTime.Now`, qua `IDateTime`) → cột `timestamp` (without time zone); set qua interceptor `CreatedAt/UpdatedAt`. Bật `Npgsql.EnableLegacyTimestampBehavior` ở `AddInfrastructure` để map `DateTime`↔`timestamp` và bỏ kiểm tra `DateTimeKind`. (Riêng `lockout_end` của Identity vẫn là `timestamptz` do framework.)
 - Mỗi entity có 1 `IEntityTypeConfiguration<>` riêng trong `Infrastructure/Persistence/Configurations`.
 
 ## Truy cập dữ liệu

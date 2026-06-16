@@ -122,7 +122,7 @@ public class DbInitializer
     {
         if (await _db.Products.AnyAsync()) return;
 
-        var now = DateTime.UtcNow;
+        var now = DateTime.Now;
         var iphone = await _db.Categories.FirstAsync(c => c.Slug == "iphone");
         var ipad = await _db.Categories.FirstAsync(c => c.Slug == "ipad");
         var mac = await _db.Categories.FirstAsync(c => c.Slug == "mac");

@@ -20,7 +20,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
     {
         // Dùng DateTime "thuần" (không offset): map sang `timestamp without time zone` và bỏ kiểm tra Kind
-        // của Npgsql, để ghi DateTime.UtcNow vào cột timestamp không lỗi. Xem docs/conventions.md.
+        // của Npgsql, để ghi DateTime.Now (giờ server) vào cột timestamp không lỗi. Xem docs/conventions.md.
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
         var connectionString = config.GetConnectionString("Default")
