@@ -54,9 +54,13 @@ public static class DependencyInjection
             options.SlidingExpiration = true;
         });
 
-        // Redis (cache giá/KM + session/giỏ khách vãng lai)
-        var redis = config.GetConnectionString("Redis") ?? "localhost:6379";
-        services.AddStackExchangeRedisCache(o => o.Configuration = redis);
+        // Cache (giá/KM + session/giỏ khách vãng lai) qua IDistributedCache.
+        // Để "memory" (hoặc bỏ trống) khi dev không có Redis → dùng in-memory; RedisCacheService chạy trên cả hai.
+        var redis = config.GetConnectionString("Redis");
+        if (string.IsNullOrWhiteSpace(redis) || redis.Equals("memory", StringComparison.OrdinalIgnoreCase))
+            services.AddDistributedMemoryCache();
+        else
+            services.AddStackExchangeRedisCache(o => o.Configuration = redis);
         services.AddScoped<ICacheService, RedisCacheService>();
 
         services.AddScoped<ISearchService, PostgresSearchService>();

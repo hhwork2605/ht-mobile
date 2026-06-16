@@ -7,6 +7,8 @@
 ```powershell
 docker compose up -d        # khởi động redis:7 (+ pgadmin nếu bật)
 ```
+> Không có Docker/Redis? Đặt `ConnectionStrings:Redis = "memory"` (hoặc bỏ trống) để chạy **cache in-memory**
+> — `appsettings.Development.json` đã set sẵn `"memory"` nên dev chạy được ngay không cần Redis. Production vẫn dùng Redis thật.
 
 ## 2. Connection string (KHÔNG commit — dùng user-secrets)
 Lấy connection từ Supabase → Project Settings → Database.
