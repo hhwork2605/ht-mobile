@@ -13,7 +13,6 @@ public static class PriceCalculator
 {
     public static EffectivePrice Calculate(
         long variantId,
-        long regionId,
         decimal listPrice,
         decimal? compareAtPrice,
         IEnumerable<Promotion> promotions,
@@ -49,7 +48,6 @@ public static class PriceCalculator
         return new EffectivePrice
         {
             VariantId = variantId,
-            RegionId = regionId,
             ListPrice = listPrice,
             CompareAtPrice = compareAtPrice,
             FinalPrice = finalPrice,

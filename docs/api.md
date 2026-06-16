@@ -8,13 +8,13 @@ Trang khách (SSR) gọi service Application trực tiếp; API phục vụ auto
 GET  /api/categories
 GET  /api/categories/{slug}/products?series=&page=&sort=
 GET  /api/products/{slug}                 # PDP + variants + media + reviews
-GET  /api/variants/{slug}?region={id}     # giá theo vùng
+GET  /api/variants/{slug}                 # chi tiết + giá hiệu lực
 GET  /api/search/suggest?q=               # autocomplete (keyword + products)
 ```
 
 ## Pricing
 ```
-GET  /api/variants/{id}/price?region={id}
+GET  /api/variants/{id}/price
 GET  /api/products/{id}/promotions
 GET  /api/products/{id}/bundle
 ```
@@ -42,7 +42,7 @@ GET  /api/customer/orders
 ```
 POST /api/trade-in/estimate
 POST /api/stock-notifications
-GET  /api/stores?region=&q=
+GET  /api/stores?q=
 POST /api/business/quote-request
 ```
 

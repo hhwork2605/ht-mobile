@@ -31,7 +31,7 @@ public class CatalogService
     }
 
     /// <summary>Trang chủ: banner slider + tile/nav danh mục + lưới sản phẩm nổi bật.</summary>
-    public async Task<HomePageDto> GetHomePageAsync(long regionId, int featuredCount = 8, CancellationToken ct = default)
+    public async Task<HomePageDto> GetHomePageAsync(int featuredCount = 8, CancellationToken ct = default)
     {
         var now = DateTime.Now;
 
@@ -48,20 +48,20 @@ public class CatalogService
             .ToList();
 
         var categories = await GetMenuAsync(ct);
-        var featured = await BuildCardsAsync(_ => true, regionId, featuredCount, ct);
+        var featured = await BuildCardsAsync(_ => true, featuredCount, ct);
 
         return new HomePageDto { Banners = banners, Categories = categories, Featured = featured };
     }
 
     /// <summary>Trang danh mục theo slug + lưới sản phẩm.</summary>
-    public async Task<CategoryPageDto?> GetCategoryPageAsync(string slug, long regionId, int take = 24, CancellationToken ct = default)
+    public async Task<CategoryPageDto?> GetCategoryPageAsync(string slug, int take = 24, CancellationToken ct = default)
     {
         var category = await _db.Categories
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Slug == slug, ct);
         if (category is null) return null;
 
-        var products = await BuildCardsAsync(p => p.CategoryId == category.Id, regionId, take, ct);
+        var products = await BuildCardsAsync(p => p.CategoryId == category.Id, take, ct);
 
         return new CategoryPageDto
         {
@@ -74,18 +74,18 @@ public class CatalogService
     }
 
     /// <summary>PDP theo slug của 1 biến thể (URL riêng cho mỗi variant).</summary>
-    public async Task<ProductDetailDto?> GetByVariantSlugAsync(string variantSlug, long regionId, CancellationToken ct = default)
+    public async Task<ProductDetailDto?> GetByVariantSlugAsync(string variantSlug, CancellationToken ct = default)
     {
         var variant = await _db.ProductVariants
             .AsNoTracking()
             .FirstOrDefaultAsync(v => v.Slug == variantSlug, ct);
         if (variant is null) return null;
 
-        return await BuildDetailAsync(variant.ProductId, variant.Id, regionId, ct);
+        return await BuildDetailAsync(variant.ProductId, variant.Id, ct);
     }
 
     /// <summary>PDP theo slug sản phẩm — chọn biến thể đầu tiên làm mặc định.</summary>
-    public async Task<ProductDetailDto?> GetByProductSlugAsync(string productSlug, long regionId, CancellationToken ct = default)
+    public async Task<ProductDetailDto?> GetByProductSlugAsync(string productSlug, CancellationToken ct = default)
     {
         var product = await _db.Products
             .AsNoTracking()
@@ -99,10 +99,10 @@ public class CatalogService
             .FirstOrDefaultAsync(ct);
         if (firstVariant is null) return null;
 
-        return await BuildDetailAsync(product.Id, firstVariant.Id, regionId, ct);
+        return await BuildDetailAsync(product.Id, firstVariant.Id, ct);
     }
 
-    private async Task<ProductDetailDto?> BuildDetailAsync(long productId, long selectedVariantId, long regionId, CancellationToken ct)
+    private async Task<ProductDetailDto?> BuildDetailAsync(long productId, long selectedVariantId, CancellationToken ct)
     {
         var product = await _db.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == productId, ct);
         if (product is null) return null;
@@ -127,7 +127,7 @@ public class CatalogService
             .Select(v => v.YoutubeUrl)
             .ToListAsync(ct);
 
-        var price = await _pricing.GetEffectivePriceAsync(selectedVariantId, regionId, ct);
+        var price = await _pricing.GetEffectivePriceAsync(selectedVariantId, ct);
 
         return new ProductDetailDto
         {
@@ -146,7 +146,7 @@ public class CatalogService
 
     /// <summary>Dựng thẻ sản phẩm: lấy biến thể đại diện của mỗi sản phẩm + giá hiệu lực.</summary>
     private async Task<IReadOnlyList<ProductCardDto>> BuildCardsAsync(
-        System.Linq.Expressions.Expression<Func<Product, bool>> filter, long regionId, int take, CancellationToken ct)
+        System.Linq.Expressions.Expression<Func<Product, bool>> filter, int take, CancellationToken ct)
     {
         var now = DateTime.Now;
         var products = await _db.Products
@@ -170,7 +170,7 @@ public class CatalogService
         foreach (var p in products)
         {
             if (p.Variant is null) continue;
-            var price = await _pricing.GetEffectivePriceAsync(p.Variant.Id, regionId, ct);
+            var price = await _pricing.GetEffectivePriceAsync(p.Variant.Id, ct);
             cards.Add(new ProductCardDto
             {
                 ProductId = p.Id,

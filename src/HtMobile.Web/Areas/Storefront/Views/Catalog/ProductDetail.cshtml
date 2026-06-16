@@ -1,9 +1,6 @@
 @model ProductDetailDto
-@inject HtMobile.Application.Common.Interfaces.ICurrentRegion CurrentRegion
 @{
     ViewData["Title"] = Model.Name;
-    var returnUrl = Context.Request.Path + Context.Request.QueryString;
-    var regions = new (long Id, string Name)[] { (1, "Miền Bắc"), (2, "Miền Nam") };
 }
 
 <nav class="mb-4 text-sm text-gray-500">
@@ -26,17 +23,6 @@
     <!-- Cột thông tin -->
     <div x-data="{}">
         <h1 class="text-2xl font-bold">@Model.Name</h1>
-
-        <!-- RegionSelector -->
-        <div class="mt-3 flex items-center gap-2 text-sm">
-            <span class="text-gray-500">Khu vực:</span>
-            @foreach (var r in regions)
-            {
-                var active = r.Id == CurrentRegion.RegionId;
-                <a href="/set-region?regionId=@r.Id&returnUrl=@Uri.EscapeDataString(returnUrl)"
-                   class="rounded-full border px-3 py-1 @(active ? "border-blue-600 bg-blue-50 text-blue-600" : "border-gray-300 text-gray-600")">@r.Name</a>
-            }
-        </div>
 
         <!-- PriceBlock -->
         <div class="mt-4">

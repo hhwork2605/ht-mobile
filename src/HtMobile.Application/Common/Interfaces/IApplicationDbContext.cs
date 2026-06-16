@@ -26,8 +26,6 @@ public interface IApplicationDbContext
     DbSet<ProductVideo> ProductVideos { get; }
 
     // Pricing
-    DbSet<Region> Regions { get; }
-    DbSet<PriceByRegion> PricesByRegion { get; }
     DbSet<Promotion> Promotions { get; }
     DbSet<PaymentPromotion> PaymentPromotions { get; }
 

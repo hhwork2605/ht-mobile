@@ -32,8 +32,6 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<long
     public DbSet<ProductVideo> ProductVideos => Set<ProductVideo>();
 
     // Pricing
-    public DbSet<Region> Regions => Set<Region>();
-    public DbSet<PriceByRegion> PricesByRegion => Set<PriceByRegion>();
     public DbSet<Promotion> Promotions => Set<Promotion>();
     public DbSet<PaymentPromotion> PaymentPromotions => Set<PaymentPromotion>();
 

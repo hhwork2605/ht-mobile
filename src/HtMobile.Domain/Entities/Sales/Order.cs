@@ -7,7 +7,6 @@ public class Order : BaseAuditableEntity
 {
     public long CustomerId { get; set; }
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
-    public long? RegionId { get; set; }
     public decimal Total { get; set; }
     public string? PaymentMethod { get; set; }
 

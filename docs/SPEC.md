@@ -8,7 +8,7 @@
 ## 1. Tổng quan
 
 Website bán lẻ chuỗi cửa hàng Apple với các đặc thù nghiệp vụ:
-- Giá bán **theo khu vực địa lý** (miền Bắc / miền Nam).
+- Giá bán **một mức toàn quốc** (không phân theo vùng — xem [ADR-0002](decisions/0002-bo-gia-theo-vung.md)).
 - Hệ thống **khuyến mãi nhiều tầng** (giảm %, quà tặng, voucher, combo, ưu đãi theo ngân hàng).
 - **Trả góp 0%** (qua công ty tài chính & qua thẻ tín dụng).
 - **Thu cũ đổi mới** (định giá máy cũ, trợ giá lên đời).
@@ -67,7 +67,6 @@ Nguyên tắc:
 - [ ] Trang danh mục: tab lọc theo dòng máy (series), lưới sản phẩm, block SEO.
 - [ ] Thẻ sản phẩm: ảnh, badge giảm %, badge "Mới"/"Cũ", giá gạch ngang + giá bán.
 - [ ] Trang chi tiết sản phẩm đầy đủ (mục 5).
-- [ ] **Giá theo khu vực** (dropdown chọn vùng).
 - [ ] Giỏ hàng + cập nhật số lượng + empty state.
 - [ ] Checkout: thông tin nhận hàng, phương thức giao, phương thức thanh toán.
 - [ ] Đăng nhập / Đăng ký / Quên mật khẩu / Nhớ đăng nhập.
@@ -89,7 +88,7 @@ Nguyên tắc:
 - [ ] Check IMEI, tra cứu hóa đơn điện tử, định vị cửa hàng.
 
 ### 4.3 Admin / CMS
-- [ ] Quản lý danh mục / sản phẩm / biến thể / tồn kho (theo cửa hàng & vùng).
+- [ ] Quản lý danh mục / sản phẩm / biến thể / tồn kho (theo cửa hàng).
 - [ ] Quản lý khuyến mãi & campaign theo thời gian.
 - [ ] Quản lý đơn hàng & trạng thái.
 - [ ] CMS: banner, trang tĩnh, blog.
@@ -107,7 +106,6 @@ Nguyên tắc:
 
 **Cột thông tin (phải):**
 - Tên sản phẩm.
-- Dropdown **chọn khu vực giá** (miền Bắc / miền Nam).
 - Giá hiện tại + giá gốc gạch ngang + % giảm.
 - Bộ chọn **dung lượng** (nút: 256GB / 512GB / 1TB / 2TB).
 - Bộ chọn **màu** (swatch tròn).
@@ -136,7 +134,7 @@ Nguyên tắc:
 
 | ID | Use case | Mô tả luồng |
 |---|---|---|
-| UC-01 | Tìm & mua nhanh | Gõ từ khóa → autocomplete → vào PDP → chọn dung lượng/màu → xem giá theo vùng → Mua ngay / thêm giỏ |
+| UC-01 | Tìm & mua nhanh | Gõ từ khóa → autocomplete → vào PDP → chọn dung lượng/màu → xem giá → Mua ngay / thêm giỏ |
 | UC-02 | Mua kèm phụ kiện | Tại PDP chọn phụ kiện gợi ý → mua combo 1 lần |
 | UC-03 | Trả góp | Chọn "Trả góp 0%" → nhập thông tin → duyệt hồ sơ qua công ty tài chính / thanh toán thẻ |
 | UC-04 | Thu cũ đổi mới | Khai model + tình trạng máy cũ → ước tính giá thu → áp trợ giá vào đơn mới |
@@ -152,12 +150,10 @@ Nguyên tắc:
 ```
 Category(id, parent_id, name, slug, sort_order, seo_content)
 Product(id, category_id, name, slug, description, brand, specs_json)
-ProductVariant(id, product_id, sku, storage, color, slug, base_price, status)
+ProductVariant(id, product_id, sku, storage, color, slug, base_price, compare_at_price?, status)
 ProductImage(id, product_id, variant_id?, url, sort_order)
 ProductVideo(id, product_id, youtube_url)
-Region(id, name)                                  // Bắc / Nam
-PriceByRegion(id, variant_id, region_id, price, compare_at_price)
-Store(id, name, address, region_id, lat, lng, phone)
+Store(id, name, address, lat, lng, phone)
 Inventory(id, variant_id, store_id, quantity)
 Promotion(id, name, type, value, starts_at, ends_at, conditions_json)
 PaymentPromotion(id, bank, title, description, starts_at, ends_at)
@@ -165,7 +161,7 @@ Bundle(id, main_product_id)
 BundleItem(id, bundle_id, accessory_variant_id, bundle_price)
 Cart(id, customer_id?, session_id, created_at)
 CartItem(id, cart_id, variant_id, quantity, unit_price)
-Order(id, customer_id, status, region_id, total, payment_method, created_at)
+Order(id, customer_id, status, total, payment_method, created_at)
 OrderItem(id, order_id, variant_id, quantity, unit_price)
 Payment(id, order_id, provider, status, amount, txn_ref)
 Shipment(id, order_id, address, status, tracking_no)
@@ -188,11 +184,11 @@ Translation(id, entity, entity_id, lang, field, value)
 GET  /api/categories
 GET  /api/categories/{slug}/products?series=&page=&sort=
 GET  /api/products/{slug}                 # PDP + variants + media + reviews
-GET  /api/variants/{slug}?region={id}     # giá theo vùng
+GET  /api/variants/{slug}                 # chi tiết + giá hiệu lực
 GET  /api/search/suggest?q=               # autocomplete (keyword + products)
 
 # Pricing
-GET  /api/variants/{id}/price?region={id}
+GET  /api/variants/{id}/price
 GET  /api/products/{id}/promotions
 GET  /api/products/{id}/bundle
 
@@ -214,7 +210,7 @@ GET  /api/customer/orders
 # Services / Nghiệp vụ
 POST /api/trade-in/estimate
 POST /api/stock-notifications
-GET  /api/stores?region=&q=
+GET  /api/stores?q=
 POST /api/business/quote-request
 
 # CMS
@@ -232,7 +228,6 @@ GET  /api/pages/{slug}
 - `ProductCard` (image, discount badge, new/used badge, price)
 - `Carousel` (banner / related / payment-offers)
 - `VariantSelector` (storage buttons + color swatches)
-- `RegionSelector`
 - `PriceBlock` (current + compare-at + % off)
 - `OfferList` / `PaymentOfferCarousel`
 - `BundleWidget`
@@ -279,7 +274,7 @@ GET  /api/pages/{slug}
 
 **Phase 2 — Mua hàng**
 - Giỏ hàng, checkout, đăng ký/đăng nhập, tài khoản & đơn hàng.
-- Pricing engine: giá theo vùng + khuyến mãi cơ bản.
+- Pricing engine: giá (một mức) + khuyến mãi cơ bản.
 
 **Phase 3 — Nghiệp vụ đặc thù**
 - Bundle mua kèm, trả góp, thu cũ đổi mới, theo dõi hàng về.

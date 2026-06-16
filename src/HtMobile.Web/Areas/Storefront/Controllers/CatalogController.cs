@@ -1,6 +1,5 @@
 using HtMobile.Application.Common.Interfaces;
 using HtMobile.Application.Features.Catalog;
-using HtMobile.Web.Infrastructure;
 using HtMobile.Web.Infrastructure.Routing;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,26 +11,12 @@ public class CatalogController : Controller
     private readonly CatalogService _catalog;
     private readonly ISlugResolver _resolver;
     private readonly ISearchService _search;
-    private readonly ICurrentRegion _region;
 
-    public CatalogController(CatalogService catalog, ISlugResolver resolver, ISearchService search, ICurrentRegion region)
+    public CatalogController(CatalogService catalog, ISlugResolver resolver, ISearchService search)
     {
         _catalog = catalog;
         _resolver = resolver;
         _search = search;
-        _region = region;
-    }
-
-    /// <summary>Đổi vùng giá (lưu cookie) rồi quay lại trang trước.</summary>
-    [HttpGet("/set-region")]
-    public IActionResult SetRegion(long regionId, string? returnUrl)
-    {
-        Response.Cookies.Append(CurrentRegion.CookieName, regionId.ToString(), new CookieOptions
-        {
-            Expires = DateTimeOffset.UtcNow.AddYears(1),
-            IsEssential = true
-        });
-        return LocalRedirect(string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl);
     }
 
     /// <summary>Gợi ý tìm kiếm cho htmx (trả partial HTML).</summary>
@@ -50,11 +35,11 @@ public class CatalogController : Controller
         switch (match.Kind)
         {
             case SlugKind.Category:
-                var category = await _catalog.GetCategoryPageAsync(slug, _region.RegionId, 24, ct);
+                var category = await _catalog.GetCategoryPageAsync(slug, 24, ct);
                 return category is null ? NotFound() : View("Category", category);
 
             case SlugKind.Variant:
-                var pdp = await _catalog.GetByVariantSlugAsync(slug, _region.RegionId, ct);
+                var pdp = await _catalog.GetByVariantSlugAsync(slug, ct);
                 return pdp is null ? NotFound() : View("ProductDetail", pdp);
 
             // TODO (vibe-code): Article / Page sẽ render ở Phase 4 (CMS)

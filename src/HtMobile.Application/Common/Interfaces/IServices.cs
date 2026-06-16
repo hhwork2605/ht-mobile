@@ -13,12 +13,6 @@ public interface ICurrentUser
     bool IsAuthenticated { get; }
 }
 
-/// <summary>Vùng giá đang chọn (cookie/session). Mặc định: miền Bắc.</summary>
-public interface ICurrentRegion
-{
-    long RegionId { get; }
-}
-
 /// <summary>Đồng hồ hệ thống — tách ra để test được logic phụ thuộc thời gian. Trả giờ server (DateTime.Now).</summary>
 public interface IDateTime
 {

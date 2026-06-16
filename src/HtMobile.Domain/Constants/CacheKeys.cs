@@ -5,9 +5,9 @@ public static class CacheKeys
 {
     public const string CategoryTreePrefix = "catalog:category-tree";
 
-    /// <summary>Giá hiệu lực của 1 variant theo vùng.</summary>
-    public static string VariantPrice(long variantId, long regionId) =>
-        $"pricing:variant:{variantId}:region:{regionId}";
+    /// <summary>Giá hiệu lực của 1 variant.</summary>
+    public static string VariantPrice(long variantId) =>
+        $"pricing:variant:{variantId}";
 
     /// <summary>Khuyến mãi đang hiệu lực của 1 sản phẩm.</summary>
     public static string ProductPromotions(long productId) =>

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace HtMobile.Application.Features.Pricing;
 
 /// <summary>
-/// Pricing engine (SPEC §2): lấy giá theo vùng từ DB + áp khuyến mãi (qua <see cref="PriceCalculator"/>),
+/// Pricing engine (SPEC §2): lấy giá từ variant + áp khuyến mãi (qua <see cref="PriceCalculator"/>),
 /// cache kết quả ở Redis. Mọi nơi cần giá phải đi qua interface này.
 /// </summary>
 public class PricingEngine : IPricingService
@@ -24,41 +24,27 @@ public class PricingEngine : IPricingService
         _clock = clock;
     }
 
-    public Task<EffectivePrice> GetEffectivePriceAsync(long variantId, long regionId, CancellationToken ct = default)
+    public Task<EffectivePrice> GetEffectivePriceAsync(long variantId, CancellationToken ct = default)
     {
         return _cache.GetOrCreateAsync(
-            CacheKeys.VariantPrice(variantId, regionId),
-            () => ComputeAsync(variantId, regionId, ct),
+            CacheKeys.VariantPrice(variantId),
+            () => ComputeAsync(variantId, ct),
             CacheTtl,
             ct);
     }
 
-    public Task InvalidateAsync(long variantId, long regionId, CancellationToken ct = default)
-        => _cache.RemoveAsync(CacheKeys.VariantPrice(variantId, regionId), ct);
+    public Task InvalidateAsync(long variantId, CancellationToken ct = default)
+        => _cache.RemoveAsync(CacheKeys.VariantPrice(variantId), ct);
 
-    private async Task<EffectivePrice> ComputeAsync(long variantId, long regionId, CancellationToken ct)
+    private async Task<EffectivePrice> ComputeAsync(long variantId, CancellationToken ct)
     {
-        var priceRow = await _db.PricesByRegion
+        // Giá lấy trực tiếp từ variant (giá duy nhất, không phân theo vùng).
+        var variant = await _db.ProductVariants
             .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.VariantId == variantId && p.RegionId == regionId, ct);
+            .FirstOrDefaultAsync(v => v.Id == variantId, ct);
 
-        decimal listPrice;
-        decimal? compareAt;
-
-        if (priceRow is not null)
-        {
-            listPrice = priceRow.Price;
-            compareAt = priceRow.CompareAtPrice;
-        }
-        else
-        {
-            // Fallback: chưa cấu hình giá theo vùng → dùng BasePrice của variant.
-            var variant = await _db.ProductVariants
-                .AsNoTracking()
-                .FirstOrDefaultAsync(v => v.Id == variantId, ct);
-            listPrice = variant?.BasePrice ?? 0m;
-            compareAt = null;
-        }
+        var listPrice = variant?.BasePrice ?? 0m;
+        var compareAt = variant?.CompareAtPrice;
 
         var now = _clock.Now;
         var promotions = await _db.Promotions
@@ -66,6 +52,6 @@ public class PricingEngine : IPricingService
             .Where(p => p.StartsAt <= now && p.EndsAt >= now)
             .ToListAsync(ct);
 
-        return PriceCalculator.Calculate(variantId, regionId, listPrice, compareAt, promotions, now);
+        return PriceCalculator.Calculate(variantId, listPrice, compareAt, promotions, now);
     }
 }

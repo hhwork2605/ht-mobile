@@ -32,7 +32,7 @@ public class PostgresSearchService : ISearchService
                 v.Slug,
                 v.Product.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).FirstOrDefault(),
                 v.BasePrice,
-                v.Prices.Select(p => p.CompareAtPrice).FirstOrDefault()))
+                v.CompareAtPrice))
             .ToListAsync(ct);
 
         var keywords = rows.Select(r => r.Name).Distinct().Take(limit).ToList();

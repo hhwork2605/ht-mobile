@@ -51,9 +51,8 @@ public class DbInitializer
     public async Task SeedAsync()
     {
         await SeedRolesAndAdminAsync();
-        var regions = await SeedRegionsAsync();
         await SeedCategoriesAsync();
-        await SeedSampleCatalogAsync(regions);
+        await SeedSampleCatalogAsync();
         await SeedBannersAsync();
         _logger.LogInformation("Seed completed.");
     }
@@ -81,25 +80,6 @@ public class DbInitializer
         }
     }
 
-    private async Task<(Region North, Region South)> SeedRegionsAsync()
-    {
-        var north = await _db.Regions.FirstOrDefaultAsync(r => r.Code == "north");
-        var south = await _db.Regions.FirstOrDefaultAsync(r => r.Code == "south");
-
-        if (north is null)
-        {
-            north = new Region { Name = "Miền Bắc", Code = "north" };
-            _db.Regions.Add(north);
-        }
-        if (south is null)
-        {
-            south = new Region { Name = "Miền Nam", Code = "south" };
-            _db.Regions.Add(south);
-        }
-        await _db.SaveChangesAsync();
-        return (north, south);
-    }
-
     private async Task SeedCategoriesAsync()
     {
         if (await _db.Categories.AnyAsync()) return;
@@ -118,7 +98,7 @@ public class DbInitializer
         await _db.SaveChangesAsync();
     }
 
-    private async Task SeedSampleCatalogAsync((Region North, Region South) regions)
+    private async Task SeedSampleCatalogAsync()
     {
         if (await _db.Products.AnyAsync()) return;
 
@@ -146,7 +126,6 @@ public class DbInitializer
             tagline: "Titan. Mạnh mẽ. Chuyên nghiệp.",
             basePrice: 34_990_000m,
             compareAt: 37_990_000m,
-            regions,
             variants: new (string Storage, string Color)[]
             {
                 ("256GB", "Titan Tự Nhiên"),
@@ -161,7 +140,6 @@ public class DbInitializer
             tagline: "Sống động. Mạnh mẽ. Đáng giá.",
             basePrice: 22_990_000m,
             compareAt: 24_990_000m,
-            regions,
             variants: new (string Storage, string Color)[]
             {
                 ("128GB", "Xanh"),
@@ -175,7 +153,6 @@ public class DbInitializer
             tagline: "Mạnh mẽ. Đa năng. Nhẹ nhàng.",
             basePrice: 16_990_000m,
             compareAt: 17_990_000m,
-            regions,
             variants: new (string Storage, string Color)[]
             {
                 ("128GB", "Xanh Dương"),
@@ -189,7 +166,6 @@ public class DbInitializer
             tagline: "Siêu mỏng. Pin cả ngày.",
             basePrice: 24_990_000m,
             compareAt: 27_990_000m,
-            regions,
             variants: new (string Storage, string Color)[]
             {
                 ("256GB", "Xám"),
@@ -203,7 +179,6 @@ public class DbInitializer
             tagline: "Mỏng hơn. Màn lớn hơn.",
             basePrice: 10_990_000m,
             compareAt: 12_990_000m,
-            regions,
             variants: new (string Storage, string Color)[]
             {
                 ("42mm", "Đen"),
@@ -217,7 +192,6 @@ public class DbInitializer
             tagline: "Chống ồn. USB-C.",
             basePrice: 5_490_000m,
             compareAt: 6_790_000m,
-            regions,
             variants: new (string Storage, string Color)[]
             {
                 ("USB-C", "Trắng")
@@ -270,7 +244,7 @@ public class DbInitializer
 
     private void AddProductWithVariants(
         long categoryId, string name, string slug, string tagline, decimal basePrice, decimal compareAt,
-        (Region North, Region South) regions, (string Storage, string Color)[] variants)
+        (string Storage, string Color)[] variants)
     {
         var product = new Product
         {
@@ -296,10 +270,9 @@ public class DbInitializer
                 Color = color,
                 Slug = $"{slug}-{storage.ToLowerInvariant()}",
                 BasePrice = price,
+                CompareAtPrice = compareAt + i * 4_000_000m,
                 Status = VariantStatus.Active
             };
-            variant.Prices.Add(new PriceByRegion { Region = regions.North, Price = price, CompareAtPrice = compareAt + i * 4_000_000m });
-            variant.Prices.Add(new PriceByRegion { Region = regions.South, Price = price + 200_000m, CompareAtPrice = compareAt + i * 4_000_000m + 200_000m });
             product.Variants.Add(variant);
             i++;
         }

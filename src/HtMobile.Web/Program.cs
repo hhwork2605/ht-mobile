@@ -17,7 +17,6 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 // Adapter mức Web cho interface khai báo ở Application
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
-builder.Services.AddScoped<ICurrentRegion, CurrentRegion>();
 builder.Services.AddScoped<ISlugResolver, SlugResolver>();
 
 var app = builder.Build();
