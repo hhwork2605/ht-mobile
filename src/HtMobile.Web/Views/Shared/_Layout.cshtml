@@ -1,0 +1,152 @@
+@inject HtMobile.Application.Common.Interfaces.ICurrentUser CurrentUser
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HtMobile</title>
+
+    @* Theme tokens (luôn có ở cả dev & prod). Đổi giá trị ở đây hoặc app.css để đổi theme. *@
+    <style>
+        :root {
+            --accent: #0066CC; --accent-press: #004e9e; --sale: #1d1d1f;
+            --ink: #1d1d1f; --ink2: #6e6e73;
+            --bg: #ffffff; --bg2: #f5f5f7; --line: #e4e4e7;
+            --header: rgba(255,255,255,.82); --header-ink: #1d1d1f; --header-border: #e4e4e7;
+            --card-radius: 18px;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Segoe UI", system-ui, Arial, sans-serif; }
+    </style>
+
+    @* Icon: Font Awesome Free (solid + brands) *@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@fortawesome/fontawesome-free@6.5.2/css/all.min.css" />
+
+    @* Dev: Tailwind Play CDN + map token thương hiệu vào config. Prod: CSS đã build (@theme inline trong app.css). *@
+    <environment include="Development">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: { extend: {
+                    colors: {
+                        accent: 'var(--accent)', 'accent-press': 'var(--accent-press)', sale: 'var(--sale)',
+                        ink: 'var(--ink)', ink2: 'var(--ink2)', surface: 'var(--bg)', surface2: 'var(--bg2)',
+                        line: 'var(--line)', header: 'var(--header)', 'header-ink': 'var(--header-ink)',
+                        'header-border': 'var(--header-border)'
+                    },
+                    borderRadius: { card: 'var(--card-radius)' }
+                } }
+            };
+        </script>
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    </environment>
+</head>
+<body class="min-h-screen bg-surface text-ink antialiased">
+
+    <div class="bg-surface2 text-ink2 text-center text-[12.5px] py-[7px] px-3 border-b border-line">
+        Miễn phí giao hàng toàn quốc · Trả góp 0% · Thu cũ đổi mới — Hotline 1800.0000
+    </div>
+
+    <header class="sticky top-0 z-40 bg-header text-header-ink border-b border-header-border backdrop-blur-lg">
+        <div class="mx-auto flex max-w-[1180px] items-center gap-4 px-4 sm:px-6 h-[60px]">
+            <a href="/" class="flex items-center gap-2 text-xl font-bold tracking-tight text-header-ink">
+                <i class="fa-brands fa-apple text-[19px]"></i><span>HtMobile</span>
+            </a>
+
+            <nav class="hidden flex-1 items-center gap-0.5 md:flex">
+                <vc:menu></vc:menu>
+            </nav>
+
+            <form action="/search" method="get" class="relative ml-auto hidden md:block" autocomplete="off">
+                <div class="flex items-center gap-2 rounded-full bg-black/5 px-3.5 py-2 w-[230px]">
+                    <i class="fa-solid fa-magnifying-glass text-sm text-header-ink opacity-60"></i>
+                    <input type="search" name="q" placeholder="Tìm sản phẩm..."
+                           class="w-full border-0 bg-transparent text-[13.5px] text-header-ink outline-none"
+                           hx-get="/search/suggest" hx-trigger="keyup changed delay:300ms"
+                           hx-target="#search-suggest" hx-indicator="#search-spin" />
+                </div>
+                <div id="search-suggest" class="absolute left-0 right-0 top-full z-50 mt-1"></div>
+            </form>
+
+            <a href="/search" class="ml-auto flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5 md:hidden" aria-label="Tìm kiếm">
+                <i class="fa-solid fa-magnifying-glass text-lg"></i>
+            </a>
+            <a href="@(CurrentUser.IsAuthenticated ? "/customer/info" : "/login")"
+               class="flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5" aria-label="Tài khoản">
+                <i class="fa-regular fa-circle-user text-lg"></i>
+            </a>
+            <a href="/cart" class="flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5" aria-label="Giỏ hàng">
+                <i class="fa-solid fa-cart-shopping text-lg"></i>
+            </a>
+        </div>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="mt-12 border-t border-line bg-surface2">
+        <div class="mx-auto max-w-[1180px] px-4 sm:px-6 pt-10 pb-6">
+            <div class="flex flex-wrap justify-between gap-10">
+                <div class="max-w-[280px]">
+                    <div class="mb-2.5 flex items-center gap-2 text-lg font-bold text-ink">
+                        <i class="fa-brands fa-apple"></i>HtMobile
+                    </div>
+                    <p class="m-0 text-[13px] leading-relaxed text-ink2">
+                        Hệ thống bán lẻ sản phẩm Apple chính hãng. Trả góp 0%, giao nhanh toàn quốc, bảo hành tận tâm.
+                    </p>
+                </div>
+                <div>
+                    <div class="mb-3 text-[13px] font-bold text-ink">Sản phẩm</div>
+                    <div class="flex flex-col gap-[9px] text-[13px] text-ink2">
+                        <a href="/iphone" class="hover:text-accent">iPhone</a>
+                        <a href="/ipad" class="hover:text-accent">iPad</a>
+                        <a href="/mac" class="hover:text-accent">Mac</a>
+                        <a href="/apple-watch" class="hover:text-accent">Apple Watch</a>
+                        <a href="/phu-kien" class="hover:text-accent">Phụ kiện</a>
+                    </div>
+                </div>
+                <div>
+                    <div class="mb-3 text-[13px] font-bold text-ink">Hỗ trợ</div>
+                    <div class="flex flex-col gap-[9px] text-[13px] text-ink2">
+                        <span class="cursor-pointer hover:text-accent">Tra cứu đơn hàng</span>
+                        <span class="cursor-pointer hover:text-accent">Bảo hành</span>
+                        <span class="cursor-pointer hover:text-accent">Trả góp 0%</span>
+                        <span class="cursor-pointer hover:text-accent">Thu cũ đổi mới</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="mb-3 text-[13px] font-bold text-ink">Về chúng tôi</div>
+                    <div class="flex flex-col gap-[9px] text-[13px] text-ink2">
+                        <span class="cursor-pointer hover:text-accent">Hệ thống cửa hàng</span>
+                        <span class="cursor-pointer hover:text-accent">Tuyển dụng</span>
+                        <span class="cursor-pointer hover:text-accent">Tin tức</span>
+                        <span class="cursor-pointer hover:text-accent">Liên hệ</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-[30px] flex flex-wrap items-center justify-between gap-3 border-t border-line pt-[18px]">
+                <span class="text-xs text-ink2">© 2026 HtMobile — Apple Reseller (demo scaffold).</span>
+                <div class="flex gap-3 text-[19px] text-ink2">
+                    <i class="fa-brands fa-facebook"></i><i class="fa-brands fa-youtube"></i>
+                    <i class="fa-brands fa-instagram"></i><i class="fa-brands fa-tiktok"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    @* Nút nổi: hotline / lên đầu trang (SPEC §9) *@
+    <div class="fixed bottom-4 right-4 z-40 flex flex-col gap-2">
+        <a href="tel:18000000" class="rounded-full bg-accent px-4 py-2 text-sm font-medium text-white shadow-lg hover:bg-accent-press">
+            <i class="fa-solid fa-phone mr-1"></i>Hotline
+        </a>
+        <button onclick="window.scrollTo({top:0,behavior:'smooth'})"
+                class="rounded-full bg-ink px-4 py-2 text-sm font-medium text-white shadow-lg">↑</button>
+    </div>
+
+    <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

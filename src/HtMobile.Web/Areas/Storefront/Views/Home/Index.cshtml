@@ -1,0 +1,158 @@
+@model HomePageDto
+@{
+    ViewData["Title"] = "Trang chủ";
+
+    string CatIcon(string slug) => slug switch
+    {
+        "iphone" => "fa-mobile-screen-button",
+        "ipad" => "fa-tablet-screen-button",
+        "mac" => "fa-laptop",
+        "apple-watch" => "fa-clock",
+        "phu-kien" => "fa-headphones",
+        "am-thanh" => "fa-volume-high",
+        "camera" => "fa-camera",
+        "gia-dung" => "fa-blender",
+        "may-cu" => "fa-recycle",
+        _ => "fa-tag"
+    };
+}
+
+@* ============ BANNER SLIDER ============ *@
+@if (Model.Banners.Count > 0)
+{
+    <section class="bg-surface2">
+        <div class="relative mx-auto max-w-[1180px] px-4 sm:px-6 py-12"
+             x-data="{ i: 0, n: @Model.Banners.Count, timer: null,
+                       start() { if (this.n > 1) this.timer = setInterval(() => this.next(), 5000); },
+                       stop() { clearInterval(this.timer); },
+                       next() { this.i = (this.i + 1) % this.n; },
+                       prev() { this.i = (this.i - 1 + this.n) % this.n; } }"
+             x-init="start()" @@mouseenter="stop()" @@mouseleave="start()">
+            @for (var k = 0; k < Model.Banners.Count; k++)
+            {
+                var b = Model.Banners[k];
+                <div x-show="i === @k" x-transition.opacity.duration.500ms class="@(k == 0 ? "" : "hidden")">
+                    <div class="grid items-center gap-6 md:grid-cols-2">
+                        <div class="text-center md:text-left">
+                            @if (!string.IsNullOrWhiteSpace(b.Eyebrow))
+                            {
+                                <div class="text-sm font-semibold tracking-wide text-accent">@b.Eyebrow</div>
+                            }
+                            <h1 class="my-2 text-[40px] font-bold leading-[1.05] tracking-tight text-ink">@b.Title</h1>
+                            @if (!string.IsNullOrWhiteSpace(b.Subtitle))
+                            {
+                                <p class="mb-5 text-[19px] font-medium text-ink2">@b.Subtitle</p>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(b.LinkUrl))
+                            {
+                                <a href="@b.LinkUrl" class="inline-block rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-press">
+                                    @(string.IsNullOrWhiteSpace(b.CtaText) ? "Mua ngay" : b.CtaText) ›
+                                </a>
+                            }
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <img src="@(string.IsNullOrWhiteSpace(b.ImageUrl) ? "/images/placeholder.svg" : b.ImageUrl)"
+                                 alt="@b.Title" class="h-[300px] w-full max-w-[460px] object-contain" />
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.Banners.Count > 1)
+            {
+                <button type="button" @@click="prev()" aria-label="Trước"
+                        class="absolute left-2 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-ink shadow hover:bg-white md:flex">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button type="button" @@click="next()" aria-label="Sau"
+                        class="absolute right-2 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-ink shadow hover:bg-white md:flex">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+                <div class="mt-6 flex justify-center gap-2">
+                    @for (var k = 0; k < Model.Banners.Count; k++)
+                    {
+                        <button type="button" @@click="i = @k" aria-label="Slide @(k + 1)"
+                                class="h-2 rounded-full transition-all"
+                                :class="i === @k ? 'w-6 bg-accent' : 'w-2 bg-ink2/30'"></button>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@* ============ TILE DANH MỤC ============ *@
+@if (Model.Categories.Count > 0)
+{
+    <section class="mx-auto max-w-[1180px] px-4 sm:px-6 pt-10 pb-3.5">
+        <div class="flex flex-wrap justify-center gap-3.5">
+            @foreach (var c in Model.Categories)
+            {
+                <a href="/@c.Slug"
+                   class="flex min-w-[140px] max-w-[210px] flex-1 flex-col items-center gap-2.5 rounded-[18px] bg-surface2 px-4 py-[22px] transition hover:-translate-y-[3px]">
+                    <i class="fa-solid @CatIcon(c.Slug) text-[28px] text-ink"></i>
+                    <span class="text-sm font-semibold text-ink">@c.Name</span>
+                </a>
+            }
+        </div>
+    </section>
+}
+
+@* ============ SẢN PHẨM NỔI BẬT ============ *@
+<section class="mx-auto max-w-[1180px] px-4 sm:px-6 pt-6 pb-12">
+    <div class="mb-[18px] flex items-baseline justify-between">
+        <h2 class="m-0 text-[28px] font-bold tracking-tight text-ink">Sản phẩm nổi bật</h2>
+        <a href="/iphone" class="text-[15px] text-accent hover:underline">Xem tất cả ›</a>
+    </div>
+    @if (Model.Featured.Count == 0)
+    {
+        <p class="text-ink2">Chưa có dữ liệu. Chạy <code>scripts/seed.ps1</code> để nạp sản phẩm mẫu.</p>
+    }
+    else
+    {
+        <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            @foreach (var p in Model.Featured)
+            {
+                <vc:product-card product="p"></vc:product-card>
+            }
+        </div>
+    }
+</section>
+
+@* ============ BENTO: TRẢ GÓP / THU CŨ ============ *@
+<section class="mx-auto max-w-[1180px] px-4 sm:px-6 pb-12">
+    <div class="grid gap-4 md:grid-cols-2">
+        <div class="flex min-h-[200px] flex-col gap-2 rounded-[22px] bg-surface2 p-[34px]">
+            <h3 class="m-0 text-2xl font-bold tracking-tight text-ink">Trả góp 0%</h3>
+            <p class="m-0 max-w-[300px] text-[15px] leading-normal text-ink2">Sở hữu sản phẩm Apple chính hãng với 0đ trả trước, duyệt nhanh trong 5 phút.</p>
+            <a href="/iphone" class="mt-auto self-start rounded-full bg-accent px-[22px] py-2.5 text-sm font-semibold text-white hover:bg-accent-press">Tìm hiểu</a>
+        </div>
+        <div class="flex min-h-[200px] flex-col gap-2 rounded-[22px] bg-surface2 p-[34px]">
+            <h3 class="m-0 text-2xl font-bold tracking-tight text-ink">Thu cũ đổi mới</h3>
+            <p class="m-0 max-w-[300px] text-[15px] leading-normal text-ink2">Lên đời dễ dàng — trợ giá đến 3 triệu khi mang máy cũ đến đổi.</p>
+            <a href="/may-cu" class="mt-auto self-start rounded-full border-[1.5px] border-ink bg-white px-[22px] py-2.5 text-sm font-semibold text-ink hover:bg-surface2">Định giá máy</a>
+        </div>
+    </div>
+</section>
+
+@* ============ TRUST BAR ============ *@
+<section class="bg-surface2 py-7">
+    <div class="mx-auto flex max-w-[1180px] flex-wrap justify-between gap-5 px-4 sm:px-6">
+        <div class="flex min-w-[200px] flex-1 items-center gap-3">
+            <i class="fa-solid fa-truck text-2xl text-accent"></i>
+            <div><div class="text-sm font-semibold text-ink">Giao nhanh 2 giờ</div><div class="text-[12.5px] text-ink2">Nội thành miễn phí</div></div>
+        </div>
+        <div class="flex min-w-[200px] flex-1 items-center gap-3">
+            <i class="fa-solid fa-shield-halved text-2xl text-accent"></i>
+            <div><div class="text-sm font-semibold text-ink">Chính hãng VN/A</div><div class="text-[12.5px] text-ink2">Bảo hành 12 tháng</div></div>
+        </div>
+        <div class="flex min-w-[200px] flex-1 items-center gap-3">
+            <i class="fa-solid fa-credit-card text-2xl text-accent"></i>
+            <div><div class="text-sm font-semibold text-ink">Trả góp 0%</div><div class="text-[12.5px] text-ink2">Duyệt trong 5 phút</div></div>
+        </div>
+        <div class="flex min-w-[200px] flex-1 items-center gap-3">
+            <i class="fa-solid fa-arrows-rotate text-2xl text-accent"></i>
+            <div><div class="text-sm font-semibold text-ink">Đổi trả 30 ngày</div><div class="text-[12.5px] text-ink2">1 đổi 1 nếu lỗi</div></div>
+        </div>
+    </div>
+</section>

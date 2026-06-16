@@ -1,0 +1,18 @@
+@model HtMobile.Application.Common.Interfaces.SearchSuggestResult
+
+@if (Model.Products.Count == 0)
+{
+    return;
+}
+
+<div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+    @foreach (var p in Model.Products)
+    {
+        <a href="/@p.Slug" class="flex items-center gap-3 px-3 py-2 hover:bg-blue-50">
+            <img src="@(string.IsNullOrEmpty(p.ThumbnailUrl) ? "/images/placeholder.svg" : p.ThumbnailUrl)"
+                 alt="@p.Name" class="h-10 w-10 object-contain" />
+            <span class="flex-1 text-sm">@p.Name</span>
+            <span class="text-sm font-semibold text-red-600">@p.Price.ToString("#,##0")₫</span>
+        </a>
+    }
+</div>

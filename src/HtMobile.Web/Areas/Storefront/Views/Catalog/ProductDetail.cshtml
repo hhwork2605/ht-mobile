@@ -1,0 +1,82 @@
+@model ProductDetailDto
+@inject HtMobile.Application.Common.Interfaces.ICurrentRegion CurrentRegion
+@{
+    ViewData["Title"] = Model.Name;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    var regions = new (long Id, string Name)[] { (1, "Miền Bắc"), (2, "Miền Nam") };
+}
+
+<nav class="mb-4 text-sm text-gray-500">
+    <a href="/" class="hover:text-blue-600">Trang chủ</a> / <span class="text-gray-700">@Model.Name</span>
+</nav>
+
+<div class="grid gap-8 lg:grid-cols-2">
+    <!-- Cột media -->
+    <div>
+        <div class="aspect-square overflow-hidden rounded-xl border bg-white">
+            <img src="@(Model.Images.FirstOrDefault() ?? "/images/placeholder.svg")"
+                 alt="@Model.Name" class="h-full w-full object-contain p-6" />
+        </div>
+        @if (Model.YoutubeUrls.Any())
+        {
+            <p class="mt-2 text-sm text-blue-600">▶ Video giới thiệu (@Model.YoutubeUrls.Count)</p>
+        }
+    </div>
+
+    <!-- Cột thông tin -->
+    <div x-data="{}">
+        <h1 class="text-2xl font-bold">@Model.Name</h1>
+
+        <!-- RegionSelector -->
+        <div class="mt-3 flex items-center gap-2 text-sm">
+            <span class="text-gray-500">Khu vực:</span>
+            @foreach (var r in regions)
+            {
+                var active = r.Id == CurrentRegion.RegionId;
+                <a href="/set-region?regionId=@r.Id&returnUrl=@Uri.EscapeDataString(returnUrl)"
+                   class="rounded-full border px-3 py-1 @(active ? "border-blue-600 bg-blue-50 text-blue-600" : "border-gray-300 text-gray-600")">@r.Name</a>
+            }
+        </div>
+
+        <!-- PriceBlock -->
+        <div class="mt-4">
+            <partial name="_PriceBlock" model="Model.Price" />
+        </div>
+
+        <!-- VariantSelector: mỗi biến thể có URL riêng -->
+        <div class="mt-5">
+            <p class="mb-2 text-sm font-medium text-gray-700">Phiên bản</p>
+            <div class="flex flex-wrap gap-2">
+                @foreach (var v in Model.Variants)
+                {
+                    <a href="/@v.Slug"
+                       class="rounded-lg border px-3 py-2 text-sm @(v.IsSelected ? "border-blue-600 bg-blue-50 font-semibold text-blue-600" : "border-gray-300 hover:border-blue-400")">
+                        @v.Storage @(string.IsNullOrEmpty(v.Color) ? "" : "· " + v.Color)
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- Hành động mua (SPEC §5) -->
+        <div class="mt-6 grid gap-2 sm:grid-cols-2">
+            <button class="rounded-lg bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700">MUA NGAY</button>
+            <button class="rounded-lg border border-blue-600 px-4 py-3 font-semibold text-blue-600 hover:bg-blue-50">Trả góp 0%</button>
+            <button class="rounded-lg border border-gray-300 px-4 py-3 text-sm hover:bg-gray-50">Trả góp qua thẻ</button>
+            <button class="rounded-lg border border-gray-300 px-4 py-3 text-sm hover:bg-gray-50">Thu cũ đổi mới</button>
+        </div>
+
+        <ul class="mt-6 space-y-1 text-sm text-gray-600">
+            <li>✔ Đổi 1-1 trong 30 ngày</li>
+            <li>✔ Bảo hành 12 tháng chính hãng</li>
+            <li>✔ Giao hàng toàn quốc</li>
+        </ul>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.Description))
+{
+    <section class="mt-10 rounded-lg bg-white p-6">
+        <h2 class="mb-3 text-lg font-bold">Mô tả sản phẩm</h2>
+        <div class="prose max-w-none text-sm">@Html.Raw(Model.Description)</div>
+    </section>
+}

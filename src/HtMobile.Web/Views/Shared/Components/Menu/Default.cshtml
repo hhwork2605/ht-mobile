@@ -1,0 +1,7 @@
+@model IReadOnlyList<CategoryDto>
+
+@foreach (var c in Model)
+{
+    <a href="/@c.Slug"
+       class="rounded-lg px-3 py-2 text-sm font-medium text-header-ink opacity-80 transition hover:bg-black/5 hover:opacity-100">@c.Name</a>
+}

@@ -1,0 +1,15 @@
+<Project>
+
+  <!-- Cấu hình chung cho toàn bộ project trong solution -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Ghim EF Core / ASP.NET stack ở dòng 9.x để khớp target net9.0 -->
+    <AspNetCoreVersion>9.0.0</AspNetCoreVersion>
+    <EfCoreVersion>9.0.0</EfCoreVersion>
+  </PropertyGroup>
+
+</Project>

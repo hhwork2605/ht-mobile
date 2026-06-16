@@ -1,0 +1,31 @@
+@model CategoryPageDto
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<nav class="mb-4 text-sm text-gray-500">
+    <a href="/" class="hover:text-blue-600">Trang chủ</a> / <span class="text-gray-700">@Model.Name</span>
+</nav>
+
+<h1 class="mb-4 text-2xl font-bold">@Model.Name</h1>
+
+@if (Model.Products.Count == 0)
+{
+    <p class="text-gray-500">Danh mục này chưa có sản phẩm.</p>
+}
+else
+{
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        @foreach (var p in Model.Products)
+        {
+            <vc:product-card product="p"></vc:product-card>
+        }
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.SeoContent))
+{
+    <section class="prose mt-10 max-w-none rounded-lg bg-white p-6 text-sm">
+        @Html.Raw(Model.SeoContent)
+    </section>
+}
