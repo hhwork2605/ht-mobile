@@ -1,0 +1,40 @@
+@model LoginVm
+@{
+    ViewData["Title"] = "Đăng nhập";
+    ViewData["MetaDescription"] = "Đăng nhập tài khoản HtMobile.";
+    var input = "w-full rounded-xl border border-line px-3.5 py-3 text-[15px] text-ink outline-none focus:border-accent";
+}
+@section Head { <meta name="robots" content="noindex, nofollow" /> }
+
+<div class="mx-auto my-8 max-w-[380px] px-4 text-center">
+    <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface2">
+        <i class="fa-regular fa-circle-user text-3xl text-accent"></i>
+    </div>
+    <h1 class="text-2xl font-bold text-ink">Đăng nhập</h1>
+    <p class="mb-6 mt-1.5 text-sm text-ink2">Đăng nhập để theo dõi đơn hàng và nhận ưu đãi thành viên.</p>
+
+    <form method="post" action="/login" class="flex flex-col gap-3 text-left">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ReturnUrl" />
+        <div asp-validation-summary="ModelOnly" class="text-sm font-medium text-sale"></div>
+        <div>
+            <input asp-for="Email" class="@input" placeholder="Email" autocomplete="username" />
+            <span asp-validation-for="Email" class="text-xs text-sale"></span>
+        </div>
+        <div>
+            <input asp-for="Password" class="@input" placeholder="Mật khẩu" autocomplete="current-password" />
+            <span asp-validation-for="Password" class="text-xs text-sale"></span>
+        </div>
+        <label class="flex items-center gap-2 text-sm text-ink2">
+            <input asp-for="RememberMe" class="h-4 w-4" /> Nhớ đăng nhập
+        </label>
+        <button type="submit" class="mt-1 rounded-xl bg-accent py-3.5 font-bold text-white transition hover:bg-accent-press">Đăng nhập</button>
+    </form>
+
+    <div class="mt-4 flex justify-between text-sm">
+        <a href="/forgot-password" class="text-accent hover:underline">Quên mật khẩu?</a>
+        <a href="/register" class="text-accent hover:underline">Tạo tài khoản</a>
+    </div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -43,4 +43,10 @@ public class CartContext
         }
         return new CartOwner(null, id);
     }
+
+    /// <summary>Đọc session id của giỏ guest từ cookie (null nếu chưa có) — dùng để merge khi đăng nhập.</summary>
+    public string? GuestSessionId => _http.HttpContext?.Request.Cookies[GuestCookie];
+
+    /// <summary>Xoá cookie giỏ guest (sau khi đã merge vào giỏ user).</summary>
+    public void ClearGuest() => _http.HttpContext?.Response.Cookies.Delete(GuestCookie);
 }

@@ -35,6 +35,23 @@ POST /cart/items/{id}/remove     # xoá dòng → partial _CartBody (htmx)
 > Badge số lượng ở header: ViewComponent `CartBadge`. Đơn giá mỗi dòng = giá hiệu lực qua `IPricingService`.
 > Merge giỏ guest→user: `ICartService.MergeAsync` (gọi sau khi đăng nhập — nối ở feature auth P2).
 > REST `/api/cart/*` (SPEC §8) để dành cho đối tác/app sau; storefront dùng route MVC trên.
+
+### Tài khoản / Auth (ASP.NET Identity — cookie, email + mật khẩu)
+`AccountController` (Storefront). Mọi POST có antiforgery. Đăng nhập/đăng ký thành công → gộp giỏ guest.
+```
+GET  /register                       # form đăng ký (email, mật khẩu, họ tên)
+POST /register                       # tạo user + role Customer + đăng nhập + merge giỏ
+GET  /login?ReturnUrl=               # form đăng nhập (email, mật khẩu, nhớ đăng nhập)
+POST /login                          # PasswordSignIn + merge giỏ; ReturnUrl chỉ nhận URL nội bộ
+POST /logout                         # SignOut
+GET  /forgot-password                # form nhập email
+POST /forgot-password                # sinh token + IEmailSender; luôn báo "đã gửi" (không lộ email tồn tại)
+GET  /reset-password?token=&email=   # form đặt lại mật khẩu
+POST /reset-password                 # đổi mật khẩu bằng token
+GET  /account                        # landing tối thiểu (email + Đăng xuất); dashboard đầy đủ là feature riêng
+```
+> ReturnUrl chống open-redirect bằng helper `UrlSafety.SafeLocalUrl`. Quên MK: `IEmailSender` hiện là
+> `NullEmailSender` (chỉ log) → dev xem link reset trong log. REST `/api/auth/*` (SPEC §8) để dành cho app sau.
 > SEO bắt buộc mỗi trang (xem [conventions.md](conventions.md) §SEO): `_Layout` sinh `<title>`/`description`/canonical/OG/hreflang + JSON-LD `Organization`/`WebSite`; mỗi trang bổ sung JSON-LD qua section `Head` (Category → `ItemList`+`BreadcrumbList`; PDP → `Product`+`offers`(+`aggregateRating`)+`BreadcrumbList`). Helper: `Web/Infrastructure/Seo/JsonLd`.
 
 ## Pricing

@@ -14,7 +14,8 @@ public class NullEmailSender : IEmailSender
 
     public Task SendAsync(string to, string subject, string htmlBody, CancellationToken ct = default)
     {
-        _logger.LogInformation("[Email:DEV] To={To} Subject={Subject}", to, subject);
+        // Dev sender: log cả nội dung để thấy link (reset mật khẩu…) — KHÔNG gửi thật.
+        _logger.LogInformation("[Email:DEV] To={To} Subject={Subject}\n{Body}", to, subject, htmlBody);
         return Task.CompletedTask;
     }
 }

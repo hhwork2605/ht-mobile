@@ -1,0 +1,27 @@
+@{
+    ViewData["Title"] = "Tài khoản";
+    ViewData["MetaDescription"] = "Tài khoản HtMobile.";
+    var email = User.Identity?.Name ?? "";
+    var initial = string.IsNullOrEmpty(email) ? "?" : email[..1].ToUpperInvariant();
+}
+@section Head { <meta name="robots" content="noindex, nofollow" /> }
+
+<div class="mx-auto max-w-[680px] px-4 sm:px-6 py-8">
+    <div class="flex flex-wrap items-center gap-4">
+        <div class="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-surface2 text-2xl font-bold text-accent">@initial</div>
+        <div class="min-w-[160px] flex-1">
+            <div class="text-xl font-bold text-ink">Xin chào 👋</div>
+            <div class="text-[13.5px] text-ink2">@email</div>
+        </div>
+        <form method="post" action="/logout">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="rounded-[10px] border border-line bg-white px-4 py-2.5 text-[13.5px] font-semibold text-ink hover:bg-surface2">Đăng xuất</button>
+        </form>
+    </div>
+
+    <div class="mt-6 rounded-card border border-line p-6 text-sm text-ink2">
+        Trang quản lý đơn hàng, sản phẩm yêu thích và thông tin cá nhân sẽ sớm có.
+        Trong lúc chờ, bạn có thể <a href="/" class="text-accent hover:underline">tiếp tục mua sắm</a>
+        hoặc xem <a href="/cart" class="text-accent hover:underline">giỏ hàng</a>.
+    </div>
+</div>
