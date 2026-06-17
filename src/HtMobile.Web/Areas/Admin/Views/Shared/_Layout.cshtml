@@ -1,0 +1,68 @@
+@inject HtMobile.Application.Common.Interfaces.ICurrentUser CurrentUser
+@{
+    var path = Context.Request.Path.Value ?? "/admin";
+    string nav(string href) => path.Equals(href, StringComparison.OrdinalIgnoreCase) || (href != "/admin" && path.StartsWith(href, StringComparison.OrdinalIgnoreCase))
+        ? "bg-accent/10 text-accent"
+        : "text-ink2 hover:bg-surface2 hover:text-ink";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>@ViewData["Title"] · HtMobile Admin</title>
+    <style>
+        :root { --accent:#0066CC; --accent-press:#004e9e; --sale:#1d1d1f; --ink:#1d1d1f; --ink2:#6e6e73; --bg:#fff; --bg2:#f5f5f7; --line:#e4e4e7; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Arial, sans-serif; }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@fortawesome/fontawesome-free@6.5.2/css/all.min.css" />
+    <environment include="Development">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = { theme: { extend: { colors: {
+                accent: 'var(--accent)', 'accent-press': 'var(--accent-press)', sale: 'var(--sale)',
+                ink: 'var(--ink)', ink2: 'var(--ink2)', surface: 'var(--bg)', surface2: 'var(--bg2)', line: 'var(--line)'
+            }, borderRadius: { card: '14px' } } } };
+        </script>
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    </environment>
+</head>
+<body class="min-h-screen bg-surface2 text-ink antialiased">
+    <div class="flex min-h-screen">
+        <aside class="flex w-[244px] shrink-0 flex-col border-r border-line bg-white">
+            <a href="/admin" class="flex h-[60px] items-center gap-2 border-b border-line px-5 text-lg font-bold text-ink">
+                <i class="fa-brands fa-apple"></i>HtMobile <span class="text-ink2 font-medium">Admin</span>
+            </a>
+            <nav class="flex-1 space-y-0.5 p-3 text-[13.5px] font-medium">
+                <a href="/admin" class="flex items-center gap-3 rounded-[10px] px-3 py-2.5 @nav("/admin")"><i class="fa-solid fa-table-columns w-4"></i>Bảng điều khiển</a>
+                <a href="/admin/orders" class="flex items-center gap-3 rounded-[10px] px-3 py-2.5 @nav("/admin/orders")"><i class="fa-solid fa-bag-shopping w-4"></i>Đơn hàng</a>
+                @foreach (var (label, icon) in new[] { ("Sản phẩm", "fa-box"), ("Khuyến mãi", "fa-bullhorn"), ("Người dùng", "fa-users"), ("Nội dung (CMS)", "fa-file-lines"), ("Báo cáo", "fa-chart-line") })
+                {
+                    <span class="flex cursor-not-allowed items-center gap-3 rounded-[10px] px-3 py-2.5 text-ink2/50" title="Sắp có"><i class="fa-solid @icon w-4"></i>@label</span>
+                }
+            </nav>
+            <a href="/" class="border-t border-line px-5 py-3 text-[13px] text-ink2 hover:text-accent"><i class="fa-solid fa-arrow-left mr-1.5"></i>Về cửa hàng</a>
+        </aside>
+
+        <div class="flex min-w-0 flex-1 flex-col">
+            <header class="flex h-[60px] shrink-0 items-center justify-between border-b border-line bg-white px-6">
+                <h1 class="text-[17px] font-bold text-ink">@ViewData["Title"]</h1>
+                <div class="flex items-center gap-3 text-[13px]">
+                    <span class="text-ink2">@(User.Identity?.Name ?? "Admin")</span>
+                    <form method="post" action="/logout">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="rounded-[10px] border border-line px-3 py-1.5 font-semibold text-ink hover:bg-surface2">Đăng xuất</button>
+                    </form>
+                </div>
+            </header>
+            <main class="flex-1 p-6">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

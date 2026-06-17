@@ -41,6 +41,7 @@
 
 ## Phase 5 — Hoàn thiện  → `phase-5-admin-polish/`
 - [ ] Admin: danh mục/SP/biến thể/tồn kho theo cửa hàng
-- [ ] Admin: khuyến mãi/campaign + đơn hàng + người dùng & phân quyền + CMS
+- [~] Admin: khuyến mãi/campaign + đơn hàng + người dùng & phân quyền + CMS
+  - [x] Đơn hàng (P5-01) — layout admin + danh sách/lọc + chi tiết + đổi trạng thái (validate luồng)
 - [ ] Báo cáo doanh thu / đơn hàng
 - [ ] SEO nâng cao (structured data) + tối ưu hiệu năng + kiểm thử bảo mật

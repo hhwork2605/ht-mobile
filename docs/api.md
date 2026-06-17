@@ -68,6 +68,14 @@ POST /checkout            # tạo Order(Pending)+OrderItem(snapshot giá)+Shipme
 > (guest = null). Giá dòng = `IPricingService` lúc đặt (snapshot vào `OrderItem.UnitPrice`). Mã đơn hiển thị = `SD{Id:D6}`.
 > SEO bắt buộc mỗi trang (xem [conventions.md](conventions.md) §SEO): `_Layout` sinh `<title>`/`description`/canonical/OG/hreflang + JSON-LD `Organization`/`WebSite`; mỗi trang bổ sung JSON-LD qua section `Head` (Category → `ItemList`+`BreadcrumbList`; PDP → `Product`+`offers`(+`aggregateRating`)+`BreadcrumbList`). Helper: `Web/Infrastructure/Seo/JsonLd`.
 
+### Admin (Area `Admin`, `[Authorize(Roles=Admin)]`)
+```
+GET  /admin                          # dashboard
+GET  /admin/orders?status=           # danh sách đơn + tab lọc theo trạng thái (P5-01)
+GET  /admin/orders/{id}              # chi tiết đơn + form đổi trạng thái
+POST /admin/orders/{id}/status       # đổi trạng thái (validate chuyển hợp lệ server-side) → /admin/orders/{id}
+```
+
 ## Pricing
 ```
 GET  /api/variants/{id}/price
