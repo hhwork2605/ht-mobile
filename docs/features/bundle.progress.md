@@ -12,13 +12,15 @@ Cổng hiện tại: 2
 - [x] 5. Review subagent — DONE (0 Critical)
 - [x] 6. Review tay       — DONE (duyệt: H2 lọc Active; H1 giữ + ghi rõ)
 - [x] 7. Test (green)     — DONE (73 test pass)
-- [x] 8. Commit           — IN_PROGRESS
+- [x] 8. Commit           — DONE (4ec724a)
 
-## Đã sửa (Cổng 7)
+## Đã sửa (Cổng 7) + hoàn tất
 - H2: GetForProductAsync lọc phụ kiện Status==Active. H1: comment chủ đích (giá kèm áp cả dòng, có lợi khách).
+- Migration CartItemUnitPriceOverride ĐÃ apply. Smoke-test OK: PDP widget AirPods 4.490.000 → /bundle/add →
+  /cart có iPhone + AirPods ở GIÁ MUA KÈM 4.490.000 (không phải 4.941.000 giá thường) → override hoạt động.
 
 ## Next action
-- CHỜ DUYỆT: apply migration CartItemUnitPriceOverride → smoke-test PDP bundle → /cart giá mua kèm.
+- XONG feature Bundle. Phase 3 còn: Trả góp, Thu cũ, Theo dõi hàng về, Cổng thanh toán.
 
 ## Vấn đề mở (reviewer Cổng 5)
 - [H2] GetForProductAsync không lọc phụ kiện Status==Active → widget hiện phụ kiện ngừng bán, lệch giỏ. → thêm filter Active.
