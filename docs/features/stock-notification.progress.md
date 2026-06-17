@@ -16,8 +16,13 @@ Chế độ: TỰ DUYỆT (người dùng yêu cầu auto-approve các cổng D�
 - [x] 7. Test (green)     — DONE (103 test pass)
 - [x] 8. Commit           — IN_PROGRESS
 
+## Hoàn tất
+- Smoke-test OK: PDP hết hàng → form theo dõi (ẩn MUA NGAY); còn hàng → MUA NGAY; đăng ký 200 "đã đăng ký";
+  đăng ký lại = dedupe (vẫn done); contact bậy = "không hợp lệ".
+- Fix runtime: chuyển _StockNotify.cshtml sang Views/Shared (controller không tìm thấy ở Views/Catalog → 500).
+
 ## Next action
-- Smoke-test PDP variant hết hàng → form theo dõi. Phase 3: 4/5 (còn cổng thanh toán).
+- XONG. Phase 3: 4/5 (còn Cổng thanh toán VNPAY/ZaloPay — cần sandbox thật).
 
 ## Contract (Cổng 2) — chốt
 - KHÔNG entity/DB/migration (StockNotification + DbSet đã có).
