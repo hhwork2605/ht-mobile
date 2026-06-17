@@ -19,7 +19,7 @@ Cổng hiện tại: 1
 - +3 integration test AdminOrderService (valid/invalid/notfound).
 
 ## Next action
-- Smoke-test: login admin → /admin/orders → chi tiết → đổi trạng thái.
+- XONG. Smoke-test OK: authz redirect, danh sách+đơn SD000003, đổi Pending→Đã xác nhận.
 
 ## Vấn đề mở (reviewer Cổng 5)
 - [M1] Cột "Khách hàng" đang đổ Shipment.Address (Shipment không tách tên/SĐT) → đổi header cột thành "Nhận hàng".
