@@ -31,14 +31,13 @@
 - [x] Trả góp 0% (P3-02) — calculator + bảng kỳ hạn trên PDP (chưa tích hợp công ty tài chính/thẻ thật)
 - [x] Thu cũ đổi mới (định giá + trợ giá) (P3-03) — form /thu-cu-doi-moi, estimate server-side, tạo TradeInRequest
 - [x] Theo dõi hàng về (StockNotification) (P3-04) — form PDP khi hết hàng, dedupe, chỉ OutOfStock
+- [ ] Đa ngôn ngữ VI/EN (resx + Translation) + /changelanguage — *chuyển từ Phase 4 sang (2026-06-17)*
 - [ ] Tích hợp cổng thanh toán (VNPAY/ZaloPay) — ⏸️ **HOÃN, LÀM SAU** (2026-06-17): cần credentials/sandbox thật + webhook IPN, là tích hợp ngoài. Hiện checkout chỉ COD (P2-02). Khi làm: thêm IPaymentGateway (Application) + adapter ở Infrastructure, không phá luồng đặt hàng hiện có.
 
-## Phase 4 — Dịch vụ & CMS  → `phase-4-services-cms/`
-- [ ] Gói bảo hành / AppleCare (ServicePackage)
-- [ ] Bán hàng doanh nghiệp / trường học (báo giá)
-- [ ] Blog/newsfeed + trang chính sách (CMS)
-- [ ] Đa ngôn ngữ VI/EN (resx + Translation) + /changelanguage
-- [ ] Định vị cửa hàng + check IMEI + tra cứu hoá đơn
+## Phase 4 — ❌ ĐÃ BỎ (2026-06-17)
+> Theo quyết định: chuyển **Đa ngôn ngữ** lên Phase 3, **bỏ** các tính năng còn lại (Gói bảo hành/AppleCare,
+> Bán hàng doanh nghiệp/trường học, Blog/newsfeed + trang chính sách CMS, Định vị cửa hàng + check IMEI + tra cứu hoá đơn).
+> Thư mục `phase-4-services-cms/` để trống. Nếu cần lại sau này thì mở lại từ SPEC §4.
 
 ## Phase 5 — Hoàn thiện  → `phase-5-admin-polish/`
 - [ ] Admin: danh mục/SP/biến thể/tồn kho theo cửa hàng

@@ -278,11 +278,12 @@ GET  /api/pages/{slug}
 
 **Phase 3 — Nghiệp vụ đặc thù**
 - Bundle mua kèm, trả góp, thu cũ đổi mới, theo dõi hàng về.
-- Tích hợp cổng thanh toán.
+- **Đa ngôn ngữ VI/EN** (chuyển từ Phase 4 sang — 2026-06-17).
+- Tích hợp cổng thanh toán — ⏸️ hoãn, làm sau (xem `tasks/backlog.md`).
 
-**Phase 4 — Dịch vụ & CMS**
-- Gói bảo hành, bán hàng doanh nghiệp, blog/newsfeed, trang chính sách.
-- Đa ngôn ngữ, định vị cửa hàng, check IMEI.
+**Phase 4 — ❌ đã bỏ (2026-06-17)**
+- Đa ngôn ngữ đã chuyển lên Phase 3; các tính năng còn lại (gói bảo hành/AppleCare, bán hàng doanh nghiệp/trường học,
+  blog/newsfeed + trang chính sách, định vị cửa hàng, check IMEI, tra cứu hoá đơn) **bỏ khỏi lộ trình** ở giai đoạn này.
 
 **Phase 5 — Hoàn thiện**
 - Admin/CMS đầy đủ, báo cáo, SEO nâng cao, tối ưu hiệu năng, kiểm thử bảo mật.
