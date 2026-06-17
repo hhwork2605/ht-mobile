@@ -129,6 +129,12 @@
                 <partial name="_PriceBlock" model="Model.Price" />
             </div>
 
+            @{ var monthlyFrom = InstallmentCalculator.MonthlyFrom(Model.Price.FinalPrice); }
+            @if (monthlyFrom > 0)
+            {
+                <p class="mt-1.5 text-[13px] text-ink2"><i class="fa-solid fa-circle-percent mr-1 text-accent"></i>Trả góp 0% chỉ từ <span class="font-semibold text-ink">@monthlyFrom.ToString("#,##0")₫</span>/tháng</p>
+            }
+
             @* VariantSelector: mỗi tổ hợp dung lượng×màu là 1 SKU có URL riêng *@
             <div class="mt-5">
                 <p class="mb-2 text-sm font-semibold text-ink">Phiên bản</p>
@@ -144,17 +150,38 @@
             </div>
 
             @* Hành động mua (SPEC §5) *@
-            <div class="mt-6 grid gap-2.5 sm:grid-cols-2">
-                <form method="post" action="/cart/items" class="contents">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="variantId" value="@Model.SelectedVariantId" />
-                    <button type="submit" class="rounded-full bg-accent px-4 py-3 font-semibold text-white transition hover:bg-accent-press">
-                        <i class="fa-solid fa-cart-shopping mr-1.5"></i>MUA NGAY
-                    </button>
-                </form>
-                <button class="rounded-full border-[1.5px] border-accent px-4 py-3 font-semibold text-accent transition hover:bg-accent/5">Trả góp 0%</button>
-                <button class="rounded-full border border-line px-4 py-3 text-sm text-ink transition hover:bg-surface2">Trả góp qua thẻ</button>
-                <button class="rounded-full border border-line px-4 py-3 text-sm text-ink transition hover:bg-surface2">Thu cũ đổi mới</button>
+            <div class="mt-6" x-data="{ showInstall: false }">
+                <div class="grid gap-2.5 sm:grid-cols-2">
+                    <form method="post" action="/cart/items" class="contents">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="variantId" value="@Model.SelectedVariantId" />
+                        <button type="submit" class="rounded-full bg-accent px-4 py-3 font-semibold text-white transition hover:bg-accent-press">
+                            <i class="fa-solid fa-cart-shopping mr-1.5"></i>MUA NGAY
+                        </button>
+                    </form>
+                    <button type="button" @@click="showInstall = !showInstall" :aria-expanded="showInstall"
+                            class="rounded-full border-[1.5px] border-accent px-4 py-3 font-semibold text-accent transition hover:bg-accent/5">Trả góp 0%</button>
+                    <button class="rounded-full border border-line px-4 py-3 text-sm text-ink transition hover:bg-surface2">Trả góp qua thẻ</button>
+                    <button class="rounded-full border border-line px-4 py-3 text-sm text-ink transition hover:bg-surface2">Thu cũ đổi mới</button>
+                </div>
+
+                @{ var plans = InstallmentCalculator.Plans(Model.Price.FinalPrice); }
+                @if (plans.Count > 0)
+                {
+                    <div x-show="showInstall" x-cloak x-transition class="mt-3 rounded-card border border-line p-4">
+                        <h3 class="mb-2 text-sm font-bold text-ink">Trả góp 0% lãi suất</h3>
+                        <div class="divide-y divide-line">
+                            @foreach (var p in plans)
+                            {
+                                <div class="flex items-center justify-between py-2 text-sm">
+                                    <span class="text-ink2">@p.Months tháng</span>
+                                    <span class="font-semibold text-ink">@p.MonthlyAmount.ToString("#,##0")₫<span class="text-[12px] font-normal text-ink2">/tháng</span></span>
+                                </div>
+                            }
+                        </div>
+                        <p class="mt-2 text-[12px] text-ink2">Lãi suất 0%. Duyệt hồ sơ qua công ty tài chính/thẻ tín dụng (liên hệ tại cửa hàng).</p>
+                    </div>
+                }
             </div>
 
             @* Khối ưu đãi (khuyến mãi hiệu lực) *@

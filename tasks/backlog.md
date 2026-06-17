@@ -28,7 +28,7 @@
 
 ## Phase 3 — Nghiệp vụ đặc thù  → `phase-3-business/`
 - [x] Bundle "mua kèm phụ kiện" (tổng tiết kiệm) (P3-01) — *migration CartItemUnitPriceOverride chờ apply*
-- [ ] Trả góp 0% (công ty tài chính + qua thẻ)
+- [x] Trả góp 0% (P3-02) — calculator + bảng kỳ hạn trên PDP (chưa tích hợp công ty tài chính/thẻ thật)
 - [ ] Thu cũ đổi mới (định giá + trợ giá)
 - [ ] Theo dõi hàng về (StockNotification)
 - [ ] Tích hợp cổng thanh toán (VNPAY/ZaloPay)
