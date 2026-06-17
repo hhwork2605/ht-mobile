@@ -16,6 +16,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // JWT bearer cho Ht.Admin (Angular SPA).
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddScoped<JwtTokenService>();
+builder.Services.AddScoped<HtMobile.Api.Users.AdminUserService>();
 var jwt = builder.Configuration.GetSection("Jwt").Get<JwtOptions>() ?? new JwtOptions();
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", o =>

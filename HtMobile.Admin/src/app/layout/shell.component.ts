@@ -86,7 +86,7 @@ export class ShellComponent {
       { label: 'Đơn hàng', icon: 'pi-shopping-cart', link: '/orders' },
       { label: 'Khuyến mãi', icon: 'pi-megaphone', link: '/promotions' },
     ] },
-    { title: 'Quản trị', items: [{ label: 'Người dùng & quyền', icon: 'pi-users', disabled: true }] },
+    { title: 'Quản trị', items: [{ label: 'Người dùng & quyền', icon: 'pi-users', link: '/users' }] },
   ];
 
   constructor(public auth: AuthService, private router: Router) {}
