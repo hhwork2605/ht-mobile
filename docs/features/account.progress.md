@@ -12,15 +12,18 @@ Cổng hiện tại: 2
 - [x] 5. Review subagent — DONE (0 blocker; quyền/giá đúng)
 - [x] 6. Review tay       — DONE (duyệt fix H1/M2/L2)
 - [x] 7. Test (green)     — DONE (49 test pass)
-- [x] 8. Commit           — IN_PROGRESS
+- [x] 8. Commit           — DONE (6524a0f)
 
 ## Đã sửa (Cổng 7)
 - H1: tên user thành <h1>. M2: thumbnail ưu tiên ảnh đúng variant. L2: link tên SP trong đơn về PDP.
 - (Build từng kẹt do tiến trình HtMobile.Web.exe sót khoá DLL → đã kill, build lại xanh.)
 
+## Hoàn tất
+- Migration OrderCustomerNullable ĐÃ apply. Smoke-test E2E OK: đăng ký → giỏ → /checkout (302 success
+  SD000002) → /account hiện đơn #SD000002 + SP + trạng thái "Chờ xác nhận"; giỏ trống lại.
+
 ## Next action
-- XONG feature. Phase 2 chỉ còn Pricing engine đầy đủ. Migration OrderCustomerNullable (checkout) vẫn chờ apply
-  để smoke-test luồng cart→checkout→account.
+- XONG feature Tài khoản. Phase 2 chỉ còn Pricing engine đầy đủ.
 
 ## Vấn đề mở (reviewer Cổng 5)
 - [H1] Trang /account thiếu <h1> (quy ước SEO/a11y) → đổi tên user thành <h1>.
