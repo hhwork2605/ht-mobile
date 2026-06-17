@@ -53,6 +53,7 @@ POST /reset-password                 # đổi mật khẩu bằng token
 GET  /account                        # [Authorize] dashboard: tabs Đơn hàng (lịch sử) + Thông tin (P2-04)
 GET  /thu-cu-doi-moi                  # form thu cũ (dòng máy + tình trạng) + ước tính live (P3-03)
 POST /thu-cu-doi-moi                  # validate ∈ catalog + tính lại estimate server-side → tạo TradeInRequest(Pending) → màn xác nhận
+GET  /changelanguage?culture=&returnUrl=  # đổi ngôn ngữ VI/EN (set cookie .AspNetCore.Culture) → redirect returnUrl nội bộ (P3-05)
 ```
 > ReturnUrl chống open-redirect bằng helper `UrlSafety.SafeLocalUrl`. Quên MK: `IEmailSender` hiện là
 > `NullEmailSender` (chỉ log) → dev xem link reset trong log. REST `/api/auth/*` (SPEC §8) để dành cho app sau.

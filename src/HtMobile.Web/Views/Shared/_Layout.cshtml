@@ -1,6 +1,10 @@
 @inject HtMobile.Application.Common.Interfaces.ICurrentUser CurrentUser
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@inject Microsoft.Extensions.Localization.IStringLocalizer<HtMobile.Web.Resources.SharedResource> L
 @{
+    // Đa ngôn ngữ (P3-05): culture hiện tại + returnUrl để giữ trang khi đổi ngôn ngữ.
+    var uiLang = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+    var langReturn = Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString);
     // Token antiforgery cho mọi POST của htmx (giỏ hàng…). Header khớp AddAntiforgery ở Program.cs.
     var xsrfToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 
@@ -18,7 +22,7 @@
     var ogType = ViewData["OgType"] as string ?? "website";
 }
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="@uiLang">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -32,7 +36,7 @@
 
     @* Open Graph + Twitter Card *@
     <meta property="og:site_name" content="HtMobile" />
-    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:locale" content="@(uiLang == "en" ? "en_US" : "vi_VN")" />
     <meta property="og:type" content="@ogType" />
     <meta property="og:title" content="@fullTitle" />
     <meta property="og:description" content="@metaDescription" />
@@ -112,7 +116,7 @@
 <body class="min-h-screen bg-surface text-ink antialiased">
 
     <div class="bg-surface2 text-ink2 text-center text-[12.5px] py-[7px] px-3 border-b border-line">
-        Miễn phí giao hàng toàn quốc · Trả góp 0% · Thu cũ đổi mới — Hotline 1800.0000
+        @L["TopBar.Promo"]
     </div>
 
     <header class="sticky top-0 z-40 bg-header text-header-ink border-b border-header-border backdrop-blur-lg">
@@ -128,7 +132,7 @@
             <form action="/search" method="get" class="relative ml-auto hidden md:block" autocomplete="off">
                 <div class="flex items-center gap-2 rounded-full bg-black/5 px-3.5 py-2 w-[230px]">
                     <i class="fa-solid fa-magnifying-glass text-sm text-header-ink opacity-60"></i>
-                    <input type="search" name="q" placeholder="Tìm sản phẩm..."
+                    <input type="search" name="q" placeholder="@L["Search.Placeholder"]"
                            class="w-full border-0 bg-transparent text-[13.5px] text-header-ink outline-none"
                            hx-get="/search/suggest" hx-trigger="keyup changed delay:300ms"
                            hx-target="#search-suggest" hx-indicator="#search-spin" />
@@ -136,17 +140,24 @@
                 <div id="search-suggest" class="absolute left-0 right-0 top-full z-50 mt-1"></div>
             </form>
 
-            <a href="/search" class="ml-auto flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5 md:hidden" aria-label="Tìm kiếm">
+            <a href="/search" class="ml-auto flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5 md:hidden" aria-label="@L["Nav.Search"]">
                 <i class="fa-solid fa-magnifying-glass text-lg"></i>
             </a>
             <a href="@(CurrentUser.IsAuthenticated ? "/account" : "/login")"
-               class="flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5" aria-label="Tài khoản">
+               class="flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5" aria-label="@L["Nav.Account"]">
                 <i class="fa-regular fa-circle-user text-lg"></i>
             </a>
-            <a href="/cart" class="relative flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5" aria-label="Giỏ hàng">
+            <a href="/cart" class="relative flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5" aria-label="@L["Nav.Cart"]">
                 <i class="fa-solid fa-cart-shopping text-lg"></i>
                 <vc:cart-badge></vc:cart-badge>
             </a>
+
+            @* LangSwitcher VI|EN (P3-05) — giữ trang hiện tại qua returnUrl *@
+            <div class="flex items-center text-[12.5px] font-semibold">
+                <a href="/changelanguage?culture=vi&returnUrl=@langReturn" class="@(uiLang == "vi" ? "text-accent" : "text-ink2 hover:text-ink")">VI</a>
+                <span class="mx-1 text-ink2/40">|</span>
+                <a href="/changelanguage?culture=en&returnUrl=@langReturn" class="@(uiLang == "en" ? "text-accent" : "text-ink2 hover:text-ink")">EN</a>
+            </div>
         </div>
     </header>
 
@@ -162,11 +173,11 @@
                         <i class="fa-brands fa-apple"></i>HtMobile
                     </div>
                     <p class="m-0 text-[13px] leading-relaxed text-ink2">
-                        Hệ thống bán lẻ sản phẩm Apple chính hãng. Trả góp 0%, giao nhanh toàn quốc, bảo hành tận tâm.
+                        @L["Footer.Tagline"]
                     </p>
                 </div>
                 <div>
-                    <div class="mb-3 text-[13px] font-bold text-ink">Sản phẩm</div>
+                    <div class="mb-3 text-[13px] font-bold text-ink">@L["Footer.Products"]</div>
                     <div class="flex flex-col gap-[9px] text-[13px] text-ink2">
                         <a href="/iphone" class="hover:text-accent">iPhone</a>
                         <a href="/ipad" class="hover:text-accent">iPad</a>
@@ -176,7 +187,7 @@
                     </div>
                 </div>
                 <div>
-                    <div class="mb-3 text-[13px] font-bold text-ink">Hỗ trợ</div>
+                    <div class="mb-3 text-[13px] font-bold text-ink">@L["Footer.Support"]</div>
                     <div class="flex flex-col gap-[9px] text-[13px] text-ink2">
                         <span class="cursor-pointer hover:text-accent">Tra cứu đơn hàng</span>
                         <span class="cursor-pointer hover:text-accent">Bảo hành</span>
@@ -185,7 +196,7 @@
                     </div>
                 </div>
                 <div>
-                    <div class="mb-3 text-[13px] font-bold text-ink">Về chúng tôi</div>
+                    <div class="mb-3 text-[13px] font-bold text-ink">@L["Footer.Company"]</div>
                     <div class="flex flex-col gap-[9px] text-[13px] text-ink2">
                         <span class="cursor-pointer hover:text-accent">Hệ thống cửa hàng</span>
                         <span class="cursor-pointer hover:text-accent">Tuyển dụng</span>

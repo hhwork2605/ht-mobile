@@ -7,7 +7,8 @@ using HtMobile.Web.Infrastructure.Routing;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddViewLocalization();
+builder.Services.AddLocalization(o => o.ResourcesPath = "Resources");
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSession();
 
@@ -33,6 +34,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Đa ngôn ngữ VI/EN (P3-05): culture theo cookie .AspNetCore.Culture, mặc định vi.
+app.UseRequestLocalization(new Microsoft.AspNetCore.Builder.RequestLocalizationOptions()
+    .SetDefaultCulture(LanguageOptions.Default)
+    .AddSupportedCultures(LanguageOptions.Supported)
+    .AddSupportedUICultures(LanguageOptions.Supported));
+
 app.UseRouting();
 app.UseSession();
 app.UseAuthentication();
