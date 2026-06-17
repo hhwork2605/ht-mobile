@@ -1,3 +1,4 @@
+using HtMobile.Application.Features.Bundles.Dtos;
 using HtMobile.Application.Features.Pricing.Dtos;
 
 namespace HtMobile.Application.Features.Catalog.Dtos;
@@ -40,6 +41,9 @@ public record ProductDetailDto
 
     /// <summary>Ưu đãi thanh toán theo ngân hàng (carousel).</summary>
     public IReadOnlyList<PaymentOfferDto> PaymentOffers { get; init; } = Array.Empty<PaymentOfferDto>();
+
+    /// <summary>Combo "mua kèm phụ kiện" (P3-01); null nếu sản phẩm không có bundle.</summary>
+    public BundleView? Bundle { get; init; }
 
     /// <summary>Tổng số đánh giá của các variant thuộc sản phẩm.</summary>
     public int ReviewCount { get; init; }

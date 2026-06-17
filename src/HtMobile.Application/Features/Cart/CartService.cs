@@ -39,7 +39,9 @@ public class CartService : ICartService
 
         foreach (var item in cart.Items.OrderBy(i => i.Id))
         {
-            var price = await _pricing.GetEffectivePriceAsync(item.VariantId, ct);
+            // Giá cố định (mua kèm bundle) thì dùng đúng; ngược lại lấy giá hiệu lực qua IPricingService.
+            var unitPrice = item.UnitPriceOverride
+                ?? (await _pricing.GetEffectivePriceAsync(item.VariantId, ct)).FinalPrice;
             var variant = item.Variant;
             var product = variant.Product;
             var variantText = string.Join(" · ",
@@ -54,11 +56,11 @@ public class CartService : ICartService
                 VariantText = variantText,
                 ThumbnailUrl = thumb,
                 VariantSlug = variant.Slug,
-                UnitPrice = price.FinalPrice,
+                UnitPrice = unitPrice,
                 Quantity = item.Quantity,
-                LineTotal = price.FinalPrice * item.Quantity
+                LineTotal = unitPrice * item.Quantity
             });
-            amounts.Add(new CartLineAmount(price.FinalPrice, item.Quantity));
+            amounts.Add(new CartLineAmount(unitPrice, item.Quantity));
         }
 
         var totals = CartMath.Summarize(amounts);
@@ -73,7 +75,7 @@ public class CartService : ICartService
     }
 
     /// <summary>Thêm 1 biến thể vào giỏ (gộp nếu đã có). Trả về tổng số lượng giỏ sau khi thêm.</summary>
-    public async Task<int> AddItemAsync(CartOwner owner, long variantId, int quantity = 1, CancellationToken ct = default)
+    public async Task<int> AddItemAsync(CartOwner owner, long variantId, int quantity = 1, decimal? unitPriceOverride = null, CancellationToken ct = default)
     {
         if (quantity <= 0) quantity = 1;
 
@@ -89,15 +91,24 @@ public class CartService : ICartService
         if (existing is not null)
         {
             existing.Quantity += quantity;
+            // Mua kèm bundle: áp giá ưu đãi cho CẢ dòng (do unique (CartId,VariantId) gộp 1 dòng).
+            // Có chủ đích Phase 3: có lợi cho khách, không bao giờ tính cao hơn giá thường. Việc tách
+            // giá theo từng đơn vị / áp giá kèm khi thêm lẻ là out-of-scope (xem P3-01).
+            if (unitPriceOverride is not null)
+            {
+                existing.UnitPriceOverride = unitPriceOverride;
+                existing.UnitPrice = unitPriceOverride.Value;
+            }
         }
         else
         {
-            var price = await _pricing.GetEffectivePriceAsync(variantId, ct);
+            var unit = unitPriceOverride ?? (await _pricing.GetEffectivePriceAsync(variantId, ct)).FinalPrice;
             cart.Items.Add(new CartItem
             {
                 VariantId = variantId,
                 Quantity = quantity,
-                UnitPrice = price.FinalPrice   // snapshot lúc thêm
+                UnitPrice = unit,                       // snapshot lúc thêm
+                UnitPriceOverride = unitPriceOverride   // null = theo giá hiệu lực
             });
         }
 

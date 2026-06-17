@@ -27,7 +27,7 @@
 - [x] Pricing engine đầy đủ: khuyến mãi nhiều tầng (best%+best fixed) + điều kiện ConditionsJson + cache (P2-05, giá một mức — ADR-0002)
 
 ## Phase 3 — Nghiệp vụ đặc thù  → `phase-3-business/`
-- [ ] Bundle "mua kèm phụ kiện" (tổng tiết kiệm)
+- [x] Bundle "mua kèm phụ kiện" (tổng tiết kiệm) (P3-01) — *migration CartItemUnitPriceOverride chờ apply*
 - [ ] Trả góp 0% (công ty tài chính + qua thẻ)
 - [ ] Thu cũ đổi mới (định giá + trợ giá)
 - [ ] Theo dõi hàng về (StockNotification)

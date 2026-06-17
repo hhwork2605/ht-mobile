@@ -200,6 +200,57 @@
         </div>
     </div>
 
+    @* ===== Mua kèm phụ kiện (bundle, P3-01) ===== *@
+    @if (Model.Bundle is { Accessories.Count: > 0 } b)
+    {
+        <section class="mt-10 rounded-card border border-line p-6"
+                 x-data="@($"{{ main: {(long)Model.Price.FinalPrice}, items: [{string.Join(",", b.Accessories.Select(a => $"{{id:{a.VariantId},b:{(long)a.BundlePrice},s:{(long)a.Saving},on:true}}"))}], money(n){{return n.toLocaleString('vi-VN')+'₫'}}, get picked(){{return this.items.filter(i=>i.on)}}, get total(){{return this.main + this.picked.reduce((t,i)=>t+i.b,0)}}, get saving(){{return this.picked.reduce((t,i)=>t+i.s,0)}}, get count(){{return 1 + this.picked.length}} }}")">
+            <h2 class="mb-4 text-lg font-bold text-ink"><i class="fa-solid fa-gift mr-2 text-accent"></i>Mua kèm tiết kiệm hơn</h2>
+            <form method="post" action="/bundle/add" class="flex flex-col gap-3">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="mainVariantId" value="@Model.SelectedVariantId" />
+
+                @for (var i = 0; i < b.Accessories.Count; i++)
+                {
+                    var a = b.Accessories[i];
+                    <label class="flex items-center gap-3 rounded-xl border border-line p-3 has-[:checked]:border-accent">
+                        <input type="checkbox" name="accessoryVariantIds" value="@a.VariantId" checked
+                               x-model="items[@i].on" class="h-4 w-4 flex-none" />
+                        <div class="flex h-12 w-12 flex-none items-center justify-center rounded-lg bg-surface2">
+                            <img src="@(string.IsNullOrEmpty(a.ThumbnailUrl) ? "/images/placeholder.svg" : a.ThumbnailUrl)"
+                                 alt="@a.ProductName" width="48" height="48" loading="lazy" class="h-full w-full object-contain p-1" />
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-sm font-semibold text-ink">@a.ProductName</div>
+                            @if (!string.IsNullOrWhiteSpace(a.VariantText))
+                            {
+                                <div class="text-[12px] text-ink2">@a.VariantText</div>
+                            }
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm font-bold text-sale">@a.BundlePrice.ToString("#,##0")₫</div>
+                            @if (a.Saving > 0)
+                            {
+                                <div class="text-[12px] text-ink2 line-through">@a.ListedPrice.ToString("#,##0")₫</div>
+                            }
+                        </div>
+                    </label>
+                }
+
+                <div class="mt-2 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
+                    <div>
+                        <div class="text-sm text-ink2">Tổng <span x-text="count"></span> sản phẩm</div>
+                        <div class="text-xl font-bold text-sale" x-text="money(total)"></div>
+                        <div class="text-[12.5px] text-green-600" x-show="saving > 0">Tiết kiệm <span x-text="money(saving)"></span></div>
+                    </div>
+                    <button type="submit" class="rounded-full bg-accent px-6 py-3 font-semibold text-white transition hover:bg-accent-press">
+                        Mua <span x-text="count"></span> sản phẩm
+                    </button>
+                </div>
+            </form>
+        </section>
+    }
+
     @* ===== Mô tả ===== *@
     @if (!string.IsNullOrWhiteSpace(Model.Description))
     {

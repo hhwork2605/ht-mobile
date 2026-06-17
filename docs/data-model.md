@@ -170,6 +170,7 @@ Quan hệ: `Items` (CartItem). Lưu ý: giỏ khách vãng lai có thể cache �
 | `VariantId` | `long` | FK → `ProductVariants.Id` | Biến thể được thêm. |
 | `Quantity` | `int` | | Số lượng. |
 | `UnitPrice` | `decimal(18,2)` | | Đơn giá snapshot lúc thêm. **Hiển thị giỏ dùng giá hiệu lực hiện tại qua `IPricingService`** (phản ánh KM đang chạy), không tin cột này — tránh giá cũ. Chốt cứng khi đặt hàng (`OrderItem.UnitPrice`). |
+| `UnitPriceOverride` | `decimal(18,2)?` | | Giá cố định cho dòng (P3-01 mua kèm = `BundleItem.BundlePrice`). `null` = dùng giá hiệu lực `IPricingService`; có giá trị = giỏ/checkout **dùng đúng giá này** (không định giá lại). |
 
 ### `Orders` ✅ Audit — đơn hàng
 

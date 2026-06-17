@@ -12,11 +12,13 @@ public class CatalogService
 {
     private readonly IApplicationDbContext _db;
     private readonly IPricingService _pricing;
+    private readonly Bundles.BundleService _bundles;
 
-    public CatalogService(IApplicationDbContext db, IPricingService pricing)
+    public CatalogService(IApplicationDbContext db, IPricingService pricing, Bundles.BundleService bundles)
     {
         _db = db;
         _pricing = pricing;
+        _bundles = bundles;
     }
 
     /// <summary>Danh mục gốc cho menu điều hướng.</summary>
@@ -202,6 +204,7 @@ public class CatalogService
             .FirstOrDefaultAsync(ct);
 
         var price = await _pricing.GetEffectivePriceAsync(selectedVariantId, ct);
+        var bundle = await _bundles.GetForProductAsync(productId, ct);
 
         return new ProductDetailDto
         {
@@ -226,6 +229,7 @@ public class CatalogService
             YoutubeUrls = videos,
             Offers = offers,
             PaymentOffers = paymentOffers,
+            Bundle = bundle,
             ReviewCount = reviewStats?.Count ?? 0,
             AverageRating = reviewStats?.Avg
         };

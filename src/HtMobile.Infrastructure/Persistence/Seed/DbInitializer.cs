@@ -2,6 +2,7 @@ using HtMobile.Domain.Constants;
 using HtMobile.Domain.Entities.Catalog;
 using HtMobile.Domain.Entities.Cms;
 using HtMobile.Domain.Entities.Pricing;
+using HtMobile.Domain.Entities.Sales;
 using HtMobile.Domain.Enums;
 using HtMobile.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -54,6 +55,7 @@ public class DbInitializer
         await SeedCategoriesAsync();
         await SeedSampleCatalogAsync();
         await SeedBannersAsync();
+        await SeedBundlesAsync();
         _logger.LogInformation("Seed completed.");
     }
 
@@ -239,6 +241,21 @@ public class DbInitializer
                 IsActive = true
             });
 
+        await _db.SaveChangesAsync();
+    }
+
+    private async Task SeedBundlesAsync()
+    {
+        if (await _db.Bundles.AnyAsync()) return;
+
+        var iphone = await _db.Products.FirstOrDefaultAsync(p => p.Slug == "dien-thoai-iphone-17-pro-max");
+        var airpods = await _db.ProductVariants.FirstOrDefaultAsync(v => v.Slug == "airpods-pro-2-usb-c");
+        if (iphone is null || airpods is null) return;
+
+        var bundle = new Bundle { MainProductId = iphone.Id };
+        // AirPods niêm yết 5.490.000 (−10% KM = 4.941.000) → giá mua kèm 4.490.000.
+        bundle.Items.Add(new BundleItem { AccessoryVariantId = airpods.Id, BundlePrice = 4_490_000m });
+        _db.Bundles.Add(bundle);
         await _db.SaveChangesAsync();
     }
 

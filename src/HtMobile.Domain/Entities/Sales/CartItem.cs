@@ -10,6 +10,9 @@ public class CartItem : BaseEntity
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
 
+    /// <summary>Giá cố định cho dòng (vd giá mua kèm bundle, P3-01). null = dùng giá hiệu lực qua IPricingService.</summary>
+    public decimal? UnitPriceOverride { get; set; }
+
     public Cart Cart { get; set; } = null!;
     public ProductVariant Variant { get; set; } = null!;
 }

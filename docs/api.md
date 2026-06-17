@@ -31,6 +31,7 @@ POST /cart/items                 # body: variantId, quantity=1 → thêm; redire
 POST /cart/items/{id}/inc        # +1 → trả partial _CartBody (htmx)
 POST /cart/items/{id}/dec        # -1 (về 0 thì xoá dòng) → partial _CartBody (htmx)
 POST /cart/items/{id}/remove     # xoá dòng → partial _CartBody (htmx)
+POST /bundle/add                 # body: mainVariantId, accessoryVariantIds[] → thêm SP chính + phụ kiện mua kèm (giá BundlePrice từ DB) → /cart
 ```
 > Badge số lượng ở header: ViewComponent `CartBadge`. Đơn giá mỗi dòng = giá hiệu lực qua `IPricingService`.
 > Merge giỏ guest→user: `ICartService.MergeAsync` (gọi sau khi đăng nhập — nối ở feature auth P2).

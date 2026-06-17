@@ -27,7 +27,7 @@ public class CartController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Add([FromForm] long variantId, [FromForm] int quantity = 1, CancellationToken ct = default)
     {
-        await _cart.AddItemAsync(_ctx.GetOwner(createGuestIfMissing: true), variantId, quantity, ct);
+        await _cart.AddItemAsync(_ctx.GetOwner(createGuestIfMissing: true), variantId, quantity, ct: ct);
         return RedirectToAction(nameof(Index));
     }
 
