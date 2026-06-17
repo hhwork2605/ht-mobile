@@ -48,12 +48,7 @@ app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Admin area (conventional): /admin/{controller}/{action}
-app.MapControllerRoute(
-    name: "areas",
-    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
-
-// Storefront + API dùng attribute routing (slug SEO ở gốc)
+// Storefront + API dùng attribute routing (slug SEO ở gốc). (Admin MVC đã bỏ — admin sẽ là app Angular riêng.)
 app.MapControllers();
 
 // Dev: tự apply migration + seed (bỏ qua nếu DB chưa cấu hình)

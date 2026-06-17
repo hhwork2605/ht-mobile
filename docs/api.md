@@ -68,20 +68,9 @@ POST /checkout            # tạo Order(Pending)+OrderItem(snapshot giá)+Shipme
 > (guest = null). Giá dòng = `IPricingService` lúc đặt (snapshot vào `OrderItem.UnitPrice`). Mã đơn hiển thị = `SD{Id:D6}`.
 > SEO bắt buộc mỗi trang (xem [conventions.md](conventions.md) §SEO): `_Layout` sinh `<title>`/`description`/canonical/OG/hreflang + JSON-LD `Organization`/`WebSite`; mỗi trang bổ sung JSON-LD qua section `Head` (Category → `ItemList`+`BreadcrumbList`; PDP → `Product`+`offers`(+`aggregateRating`)+`BreadcrumbList`). Helper: `Web/Infrastructure/Seo/JsonLd`.
 
-### Admin (Area `Admin`, `[Authorize(Roles=Admin)]`)
-```
-GET  /admin                          # dashboard
-GET  /admin/orders?status=           # danh sách đơn + tab lọc theo trạng thái (P5-01)
-GET  /admin/orders/{id}              # chi tiết đơn + form đổi trạng thái
-POST /admin/orders/{id}/status       # đổi trạng thái (validate chuyển hợp lệ server-side) → /admin/orders/{id}
-GET  /admin/products?category=       # danh sách SP + lọc danh mục (P5-02)
-GET  /admin/products/create          # form thêm SP + 1 biến thể đầu
-POST /admin/products/create          # tạo SP (slug auto-gen, unique) + biến thể
-GET  /admin/products/{id}/edit       # form sửa SP + biến thể
-POST /admin/products/{id}/edit       # cập nhật field SP + sửa biến thể (giá/CompareAt/Status)
-POST /admin/products/{id}/variants   # thêm biến thể mới cho SP (AJAX htmx → partial _VariantRow, append)
-POST /admin/products/variants/{id}/toggle  # ẩn/hiện biến thể Active⇄Discontinued (AJAX htmx → partial _VariantRow)
-```
+### Admin — đã bỏ khỏi app MVC
+Khu quản trị sẽ là **webapp Angular riêng** dùng REST API (làm sau). App MVC này chỉ phục vụ storefront.
+Không còn route `/admin/*` trong `HtMobile.Web`.
 
 ## Pricing
 ```

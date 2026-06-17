@@ -26,14 +26,10 @@
 - Tương tác động: htmx trả **partial view**; state nhỏ dùng Alpine. Hạn chế JS rời rạc.
 - URL khách = slug (không lộ id). Resolve qua `ISlugResolver`.
 
-## Admin (Area `Admin`) — quy ước riêng
-- **UI dùng Bootstrap** (KHÔNG Tailwind). Storefront vẫn Tailwind v4; riêng Area `Admin` dùng Bootstrap (grid,
-  component, utility của Bootstrap) cho nhanh & sẵn component quản trị. Layout admin nạp Bootstrap CSS/JS riêng.
-- **KHÔNG cần tối ưu SEO**: mọi trang admin để `<meta robots="noindex,nofollow">` (đã có ở layout admin), không cần
-  canonical/OG/JSON-LD/hreflang/slug. URL admin dùng id thẳng (`/admin/orders/{id}`), không cần slug.
-- **Ưu tiên AJAX (htmx)** cho thao tác CRUD/đổi trạng thái: POST trả **partial** (cập nhật bảng/hàng/form tại chỗ),
-  không reload cả trang — nhanh & gọn hơn. Vẫn `[ValidateAntiForgeryToken]` (token qua header htmx như storefront).
-- Chỉ role Admin: controller/area gắn `[Authorize(Roles = Roles.Admin)]` (không chỉ ẩn UI).
+## Admin — KHÔNG nằm trong app MVC này
+App MVC `HtMobile.Web` **chỉ phục vụ bán hàng (storefront)**. Khu quản trị (admin) sẽ là **một webapp Angular riêng**
+(repo/khác), dùng REST API sau này — **không** dựng trang admin bằng MVC/Razor trong project này nữa. Identity + role
+`Admin` (seed ở `DbInitializer`) giữ lại làm hạ tầng auth cho API tương lai.
 
 ## SEO (bắt buộc khi gen trang/HTML)
 Mọi trang SSR phải render chuẩn SEO **ngay khi sinh code** — đích: rich result + Core Web Vitals tốt, dễ lên top.

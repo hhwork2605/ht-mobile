@@ -18,11 +18,9 @@ public static class DependencyInjection
     {
         services.AddScoped<IPricingService, PricingEngine>();
         services.AddScoped<CatalogService>();
-        services.AddScoped<AdminProductService>();
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<CheckoutService>();
         services.AddScoped<OrderHistoryService>();
-        services.AddScoped<AdminOrderService>();
         services.AddScoped<BundleService>();
         services.AddScoped<TradeInService>();
         services.AddScoped<StockNotificationService>();
