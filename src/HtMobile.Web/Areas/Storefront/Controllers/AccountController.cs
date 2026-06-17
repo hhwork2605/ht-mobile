@@ -1,7 +1,9 @@
 using HtMobile.Application.Common.Interfaces;
+using HtMobile.Application.Features.Orders;
 using HtMobile.Domain.Constants;
 using HtMobile.Infrastructure.Identity;
 using HtMobile.Web.Infrastructure;
+using HtMobile.Web.Models.Account;
 using HtMobile.Web.Models.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -18,6 +20,7 @@ public class AccountController : Controller
     private readonly ICartService _cart;
     private readonly CartContext _cartCtx;
     private readonly IEmailSender _email;
+    private readonly OrderHistoryService _orders;
     private readonly ILogger<AccountController> _logger;
 
     public AccountController(
@@ -26,6 +29,7 @@ public class AccountController : Controller
         ICartService cart,
         CartContext cartCtx,
         IEmailSender email,
+        OrderHistoryService orders,
         ILogger<AccountController> logger)
     {
         _users = users;
@@ -33,6 +37,7 @@ public class AccountController : Controller
         _cart = cart;
         _cartCtx = cartCtx;
         _email = email;
+        _orders = orders;
         _logger = logger;
     }
 
@@ -159,7 +164,19 @@ public class AccountController : Controller
 
     [Authorize]
     [HttpGet("/account")]
-    public IActionResult Index() => View();
+    public async Task<IActionResult> Index(CancellationToken ct)
+    {
+        var user = await _users.GetUserAsync(User);
+        if (user is null) return Redirect("/login");
+
+        var orders = await _orders.GetMyOrdersAsync(user.Id, ct);
+        return View(new AccountVm
+        {
+            FullName = user.FullName,
+            Email = user.Email ?? string.Empty,
+            Orders = orders
+        });
+    }
 
     private async Task MergeGuestCartAsync(long userId)
     {

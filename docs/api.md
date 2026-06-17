@@ -48,7 +48,7 @@ GET  /forgot-password                # form nhập email
 POST /forgot-password                # sinh token + IEmailSender; luôn báo "đã gửi" (không lộ email tồn tại)
 GET  /reset-password?token=&email=   # form đặt lại mật khẩu
 POST /reset-password                 # đổi mật khẩu bằng token
-GET  /account                        # landing tối thiểu (email + Đăng xuất); dashboard đầy đủ là feature riêng
+GET  /account                        # [Authorize] dashboard: tabs Đơn hàng (lịch sử) + Thông tin (P2-04)
 ```
 > ReturnUrl chống open-redirect bằng helper `UrlSafety.SafeLocalUrl`. Quên MK: `IEmailSender` hiện là
 > `NullEmailSender` (chỉ log) → dev xem link reset trong log. REST `/api/auth/*` (SPEC §8) để dành cho app sau.

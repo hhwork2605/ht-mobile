@@ -5,11 +5,11 @@
 ## Phase 0 — Scaffold (nền tảng)
 - [x] Solution Clean Architecture + 8 project + Dependency Rule
 - [x] Thư mục vibe-code (CLAUDE.md, docs, tasks, scripts, .claude)
-- [~] Domain entities + Enums + Common base
-- [~] Application interfaces + feature folders + DI
-- [~] Infrastructure: AppDbContext + configs + Identity + Redis + Search + Seed + DI
-- [~] Web: Program.cs + Areas + ViewComponents + Tailwind + 3 trang skeleton (Home / `/iphone` / PDP)
-- [~] Migration `Initial` + build xanh
+- [x] Domain entities + Enums + Common base
+- [x] Application interfaces + feature folders + DI
+- [x] Infrastructure: AppDbContext + configs + Identity + Redis + Search + Seed + DI
+- [x] Web: Program.cs + Areas + ViewComponents + Tailwind + 3 trang skeleton (Home / `/iphone` / PDP)
+- [x] Migration `Initial` + build xanh
 
 ## Phase 1 — Catalog & tìm kiếm  → `phase-1-catalog/`
 - [x] Trang chủ: banner slider + tile danh mục + lưới SP nổi bật + bento + trust bar (P1-01)
@@ -23,7 +23,7 @@
 - [x] Giỏ hàng (guest theo session + user) + cập nhật SL + empty state (P2-01) — *migration CartUniqueIndexes chờ apply*
 - [x] Checkout: thông tin nhận hàng + phương thức giao + thanh toán (P2-02, COD/guest) — *migration OrderCustomerNullable chờ apply*
 - [x] Đăng ký / Đăng nhập / Quên mật khẩu / Nhớ đăng nhập (Identity) (P2-03) + merge giỏ guest→user
-- [ ] Tài khoản + lịch sử đơn hàng
+- [x] Tài khoản + lịch sử đơn hàng (P2-04) — dashboard Đơn hàng + Thông tin (Wishlist dời feature riêng)
 - [ ] Pricing engine đầy đủ: khuyến mãi nhiều tầng + điều kiện (ConditionsJson) + cache Redis (giá một mức toàn quốc — ADR-0002)
 
 ## Phase 3 — Nghiệp vụ đặc thù  → `phase-3-business/`
