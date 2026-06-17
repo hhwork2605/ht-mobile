@@ -2,14 +2,16 @@
     ViewData["Title"] = "Quản trị";
 }
 
-<h1 class="mb-6 text-2xl font-bold">Bảng điều khiển quản trị</h1>
-
-<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+<div class="row g-3">
     @foreach (var m in new[] { "Sản phẩm", "Đơn hàng", "Khuyến mãi", "Người dùng", "CMS", "Báo cáo" })
     {
-        <div class="rounded-lg border bg-white p-5">
-            <h2 class="font-semibold text-gray-700">@m</h2>
-            <p class="mt-1 text-sm text-gray-400">TODO — vibe-code Phase 5</p>
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="h6 fw-semibold text-body-secondary mb-1">@m</h2>
+                    <p class="small text-body-tertiary mb-0">TODO — vibe-code Phase 5</p>
+                </div>
+            </div>
         </div>
     }
 </div>

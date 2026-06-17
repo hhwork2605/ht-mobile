@@ -27,6 +27,8 @@
 - URL khách = slug (không lộ id). Resolve qua `ISlugResolver`.
 
 ## Admin (Area `Admin`) — quy ước riêng
+- **UI dùng Bootstrap** (KHÔNG Tailwind). Storefront vẫn Tailwind v4; riêng Area `Admin` dùng Bootstrap (grid,
+  component, utility của Bootstrap) cho nhanh & sẵn component quản trị. Layout admin nạp Bootstrap CSS/JS riêng.
 - **KHÔNG cần tối ưu SEO**: mọi trang admin để `<meta robots="noindex,nofollow">` (đã có ở layout admin), không cần
   canonical/OG/JSON-LD/hreflang/slug. URL admin dùng id thẳng (`/admin/orders/{id}`), không cần slug.
 - **Ưu tiên AJAX (htmx)** cho thao tác CRUD/đổi trạng thái: POST trả **partial** (cập nhật bảng/hàng/form tại chỗ),

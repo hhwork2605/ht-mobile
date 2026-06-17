@@ -4,68 +4,76 @@
     var info = OrderStatusInfo.Describe(Model.Status);
 }
 
-<a href="/admin/orders" class="mb-4 inline-block text-[13px] text-ink2 hover:text-accent"><i class="fa-solid fa-arrow-left mr-1.5"></i>Tất cả đơn hàng</a>
+<a href="/admin/orders" class="d-inline-block mb-3 small text-body-secondary"><i class="fa-solid fa-arrow-left me-2"></i>Tất cả đơn hàng</a>
 
 @if (TempData["StatusError"] is string err)
 {
-    <div class="mb-4 rounded-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">@err</div>
+    <div class="alert alert-danger py-2 small">@err</div>
 }
 
-<div class="grid gap-5 lg:grid-cols-3">
+<div class="row g-4">
     @* Cột trái: thông tin + items *@
-    <div class="space-y-5 lg:col-span-2">
-        <div class="rounded-card border border-line bg-white p-5">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                    <span class="font-mono text-lg font-bold text-ink">#@Model.Code</span>
-                    <span class="ml-3 text-[13px] text-ink2">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <div>
+                        <span class="font-monospace fs-5 fw-bold">#@Model.Code</span>
+                        <span class="ms-3 small text-body-secondary">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    <span class="badge rounded-pill @(info.IsCancelled ? "text-bg-danger" : "text-bg-light text-accent")">@info.Label</span>
                 </div>
-                <span class="rounded-full px-3 py-1 text-xs font-semibold @(info.IsCancelled ? "bg-red-50 text-red-600" : "bg-surface2 text-accent")">@info.Label</span>
-            </div>
-            <div class="mt-4 grid gap-3 text-[13px] sm:grid-cols-2">
-                <div><div class="text-ink2">Khách hàng</div><div class="font-medium text-ink">@(Model.CustomerId is null ? "Khách vãng lai" : $"User #{Model.CustomerId}")</div></div>
-                <div><div class="text-ink2">Thanh toán</div><div class="font-medium text-ink">@Model.PaymentMethod</div></div>
-                <div class="sm:col-span-2"><div class="text-ink2">Thông tin nhận hàng</div><div class="font-medium text-ink">@(Model.ShipmentAddress ?? "—")</div></div>
+                <div class="row g-3 mt-1 small">
+                    <div class="col-sm-6"><div class="text-body-secondary">Khách hàng</div><div class="fw-medium">@(Model.CustomerId is null ? "Khách vãng lai" : $"User #{Model.CustomerId}")</div></div>
+                    <div class="col-sm-6"><div class="text-body-secondary">Thanh toán</div><div class="fw-medium">@Model.PaymentMethod</div></div>
+                    <div class="col-12"><div class="text-body-secondary">Thông tin nhận hàng</div><div class="fw-medium">@(Model.ShipmentAddress ?? "—")</div></div>
+                </div>
             </div>
         </div>
 
-        <div class="rounded-card border border-line bg-white p-5">
-            <h2 class="mb-3 text-sm font-bold text-ink">Sản phẩm</h2>
-            <div class="divide-y divide-line">
-                @foreach (var it in Model.Items)
-                {
-                    <div class="flex items-center justify-between py-2.5 text-[13px]">
-                        <div><span class="font-semibold text-ink">@it.ProductName</span><span class="text-ink2"> @it.VariantText · SL @it.Quantity</span></div>
-                        <span class="font-semibold text-ink">@it.LineTotal.ToString("#,##0")₫</span>
-                    </div>
-                }
-            </div>
-            <div class="mt-3 flex items-baseline justify-between border-t border-line pt-3">
-                <span class="text-sm font-bold text-ink">Tổng tiền</span>
-                <span class="text-xl font-bold text-sale">@Model.Total.ToString("#,##0")₫</span>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h2 class="h6 fw-bold mb-3">Sản phẩm</h2>
+                <ul class="list-group list-group-flush">
+                    @foreach (var it in Model.Items)
+                    {
+                        <li class="list-group-item d-flex align-items-center justify-content-between px-0 small">
+                            <div><span class="fw-semibold">@it.ProductName</span><span class="text-body-secondary"> @it.VariantText · SL @it.Quantity</span></div>
+                            <span class="fw-semibold">@it.LineTotal.ToString("#,##0")₫</span>
+                        </li>
+                    }
+                </ul>
+                <div class="d-flex align-items-baseline justify-content-between border-top pt-3 mt-2">
+                    <span class="fw-bold">Tổng tiền</span>
+                    <span class="fs-4 fw-bold text-dark">@Model.Total.ToString("#,##0")₫</span>
+                </div>
             </div>
         </div>
     </div>
 
     @* Cột phải: đổi trạng thái *@
-    <div class="rounded-card border border-line bg-white p-5">
-        <h2 class="mb-3 text-sm font-bold text-ink">Cập nhật trạng thái</h2>
-        @if (Model.AllowedNext.Count == 0)
-        {
-            <p class="text-[13px] text-ink2">Đơn ở trạng thái cuối (@info.Label) — không thể đổi.</p>
-        }
-        else
-        {
-            <form method="post" action="/admin/orders/@Model.Id/status" class="space-y-3">
-                @Html.AntiForgeryToken()
-                <select name="status" class="w-full rounded-xl border border-line px-3 py-2.5 text-sm text-ink outline-none focus:border-accent">
-                    @foreach (var next in Model.AllowedNext)
-                    {
-                        <option value="@next">@OrderStatusInfo.Describe(next).Label</option>
-                    }
-                </select>
-                <button type="submit" class="w-full rounded-xl bg-accent py-2.5 text-sm font-semibold text-white hover:bg-accent-press">Cập nhật</button>
-            </form>
-        }
+    <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h2 class="h6 fw-bold mb-3">Cập nhật trạng thái</h2>
+                @if (Model.AllowedNext.Count == 0)
+                {
+                    <p class="small text-body-secondary mb-0">Đơn ở trạng thái cuối (@info.Label) — không thể đổi.</p>
+                }
+                else
+                {
+                    <form method="post" action="/admin/orders/@Model.Id/status">
+                        @Html.AntiForgeryToken()
+                        <select name="status" class="form-select mb-3">
+                            @foreach (var next in Model.AllowedNext)
+                            {
+                                <option value="@next">@OrderStatusInfo.Describe(next).Label</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-primary w-100 fw-semibold">Cập nhật</button>
+                    </form>
+                }
+            </div>
+        </div>
     </div>
 </div>

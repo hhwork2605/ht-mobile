@@ -4,32 +4,29 @@
     var v = Model.Row;
     var i = Model.Index;
     var active = v.Status == HtMobile.Domain.Enums.VariantStatus.Active;
-    var cell = "rounded-[8px] border border-line px-2 py-1.5 text-[13px] text-ink focus:border-accent focus:outline-none";
 }
-<tr id="variant-@v.Id" class="border-t border-line">
+<tr id="variant-@v.Id">
     <input type="hidden" name="Variants[@i].Id" value="@v.Id" />
-    <td class="px-4 py-2.5">
-        <div class="text-[13px] font-semibold text-ink">@v.Sku</div>
-        <div class="text-[11.5px] text-ink2">@(string.Join(" · ", new[] { v.Storage, v.Color }.Where(s => !string.IsNullOrWhiteSpace(s))))</div>
+    <td>
+        <div class="fw-semibold">@v.Sku</div>
+        <div class="small text-body-secondary">@(string.Join(" · ", new[] { v.Storage, v.Color }.Where(s => !string.IsNullOrWhiteSpace(s))))</div>
     </td>
-    <td class="px-2 py-2.5">
-        <input name="Variants[@i].BasePrice" type="number" step="1" min="0" value="@v.BasePrice.ToString("0", CultureInfo.InvariantCulture)" class="@cell w-28" />
+    <td>
+        <input name="Variants[@i].BasePrice" type="number" step="1" min="0" value="@v.BasePrice.ToString("0", CultureInfo.InvariantCulture)" class="form-control form-control-sm" style="width:8rem;" />
     </td>
-    <td class="px-2 py-2.5">
-        <input name="Variants[@i].CompareAtPrice" type="number" step="1" min="0" value="@(v.CompareAtPrice?.ToString("0", CultureInfo.InvariantCulture))" class="@cell w-28" />
+    <td>
+        <input name="Variants[@i].CompareAtPrice" type="number" step="1" min="0" value="@(v.CompareAtPrice?.ToString("0", CultureInfo.InvariantCulture))" class="form-control form-control-sm" style="width:8rem;" />
     </td>
-    <td class="px-2 py-2.5">
+    <td>
         <input type="hidden" name="Variants[@i].Status" value="@((int)v.Status)" />
-        <span class="rounded-full px-2.5 py-1 text-[11.5px] font-semibold @(active ? "bg-surface2 text-accent" : "bg-red-50 text-red-600")">
-            @(active ? "Đang bán" : "Ẩn")
-        </span>
+        <span class="badge rounded-pill @(active ? "text-bg-light text-accent" : "text-bg-danger")">@(active ? "Đang bán" : "Ẩn")</span>
     </td>
-    <td class="px-2 py-2.5 text-right">
+    <td class="text-end">
         <button type="button"
                 hx-post="/admin/products/variants/@v.Id/toggle"
                 hx-target="#variant-@v.Id"
                 hx-swap="outerHTML"
-                class="rounded-[8px] border border-line px-2.5 py-1 text-[12px] font-semibold text-ink hover:bg-surface2">
+                class="btn btn-sm btn-outline-secondary">
             @(active ? "Ẩn" : "Hiện")
         </button>
     </td>
