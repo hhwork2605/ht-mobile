@@ -7,6 +7,8 @@ import { ProductFormComponent } from './pages/products/product-form.component';
 import { OrdersListComponent } from './pages/orders/orders-list.component';
 import { OrderDetailComponent } from './pages/orders/order-detail.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { PromotionsListComponent } from './pages/promotions/promotions-list.component';
+import { PromotionFormComponent } from './pages/promotions/promotion-form.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -21,6 +23,9 @@ export const routes: Routes = [
       { path: 'products/:id', component: ProductFormComponent },
       { path: 'orders', component: OrdersListComponent },
       { path: 'orders/:id', component: OrderDetailComponent },
+      { path: 'promotions', component: PromotionsListComponent },
+      { path: 'promotions/new', component: PromotionFormComponent },
+      { path: 'promotions/:id', component: PromotionFormComponent },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

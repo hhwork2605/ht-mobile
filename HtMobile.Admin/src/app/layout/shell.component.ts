@@ -84,7 +84,7 @@ export class ShellComponent {
     { title: 'Bán hàng', items: [
       { label: 'Sản phẩm', icon: 'pi-box', link: '/products' },
       { label: 'Đơn hàng', icon: 'pi-shopping-cart', link: '/orders' },
-      { label: 'Khuyến mãi', icon: 'pi-megaphone', disabled: true },
+      { label: 'Khuyến mãi', icon: 'pi-megaphone', link: '/promotions' },
     ] },
     { title: 'Quản trị', items: [{ label: 'Người dùng & quyền', icon: 'pi-users', disabled: true }] },
   ];

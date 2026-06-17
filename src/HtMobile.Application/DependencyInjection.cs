@@ -18,6 +18,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<IPricingService, PricingEngine>();
+        services.AddScoped<AdminPromotionService>();
         services.AddScoped<CatalogService>();
         services.AddScoped<AdminProductService>();
         services.AddScoped<ICartService, CartService>();
