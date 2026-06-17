@@ -31,7 +31,7 @@
 - [x] Trả góp 0% (P3-02) — calculator + bảng kỳ hạn trên PDP (chưa tích hợp công ty tài chính/thẻ thật)
 - [x] Thu cũ đổi mới (định giá + trợ giá) (P3-03) — form /thu-cu-doi-moi, estimate server-side, tạo TradeInRequest
 - [x] Theo dõi hàng về (StockNotification) (P3-04) — form PDP khi hết hàng, dedupe, chỉ OutOfStock
-- [ ] Tích hợp cổng thanh toán (VNPAY/ZaloPay)
+- [ ] Tích hợp cổng thanh toán (VNPAY/ZaloPay) — ⏸️ **HOÃN, LÀM SAU** (2026-06-17): cần credentials/sandbox thật + webhook IPN, là tích hợp ngoài. Hiện checkout chỉ COD (P2-02). Khi làm: thêm IPaymentGateway (Application) + adapter ở Infrastructure, không phá luồng đặt hàng hiện có.
 
 ## Phase 4 — Dịch vụ & CMS  → `phase-4-services-cms/`
 - [ ] Gói bảo hành / AppleCare (ServicePackage)
