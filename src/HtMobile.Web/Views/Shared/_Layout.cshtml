@@ -1,6 +1,6 @@
 @inject HtMobile.Application.Common.Interfaces.ICurrentUser CurrentUser
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
-@inject Microsoft.Extensions.Localization.IStringLocalizer<HtMobile.Web.Resources.SharedResource> L
+@inject Microsoft.Extensions.Localization.IStringLocalizer<HtMobile.Web.SharedResource> L
 @{
     // Đa ngôn ngữ (P3-05): culture hiện tại + returnUrl để giữ trang khi đổi ngôn ngữ.
     var uiLang = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;

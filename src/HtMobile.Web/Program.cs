@@ -8,7 +8,9 @@ using HtMobile.Web.Infrastructure.Routing;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews().AddViewLocalization();
-builder.Services.AddLocalization(o => o.ResourcesPath = "Resources");
+// KHÔNG set ResourcesPath: resx được SDK đặt tên theo namespace của SharedResource.cs (DependentUpon)
+// = "HtMobile.Web.SharedResource.resources", khớp IStringLocalizer<HtMobile.Web.SharedResource>.
+builder.Services.AddLocalization();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSession();
 
