@@ -83,7 +83,7 @@ export class ShellComponent {
     { title: 'Tổng quan', items: [{ label: 'Bảng điều khiển', icon: 'pi-th-large', disabled: true }] },
     { title: 'Bán hàng', items: [
       { label: 'Sản phẩm', icon: 'pi-box', link: '/products' },
-      { label: 'Đơn hàng', icon: 'pi-shopping-cart', disabled: true },
+      { label: 'Đơn hàng', icon: 'pi-shopping-cart', link: '/orders' },
       { label: 'Khuyến mãi', icon: 'pi-megaphone', disabled: true },
     ] },
     { title: 'Quản trị', items: [{ label: 'Người dùng & quyền', icon: 'pi-users', disabled: true }] },
