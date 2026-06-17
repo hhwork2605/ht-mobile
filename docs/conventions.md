@@ -26,6 +26,13 @@
 - Tương tác động: htmx trả **partial view**; state nhỏ dùng Alpine. Hạn chế JS rời rạc.
 - URL khách = slug (không lộ id). Resolve qua `ISlugResolver`.
 
+## Admin (Area `Admin`) — quy ước riêng
+- **KHÔNG cần tối ưu SEO**: mọi trang admin để `<meta robots="noindex,nofollow">` (đã có ở layout admin), không cần
+  canonical/OG/JSON-LD/hreflang/slug. URL admin dùng id thẳng (`/admin/orders/{id}`), không cần slug.
+- **Ưu tiên AJAX (htmx)** cho thao tác CRUD/đổi trạng thái: POST trả **partial** (cập nhật bảng/hàng/form tại chỗ),
+  không reload cả trang — nhanh & gọn hơn. Vẫn `[ValidateAntiForgeryToken]` (token qua header htmx như storefront).
+- Chỉ role Admin: controller/area gắn `[Authorize(Roles = Roles.Admin)]` (không chỉ ẩn UI).
+
 ## SEO (bắt buộc khi gen trang/HTML)
 Mọi trang SSR phải render chuẩn SEO **ngay khi sinh code** — đích: rich result + Core Web Vitals tốt, dễ lên top.
 

@@ -1,0 +1,73 @@
+@model AdminProductListDto
+@{
+    ViewData["Title"] = "Sản phẩm";
+}
+
+@if (TempData["Flash"] is string flash)
+{
+    <div class="mb-4 rounded-card border border-green-200 bg-green-50 px-4 py-2.5 text-[13px] text-green-700">@flash</div>
+}
+
+<div class="rounded-card border border-line bg-white">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
+        <form method="get" action="/admin/products" class="flex items-center gap-2">
+            <label class="text-[13px] text-ink2">Danh mục</label>
+            <select name="category" onchange="this.form.submit()"
+                    class="rounded-[10px] border border-line px-3 py-1.5 text-[13px] text-ink">
+                <option value="">Tất cả</option>
+                @foreach (var c in Model.Categories)
+                {
+                    <option value="@c.Id" selected="@(Model.CategoryId == c.Id)">@c.Name</option>
+                }
+            </select>
+        </form>
+        <a href="/admin/products/create" class="rounded-[10px] bg-accent px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-accent-press">
+            <i class="fa-solid fa-plus mr-1.5"></i>Thêm sản phẩm
+        </a>
+    </div>
+
+    @if (Model.Products.Count == 0)
+    {
+        <p class="p-8 text-center text-sm text-ink2">Chưa có sản phẩm nào.</p>
+    }
+    else
+    {
+        <table class="w-full border-collapse">
+            <thead>
+                <tr class="bg-surface2 text-left text-[11px] font-bold uppercase tracking-wide text-ink2">
+                    <th class="px-5 py-2.5">Sản phẩm</th>
+                    <th class="px-2 py-2.5">Danh mục</th>
+                    <th class="px-2 py-2.5 text-center">Biến thể</th>
+                    <th class="px-2 py-2.5 text-right">Giá bán</th>
+                    <th class="px-2 py-2.5 text-center">Trạng thái</th>
+                    <th class="px-2 py-2.5"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model.Products)
+                {
+                    <tr class="border-t border-line hover:bg-surface2">
+                        <td class="px-5 py-3">
+                            <a href="/admin/products/@p.Id/edit" class="text-[13px] font-semibold text-ink hover:text-accent">@p.Name</a>
+                            <div class="text-[11.5px] text-ink2">@p.Sku</div>
+                        </td>
+                        <td class="px-2 py-3 text-[12.5px] text-ink2">@p.CategoryName</td>
+                        <td class="px-2 py-3 text-center text-[12.5px] text-ink2">@p.VariantCount</td>
+                        <td class="px-2 py-3 text-right text-[13px] font-bold text-ink">
+                            @if (p.PriceFrom == p.PriceTo) { @($"{p.PriceFrom:#,##0}₫") }
+                            else { @($"{p.PriceFrom:#,##0} – {p.PriceTo:#,##0}₫") }
+                        </td>
+                        <td class="px-2 py-3 text-center">
+                            <span class="rounded-full px-2.5 py-1 text-[11.5px] font-semibold @(p.IsActive ? "bg-surface2 text-accent" : "bg-red-50 text-red-600")">
+                                @(p.IsActive ? "Đang bán" : "Ẩn")
+                            </span>
+                        </td>
+                        <td class="px-2 py-3 text-right">
+                            <a href="/admin/products/@p.Id/edit" class="text-[12.5px] font-semibold text-accent hover:underline">Sửa</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

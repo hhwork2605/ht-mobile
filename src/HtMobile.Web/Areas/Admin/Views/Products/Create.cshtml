@@ -1,0 +1,90 @@
+@model ProductCreateVm
+@{
+    ViewData["Title"] = "Thêm sản phẩm";
+    var input = "w-full rounded-[10px] border border-line px-3 py-2 text-[13.5px] text-ink focus:border-accent focus:outline-none";
+    var label = "mb-1 block text-[12.5px] font-semibold text-ink2";
+}
+
+<a href="/admin/products" class="mb-3 inline-block text-[13px] text-ink2 hover:text-accent"><i class="fa-solid fa-arrow-left mr-1.5"></i>Tất cả sản phẩm</a>
+
+<form method="post" action="/admin/products/create" class="max-w-3xl space-y-5">
+    <div asp-validation-summary="ModelOnly" class="text-[13px] text-red-600"></div>
+
+    <section class="rounded-card border border-line bg-white p-5">
+        <h2 class="mb-4 text-[15px] font-bold text-ink">Thông tin sản phẩm</h2>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+                <label class="@label">Tên sản phẩm *</label>
+                <input asp-for="Name" class="@input" placeholder="VD: iPhone 17 Pro Max" />
+                <span asp-validation-for="Name" class="text-[12px] text-red-600"></span>
+            </div>
+            <div>
+                <label class="@label">Slug (bỏ trống = tự sinh từ tên)</label>
+                <input asp-for="Slug" class="@input" placeholder="iphone-17-pro-max" />
+                <span asp-validation-for="Slug" class="text-[12px] text-red-600"></span>
+            </div>
+            <div>
+                <label class="@label">Danh mục *</label>
+                <select asp-for="CategoryId" class="@input">
+                    <option value="">— Chọn —</option>
+                    @foreach (var c in Model.Categories)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="CategoryId" class="text-[12px] text-red-600"></span>
+            </div>
+            <div>
+                <label class="@label">Thương hiệu</label>
+                <input asp-for="Brand" class="@input" placeholder="Apple" />
+            </div>
+            <div>
+                <label class="@label">Tagline</label>
+                <input asp-for="Tagline" class="@input" placeholder="Titan. Mạnh mẽ." />
+            </div>
+            <div class="sm:col-span-2">
+                <label class="@label">Mô tả</label>
+                <textarea asp-for="Description" rows="3" class="@input"></textarea>
+            </div>
+        </div>
+    </section>
+
+    <section class="rounded-card border border-line bg-white p-5">
+        <h2 class="mb-4 text-[15px] font-bold text-ink">Biến thể đầu tiên</h2>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+                <label class="@label">SKU *</label>
+                <input asp-for="Sku" class="@input" placeholder="IP17PM-256-TIT" />
+                <span asp-validation-for="Sku" class="text-[12px] text-red-600"></span>
+            </div>
+            <div></div>
+            <div>
+                <label class="@label">Dung lượng</label>
+                <input asp-for="Storage" class="@input" placeholder="256GB" />
+            </div>
+            <div>
+                <label class="@label">Màu</label>
+                <input asp-for="Color" class="@input" placeholder="Titan tự nhiên" />
+            </div>
+            <div>
+                <label class="@label">Giá bán (₫) *</label>
+                <input asp-for="BasePrice" type="number" step="1" min="0" class="@input" />
+                <span asp-validation-for="BasePrice" class="text-[12px] text-red-600"></span>
+            </div>
+            <div>
+                <label class="@label">Giá gạch (₫)</label>
+                <input asp-for="CompareAtPrice" type="number" step="1" min="0" class="@input" />
+                <span asp-validation-for="CompareAtPrice" class="text-[12px] text-red-600"></span>
+            </div>
+            <div>
+                <label class="@label">Trạng thái</label>
+                <select asp-for="Status" asp-items="Html.GetEnumSelectList<HtMobile.Domain.Enums.VariantStatus>()" class="@input"></select>
+            </div>
+        </div>
+    </section>
+
+    <div class="flex gap-3">
+        <button type="submit" class="rounded-[10px] bg-accent px-5 py-2.5 text-[13.5px] font-semibold text-white hover:bg-accent-press">Tạo sản phẩm</button>
+        <a href="/admin/products" class="rounded-[10px] border border-line px-5 py-2.5 text-[13.5px] font-semibold text-ink hover:bg-surface2">Huỷ</a>
+    </div>
+</form>

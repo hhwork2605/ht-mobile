@@ -74,6 +74,13 @@ GET  /admin                          # dashboard
 GET  /admin/orders?status=           # danh sách đơn + tab lọc theo trạng thái (P5-01)
 GET  /admin/orders/{id}              # chi tiết đơn + form đổi trạng thái
 POST /admin/orders/{id}/status       # đổi trạng thái (validate chuyển hợp lệ server-side) → /admin/orders/{id}
+GET  /admin/products?category=       # danh sách SP + lọc danh mục (P5-02)
+GET  /admin/products/create          # form thêm SP + 1 biến thể đầu
+POST /admin/products/create          # tạo SP (slug auto-gen, unique) + biến thể
+GET  /admin/products/{id}/edit       # form sửa SP + biến thể
+POST /admin/products/{id}/edit       # cập nhật field SP + sửa biến thể (giá/CompareAt/Status)
+POST /admin/products/{id}/variants   # thêm biến thể mới cho SP (AJAX htmx → partial _VariantRow, append)
+POST /admin/products/variants/{id}/toggle  # ẩn/hiện biến thể Active⇄Discontinued (AJAX htmx → partial _VariantRow)
 ```
 
 ## Pricing
