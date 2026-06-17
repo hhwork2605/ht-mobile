@@ -1,0 +1,26 @@
+@{
+    ViewData["Title"] = "Đã nhận yêu cầu thu cũ";
+    ViewData["MetaDescription"] = "Yêu cầu thu cũ đổi mới đã được ghi nhận.";
+    var result = (HtMobile.Application.Features.TradeIn.TradeInResult)ViewBag.Result;
+}
+@section Head { <meta name="robots" content="noindex, nofollow" /> }
+
+<div class="mx-auto max-w-[480px] px-4 py-14 text-center">
+    <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-green-50">
+        <i class="fa-solid fa-circle-check text-[40px] text-green-600"></i>
+    </div>
+    <h1 class="text-[26px] font-bold text-ink">Đã nhận yêu cầu thu cũ!</h1>
+    <p class="mx-0 mb-5 mt-2 text-[15px] leading-relaxed text-ink2">Cảm ơn bạn. Nhân viên sẽ liên hệ xác nhận & hẹn thẩm định máy trong thời gian sớm nhất.</p>
+
+    <div class="mb-6 rounded-card border border-line p-5 text-left">
+        <div class="flex justify-between text-sm text-ink2"><span>Mã yêu cầu</span><span class="font-semibold text-ink">#TI@result.RequestId.ToString("D6")</span></div>
+        <div class="mt-2 flex justify-between text-sm text-ink2"><span>Giá thu ước tính</span><span class="font-semibold text-ink">@result.Quote.TradeInValue.ToString("#,##0")₫</span></div>
+        <div class="mt-1 flex justify-between text-sm text-ink2"><span>Trợ giá lên đời</span><span class="font-semibold text-green-600">@result.Quote.Subsidy.ToString("#,##0")₫</span></div>
+        <div class="mt-2 flex items-baseline justify-between border-t border-line pt-2"><span class="font-bold text-ink">Tổng ước tính</span><span class="text-xl font-bold text-sale">@result.Quote.Total.ToString("#,##0")₫</span></div>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-3">
+        <a href="/" class="rounded-xl bg-accent px-6 py-3 text-[15px] font-semibold text-white hover:bg-accent-press">Về trang chủ</a>
+        <a href="/iphone" class="rounded-xl border border-line bg-white px-6 py-3 text-[15px] font-semibold text-ink hover:bg-surface2">Xem máy mới</a>
+    </div>
+</div>

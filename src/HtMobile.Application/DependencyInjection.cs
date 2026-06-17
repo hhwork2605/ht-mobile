@@ -5,6 +5,7 @@ using HtMobile.Application.Features.Catalog;
 using HtMobile.Application.Features.Checkout;
 using HtMobile.Application.Features.Orders;
 using HtMobile.Application.Features.Pricing;
+using HtMobile.Application.Features.TradeIn;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HtMobile.Application;
@@ -20,6 +21,7 @@ public static class DependencyInjection
         services.AddScoped<CheckoutService>();
         services.AddScoped<OrderHistoryService>();
         services.AddScoped<BundleService>();
+        services.AddScoped<TradeInService>();
 
         // TODO (vibe-code): đăng ký thêm service của từng feature khi triển khai
         // (Cart, Orders, Checkout, Promotions, TradeIn, …)
