@@ -21,7 +21,7 @@
 
 ## Phase 2 — Mua hàng  → `phase-2-cart-checkout/`
 - [x] Giỏ hàng (guest theo session + user) + cập nhật SL + empty state (P2-01) — *migration CartUniqueIndexes chờ apply*
-- [ ] Checkout: thông tin nhận hàng + phương thức giao + thanh toán
+- [x] Checkout: thông tin nhận hàng + phương thức giao + thanh toán (P2-02, COD/guest) — *migration OrderCustomerNullable chờ apply*
 - [x] Đăng ký / Đăng nhập / Quên mật khẩu / Nhớ đăng nhập (Identity) (P2-03) + merge giỏ guest→user
 - [ ] Tài khoản + lịch sử đơn hàng
 - [ ] Pricing engine đầy đủ: khuyến mãi nhiều tầng + điều kiện (ConditionsJson) + cache Redis (giá một mức toàn quốc — ADR-0002)

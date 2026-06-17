@@ -52,6 +52,15 @@ GET  /account                        # landing tối thiểu (email + Đăng xu�
 ```
 > ReturnUrl chống open-redirect bằng helper `UrlSafety.SafeLocalUrl`. Quên MK: `IEmailSender` hiện là
 > `NullEmailSender` (chỉ log) → dev xem link reset trong log. REST `/api/auth/*` (SPEC §8) để dành cho app sau.
+
+### Checkout (đặt hàng — MVC, COD)
+`CheckoutController` (Storefront). Guest hoặc user đều đặt được. POST có antiforgery.
+```
+GET  /checkout            # form nhận hàng + phương thức giao + tóm tắt đơn (giỏ rỗng → 302 /cart)
+POST /checkout            # tạo Order(Pending)+OrderItem(snapshot giá)+Shipment+Payment(COD); xoá giỏ → success
+```
+> Phase 2: chỉ **COD**, KHÔNG cổng thanh toán thật (Phase 3), KHÔNG trừ tồn kho. `Order.CustomerId` nullable
+> (guest = null). Giá dòng = `IPricingService` lúc đặt (snapshot vào `OrderItem.UnitPrice`). Mã đơn hiển thị = `SD{Id:D6}`.
 > SEO bắt buộc mỗi trang (xem [conventions.md](conventions.md) §SEO): `_Layout` sinh `<title>`/`description`/canonical/OG/hreflang + JSON-LD `Organization`/`WebSite`; mỗi trang bổ sung JSON-LD qua section `Head` (Category → `ItemList`+`BreadcrumbList`; PDP → `Product`+`offers`(+`aggregateRating`)+`BreadcrumbList`). Helper: `Web/Infrastructure/Seo/JsonLd`.
 
 ## Pricing

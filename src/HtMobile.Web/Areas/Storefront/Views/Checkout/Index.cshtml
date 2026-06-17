@@ -1,0 +1,95 @@
+@model CheckoutVm
+@{
+    ViewData["Title"] = "Thanh toán";
+    ViewData["MetaDescription"] = "Thanh toán đơn hàng HtMobile.";
+    var cart = (CartDto)ViewBag.Cart;
+    var input = "w-full rounded-xl border border-line px-3.5 py-3 text-[15px] text-ink outline-none focus:border-accent";
+}
+@section Head { <meta name="robots" content="noindex, nofollow" /> }
+
+<div class="mx-auto max-w-[1180px] px-4 sm:px-6 py-6">
+    <h1 class="mb-5 text-[28px] font-bold tracking-tight text-ink">Thanh toán</h1>
+
+    <form method="post" action="/checkout" class="flex flex-wrap items-start gap-7"
+          x-data="{ placing: false }" @@submit="placing = true">
+        @Html.AntiForgeryToken()
+
+        @* ===== Thông tin nhận hàng + giao + thanh toán ===== *@
+        <div class="flex min-w-[280px] flex-1 flex-col gap-6">
+            <section>
+                <h2 class="mb-3 text-base font-bold text-ink">Thông tin nhận hàng</h2>
+                <div asp-validation-summary="ModelOnly" class="mb-2 text-sm font-medium text-sale"></div>
+                <div class="flex flex-col gap-3">
+                    <div>
+                        <input asp-for="FullName" class="@input" placeholder="Họ và tên" autocomplete="name" />
+                        <span asp-validation-for="FullName" class="text-xs text-sale"></span>
+                    </div>
+                    <div>
+                        <input asp-for="Phone" class="@input" placeholder="Số điện thoại" autocomplete="tel" />
+                        <span asp-validation-for="Phone" class="text-xs text-sale"></span>
+                    </div>
+                    <div>
+                        <input asp-for="Address" class="@input" placeholder="Địa chỉ nhận hàng" autocomplete="street-address" />
+                        <span asp-validation-for="Address" class="text-xs text-sale"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="mb-3 text-base font-bold text-ink">Phương thức giao hàng</h2>
+                <div class="flex flex-col gap-2.5">
+                    <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-line p-3.5 has-[:checked]:border-accent">
+                        <input asp-for="ShipMethod" type="radio" value="delivery" class="h-4 w-4" />
+                        <span><span class="block text-sm font-semibold text-ink">Giao tận nơi</span><span class="block text-[12.5px] text-ink2">Miễn phí · Nhận trong 2–4 giờ</span></span>
+                    </label>
+                    <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-line p-3.5 has-[:checked]:border-accent">
+                        <input asp-for="ShipMethod" type="radio" value="store" class="h-4 w-4" />
+                        <span><span class="block text-sm font-semibold text-ink">Nhận tại cửa hàng</span><span class="block text-[12.5px] text-ink2">Miễn phí · Sẵn sàng sau 1 giờ</span></span>
+                    </label>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="mb-3 text-base font-bold text-ink">Phương thức thanh toán</h2>
+                <div class="flex items-center gap-3 rounded-xl border border-accent bg-accent/5 p-3.5">
+                    <i class="fa-solid fa-money-bill-wave text-accent"></i>
+                    <span class="text-sm font-semibold text-ink">Thanh toán khi nhận hàng (COD)</span>
+                </div>
+                <p class="mt-1.5 text-[12.5px] text-ink2">Các phương thức khác (chuyển khoản, thẻ, trả góp) sẽ sớm có.</p>
+            </section>
+        </div>
+
+        @* ===== Tóm tắt đơn ===== *@
+        <aside class="w-[340px] max-w-full flex-none rounded-2xl border border-line p-5">
+            <h2 class="mb-3.5 text-base font-bold text-ink">Đơn hàng (@cart.Count)</h2>
+            <div class="mb-4 flex max-h-[240px] flex-col gap-3 overflow-auto">
+                @foreach (var it in cart.Items)
+                {
+                    <div class="flex items-center gap-3">
+                        <div class="relative flex h-12 w-12 flex-none items-center justify-center rounded-[10px] bg-surface2">
+                            <img src="@(string.IsNullOrEmpty(it.ThumbnailUrl) ? "/images/placeholder.svg" : it.ThumbnailUrl)"
+                                 alt="@it.ProductName" width="48" height="48" loading="lazy" class="h-full w-full object-contain p-1" />
+                            <span class="absolute -right-1.5 -top-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-ink2 text-[10px] font-bold text-white">@it.Quantity</span>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-[13px] font-semibold text-ink">@it.ProductName</div>
+                            <div class="text-[11.5px] text-ink2">@it.VariantText</div>
+                        </div>
+                        <span class="text-[13px] font-semibold text-ink">@it.LineTotal.ToString("#,##0")₫</span>
+                    </div>
+                }
+            </div>
+            <div class="flex justify-between border-t border-line pt-3 text-sm text-ink2"><span>Tạm tính</span><span class="font-semibold text-ink">@cart.Subtotal.ToString("#,##0")₫</span></div>
+            <div class="mt-2 flex justify-between text-sm text-ink2"><span>Vận chuyển</span><span class="font-semibold text-green-600">Miễn phí</span></div>
+            <div class="mt-3 flex items-baseline justify-between border-t border-line pt-3"><span class="text-[15px] font-bold text-ink">Tổng cộng</span><span class="text-[22px] font-bold text-sale">@cart.Total.ToString("#,##0")₫</span></div>
+            <button type="submit" x-bind:disabled="placing"
+                    class="mt-4 w-full rounded-xl bg-accent py-3.5 text-base font-bold text-white transition hover:bg-accent-press disabled:opacity-60">
+                <span x-show="!placing">Đặt hàng</span>
+                <span x-show="placing" x-cloak>Đang xử lý…</span>
+            </button>
+            <p class="mt-2.5 text-center text-[11.5px] leading-relaxed text-ink2">Bằng việc đặt hàng, bạn đồng ý với điều khoản của HtMobile.</p>
+        </aside>
+    </form>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

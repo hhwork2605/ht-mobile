@@ -168,7 +168,7 @@ Quan hệ: `Items` (CartItem). Lưu ý: giỏ khách vãng lai có thể cache �
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
-| `CustomerId` | `long` | FK → `AspNetUsers.Id` | Khách đặt hàng. |
+| `CustomerId` | `long?` | | Khách đặt hàng (user đăng nhập); **`null` = khách vãng lai** (guest checkout, P2-02). Không đặt FK cứng. |
 | `Status` | `OrderStatus` (int) | mặc định `Pending` | `Pending`/`Confirmed`/`Processing`/`Shipped`/`Delivered`/`Cancelled`/`Refunded`. |
 | `Total` | `decimal(18,2)` | | Tổng tiền đơn. |
 | `PaymentMethod` | `string?` | `text` | Phương thức thanh toán đã chọn. |

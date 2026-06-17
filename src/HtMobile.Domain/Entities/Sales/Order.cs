@@ -5,7 +5,8 @@ namespace HtMobile.Domain.Entities.Sales;
 
 public class Order : BaseAuditableEntity
 {
-    public long CustomerId { get; set; }
+    /// <summary>Khách đặt hàng (user đăng nhập); <c>null</c> = khách vãng lai (guest checkout, P2-02).</summary>
+    public long? CustomerId { get; set; }
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
     public decimal Total { get; set; }
     public string? PaymentMethod { get; set; }
