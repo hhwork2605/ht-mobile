@@ -1,0 +1,26 @@
+@import 'primeicons/primeicons.css';
+
+:root {
+  --ht-brand: #0070F4;
+  --ht-brand-700: #005AC3;
+  --ht-ink: #15171A;
+  --ht-ink5: #677484;
+  --ht-ink4: #85909D;
+  --ht-ink3: #A4ACB5;
+  --ht-line: #E1E3E6;
+  --ht-surf2: #F0F1F3;
+  --ht-page: #F6F7F9;
+  --ht-success: #00B63E;
+  --ht-danger: #DC2626;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: var(--ht-page);
+  color: var(--ht-ink);
+  font-size: 14px;
+}

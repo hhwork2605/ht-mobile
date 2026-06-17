@@ -490,3 +490,6 @@ src/HtMobile.Web/wwwroot/css/app.css
 # Secrets (dùng user-secrets, không commit)
 appsettings.*.local.json
 .env
+
+# Playwright MCP artifacts
+.playwright-mcp/
