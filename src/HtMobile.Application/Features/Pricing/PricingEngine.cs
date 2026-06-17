@@ -38,20 +38,27 @@ public class PricingEngine : IPricingService
 
     private async Task<EffectivePrice> ComputeAsync(long variantId, CancellationToken ct)
     {
-        // Giá lấy trực tiếp từ variant (giá duy nhất, không phân theo vùng).
+        // Giá lấy trực tiếp từ variant (giá duy nhất, không phân theo vùng) + ngữ cảnh để lọc KM theo điều kiện.
         var variant = await _db.ProductVariants
             .AsNoTracking()
-            .FirstOrDefaultAsync(v => v.Id == variantId, ct);
-
-        var listPrice = variant?.BasePrice ?? 0m;
-        var compareAt = variant?.CompareAtPrice;
+            .Where(v => v.Id == variantId)
+            .Select(v => new { v.BasePrice, v.CompareAtPrice, v.ProductId, v.Product.CategoryId })
+            .FirstOrDefaultAsync(ct);
 
         var now = _clock.Now;
-        var promotions = await _db.Promotions
+        if (variant is null)
+            return PriceCalculator.Calculate(variantId, 0m, null, Array.Empty<Domain.Entities.Pricing.Promotion>(), now);
+
+        var ctx = new PricingContext(variantId, variant.ProductId, variant.CategoryId);
+
+        var active = await _db.Promotions
             .AsNoTracking()
             .Where(p => p.StartsAt <= now && p.EndsAt >= now)
             .ToListAsync(ct);
 
-        return PriceCalculator.Calculate(variantId, listPrice, compareAt, promotions, now);
+        // Lọc theo ConditionsJson (in-memory; danh sách KM đang chạy nhỏ).
+        var applicable = active.Where(p => PromotionConditions.Matches(p.ConditionsJson, ctx)).ToList();
+
+        return PriceCalculator.Calculate(variantId, variant.BasePrice, variant.CompareAtPrice, applicable, now);
     }
 }

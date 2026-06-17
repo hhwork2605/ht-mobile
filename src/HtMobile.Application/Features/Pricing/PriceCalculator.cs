@@ -5,9 +5,9 @@ using HtMobile.Domain.Enums;
 namespace HtMobile.Application.Features.Pricing;
 
 /// <summary>
-/// Logic tính giá THUẦN (không phụ thuộc DB/cache) để dễ unit-test.
-/// Quy tắc scaffold: chọn khuyến mãi giảm-giá (Percentage/FixedAmount) đang hiệu lực cho ra giá thấp nhất.
-/// Bổ sung điều kiện theo <c>ConditionsJson</c> ở các phase sau.
+/// Logic tính giá THUẦN (không phụ thuộc DB/cache) để dễ unit-test. Khuyến mãi đã được lọc theo điều kiện
+/// (xem <see cref="PromotionConditions"/>) trước khi truyền vào. Áp <b>nhiều tầng</b>: BEST Percentage →
+/// rồi BEST FixedAmount trên giá đã giảm (tối đa 1 mỗi loại). Tiền làm tròn về <b>đồng</b> (VND, không có hào).
 /// </summary>
 public static class PriceCalculator
 {
@@ -18,28 +18,40 @@ public static class PriceCalculator
         IEnumerable<Promotion> promotions,
         DateTime now)
     {
+        // Nhiều tầng: áp BEST Percentage (giảm % lớn nhất) → rồi BEST FixedAmount trên giá đã giảm.
+        // Gift/Voucher/Combo/BankOffer: không đổi giá (chỉ là ưu đãi liệt kê ở OfferList).
+        var active = promotions.Where(p => p.IsActiveAt(now)).ToList();
         decimal finalPrice = listPrice;
-        string? appliedName = null;
+        var appliedNames = new List<string>();
 
-        foreach (var promo in promotions.Where(p => p.IsActiveAt(now)))
+        // Tie-break theo Id để chọn KM tất định khi trùng Value (tên áp ổn định giữa các lần/cache).
+        var bestPct = active
+            .Where(p => p.Type == PromotionType.Percentage && p.Value > 0)
+            .OrderByDescending(p => p.Value).ThenBy(p => p.Id)
+            .FirstOrDefault();
+        if (bestPct is not null)
         {
-            decimal candidate = promo.Type switch
-            {
-                PromotionType.Percentage => listPrice * (1 - Clamp01(promo.Value / 100m)),
-                PromotionType.FixedAmount => listPrice - promo.Value,
-                _ => listPrice // Gift/Voucher/Combo/BankOffer: không đổi giá niêm yết ở bước này
-            };
+            finalPrice *= 1 - Clamp01(bestPct.Value / 100m);
+            appliedNames.Add(bestPct.Name);
+        }
 
-            if (candidate < finalPrice)
-            {
-                finalPrice = candidate;
-                appliedName = promo.Name;
-            }
+        var bestFixed = active
+            .Where(p => p.Type == PromotionType.FixedAmount && p.Value > 0)
+            .OrderByDescending(p => p.Value).ThenBy(p => p.Id)
+            .FirstOrDefault();
+        if (bestFixed is not null)
+        {
+            finalPrice -= bestFixed.Value;
+            appliedNames.Add(bestFixed.Name);
         }
 
         if (finalPrice < 0) finalPrice = 0;
+        // Làm tròn về đồng (VND không có hào) — giữ PDP và tổng giỏ/đơn nhất quán.
+        finalPrice = Math.Round(finalPrice, 0, MidpointRounding.AwayFromZero);
+        string? appliedName = appliedNames.Count > 0 ? string.Join(" + ", appliedNames) : null;
 
-        decimal anchor = compareAtPrice is > 0 ? compareAtPrice.Value : listPrice;
+        // Neo % giảm theo mốc cao nhất; bỏ qua compareAt nếu nhập sai (< listPrice).
+        decimal anchor = compareAtPrice is { } ca && ca >= listPrice ? ca : listPrice;
         int discountPercent = anchor > 0
             ? (int)Math.Round((anchor - finalPrice) / anchor * 100m, MidpointRounding.AwayFromZero)
             : 0;

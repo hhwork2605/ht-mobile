@@ -24,7 +24,7 @@
 - [x] Checkout: thông tin nhận hàng + phương thức giao + thanh toán (P2-02, COD/guest) — *migration OrderCustomerNullable chờ apply*
 - [x] Đăng ký / Đăng nhập / Quên mật khẩu / Nhớ đăng nhập (Identity) (P2-03) + merge giỏ guest→user
 - [x] Tài khoản + lịch sử đơn hàng (P2-04) — dashboard Đơn hàng + Thông tin (Wishlist dời feature riêng)
-- [ ] Pricing engine đầy đủ: khuyến mãi nhiều tầng + điều kiện (ConditionsJson) + cache Redis (giá một mức toàn quốc — ADR-0002)
+- [x] Pricing engine đầy đủ: khuyến mãi nhiều tầng (best%+best fixed) + điều kiện ConditionsJson + cache (P2-05, giá một mức — ADR-0002)
 
 ## Phase 3 — Nghiệp vụ đặc thù  → `phase-3-business/`
 - [ ] Bundle "mua kèm phụ kiện" (tổng tiết kiệm)

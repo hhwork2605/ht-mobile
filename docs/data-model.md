@@ -104,9 +104,16 @@ Khuyến mãi nhiều tầng (SPEC §4.2). **Giá không phân theo vùng** — 
 | `Value` | `decimal(18,2)` | | Giá trị giảm (theo % hoặc số tiền tùy `Type`). |
 | `StartsAt` | `DateTime` | index `(StartsAt, EndsAt)` | Bắt đầu hiệu lực. |
 | `EndsAt` | `DateTime` | index `(StartsAt, EndsAt)` | Kết thúc hiệu lực. |
-| `ConditionsJson` | `string?` | **`jsonb`** | Điều kiện áp dụng (danh mục, SP, ngưỡng giá…). |
+| `ConditionsJson` | `string?` | **`jsonb`** | Điều kiện nhắm mục tiêu (P2-05). `null`/rỗng = áp **toàn bộ**. |
 
 Phương thức domain: `IsActiveAt(at)` → `at` nằm trong `[StartsAt, EndsAt]`.
+
+**`ConditionsJson` (P2-05)** — KM chỉ áp khi variant khớp ≥1 danh sách được khai (danh sách bỏ trống = không ràng buộc theo trục đó):
+```json
+{ "categoryIds": [1], "productIds": [10], "variantIds": [100] }
+```
+Pricing (`IPricingService`): áp **1 `Percentage` tốt nhất → rồi 1 `FixedAmount` tốt nhất** trên giá đã giảm (clamp ≥ 0).
+`Gift`/`Voucher`/`Combo`/`BankOffer` **không đổi giá** (chỉ liệt kê ở khối Ưu đãi). `minQuantity`/`minSubtotal` chưa hỗ trợ (cần ngữ cảnh giỏ).
 
 ### `PaymentPromotions` ✅ Audit — ưu đãi thanh toán theo ngân hàng/ví
 
