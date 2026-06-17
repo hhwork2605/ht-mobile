@@ -149,6 +149,15 @@
                 </div>
             </div>
 
+            @* Hết hàng → form theo dõi hàng về (P3-04) thay khối mua *@
+            @if (!Model.InStock)
+            {
+                <div class="mt-6">
+                    <partial name="_StockNotify" model="new StockNotifyVm { VariantId = Model.SelectedVariantId }" />
+                </div>
+            }
+            else
+            {
             @* Hành động mua (SPEC §5) *@
             <div class="mt-6" x-data="{ showInstall: false }">
                 <div class="grid gap-2.5 sm:grid-cols-2">
@@ -183,6 +192,7 @@
                     </div>
                 }
             </div>
+            }
 
             @* Khối ưu đãi (khuyến mãi hiệu lực) *@
             @if (Model.Offers.Count > 0)

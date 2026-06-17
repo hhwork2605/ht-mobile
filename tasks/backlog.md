@@ -30,7 +30,7 @@
 - [x] Bundle "mua kèm phụ kiện" (tổng tiết kiệm) (P3-01) — *migration CartItemUnitPriceOverride chờ apply*
 - [x] Trả góp 0% (P3-02) — calculator + bảng kỳ hạn trên PDP (chưa tích hợp công ty tài chính/thẻ thật)
 - [x] Thu cũ đổi mới (định giá + trợ giá) (P3-03) — form /thu-cu-doi-moi, estimate server-side, tạo TradeInRequest
-- [ ] Theo dõi hàng về (StockNotification)
+- [x] Theo dõi hàng về (StockNotification) (P3-04) — form PDP khi hết hàng, dedupe, chỉ OutOfStock
 - [ ] Tích hợp cổng thanh toán (VNPAY/ZaloPay)
 
 ## Phase 4 — Dịch vụ & CMS  → `phase-4-services-cms/`

@@ -56,6 +56,7 @@ public class DbInitializer
         await SeedSampleCatalogAsync();
         await SeedBannersAsync();
         await SeedBundlesAsync();
+        await SeedStockDemoAsync();
         _logger.LogInformation("Seed completed.");
     }
 
@@ -256,6 +257,17 @@ public class DbInitializer
         // AirPods niêm yết 5.490.000 (−10% KM = 4.941.000) → giá mua kèm 4.490.000.
         bundle.Items.Add(new BundleItem { AccessoryVariantId = airpods.Id, BundlePrice = 4_490_000m });
         _db.Bundles.Add(bundle);
+        await _db.SaveChangesAsync();
+    }
+
+    private async Task SeedStockDemoAsync()
+    {
+        // Demo "theo dõi hàng về": đảm bảo có ≥1 variant hết hàng.
+        if (await _db.ProductVariants.AnyAsync(v => v.Status == VariantStatus.OutOfStock)) return;
+
+        var variant = await _db.ProductVariants.FirstOrDefaultAsync(v => v.Slug == "dien-thoai-iphone-17-256gb");
+        if (variant is null) return;
+        variant.Status = VariantStatus.OutOfStock;
         await _db.SaveChangesAsync();
     }
 

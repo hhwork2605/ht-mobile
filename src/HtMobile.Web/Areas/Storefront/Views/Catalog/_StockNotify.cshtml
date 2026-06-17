@@ -1,0 +1,35 @@
+@model StockNotifyVm
+@{
+    var done = Model.Result is StockNotifyResult.Subscribed or StockNotifyResult.AlreadySubscribed;
+    var input = "w-full rounded-xl border border-line px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-accent";
+}
+
+<div id="stock-notify-@Model.VariantId">
+    @if (done)
+    {
+        <div class="rounded-card border border-line bg-surface2 p-4 text-sm text-ink">
+            <i class="fa-solid fa-bell mr-1.5 text-accent"></i>Đã đăng ký nhận thông báo khi có hàng. Cảm ơn bạn!
+        </div>
+    }
+    else
+    {
+        <form hx-post="/stock-notify" hx-target="#stock-notify-@Model.VariantId" hx-swap="outerHTML"
+              class="rounded-card border border-line p-4">
+            <p class="mb-2 text-sm font-semibold text-ink"><i class="fa-regular fa-bell mr-1.5 text-accent"></i>Tạm hết hàng — theo dõi để biết khi có hàng</p>
+            <input type="hidden" name="variantId" value="@Model.VariantId" />
+            <div class="flex flex-wrap gap-2">
+                <input name="contact" value="@Model.Contact" placeholder="Email hoặc số điện thoại"
+                       class="@input min-w-[180px] flex-1" aria-label="Email hoặc số điện thoại" />
+                <button type="submit" class="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-press">Đăng ký</button>
+            </div>
+            @if (Model.Result == StockNotifyResult.InvalidContact)
+            {
+                <p class="mt-1.5 text-xs text-sale">Email hoặc số điện thoại không hợp lệ.</p>
+            }
+            else if (Model.Result == StockNotifyResult.StillInStock)
+            {
+                <p class="mt-1.5 text-xs text-sale">Sản phẩm đang có hàng — bạn có thể mua ngay.</p>
+            }
+        </form>
+    }
+</div>
