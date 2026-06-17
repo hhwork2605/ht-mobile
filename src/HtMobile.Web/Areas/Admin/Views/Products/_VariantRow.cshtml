@@ -3,7 +3,7 @@
 @{
     var v = Model.Row;
     var i = Model.Index;
-    var active = v.Status == HtMobile.Domain.Enums.VariantStatus.Active;
+    var active = v.Status == HtMobile.Domain.Enums.ProductStatus.Active;
 }
 <tr id="variant-@v.Id">
     <input type="hidden" name="Variants[@i].Id" value="@v.Id" />

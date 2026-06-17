@@ -27,22 +27,23 @@ public class StockNotificationService
         if (!ContactValidator.IsValid(contact)) return StockNotifyResult.InvalidContact;
         contact = contact!.Trim();
 
-        var status = await _db.ProductVariants
-            .Where(v => v.Id == variantId)
-            .Select(v => (VariantStatus?)v.Status)
+        // Chỉ biến thể con (ProductParentId != null) mới theo dõi được; model cha không bán trực tiếp.
+        var status = await _db.Products
+            .Where(p => p.Id == variantId && p.ProductParentId != null)
+            .Select(p => (ProductStatus?)p.Status)
             .FirstOrDefaultAsync(ct);
         if (status is null) return StockNotifyResult.VariantNotFound;
-        if (status == VariantStatus.Active) return StockNotifyResult.StillInStock;   // còn hàng → không cần theo dõi
+        if (status == ProductStatus.Active) return StockNotifyResult.StillInStock;   // còn hàng → không cần theo dõi
         // Chỉ OutOfStock mới có ý nghĩa theo dõi; Discontinued (ngừng KD) sẽ không có hàng lại → coi như không khả dụng.
-        if (status != VariantStatus.OutOfStock) return StockNotifyResult.VariantNotFound;
+        if (status != ProductStatus.OutOfStock) return StockNotifyResult.VariantNotFound;
 
         var already = await _db.StockNotifications
-            .AnyAsync(n => n.VariantId == variantId && n.Contact == contact && !n.Notified, ct);
+            .AnyAsync(n => n.ProductId == variantId && n.Contact == contact && !n.Notified, ct);
         if (already) return StockNotifyResult.AlreadySubscribed;   // idempotent
 
         _db.StockNotifications.Add(new StockNotification
         {
-            VariantId = variantId,
+            ProductId = variantId,
             Contact = contact,
             Notified = false
         });

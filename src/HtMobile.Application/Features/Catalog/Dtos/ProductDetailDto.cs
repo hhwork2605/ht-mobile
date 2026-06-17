@@ -23,8 +23,8 @@ public record ProductDetailDto
     /// <summary>Slug chuẩn (canonical) gom mọi variant về 1 URL để tránh trùng nội dung SEO — dùng variant mặc định.</summary>
     public string CanonicalSlug { get; init; } = string.Empty;
 
-    public string? SelectedStorage { get; init; }
-    public string? SelectedColor { get; init; }
+    /// <summary>Nhãn biến thể đang chọn ghép từ thuộc tính (vd "256GB · Đen"); rỗng nếu không có.</summary>
+    public string? SelectedVariantLabel { get; init; }
     public string SelectedSku { get; init; } = string.Empty;
 
     /// <summary>Còn bán (variant Active) → JSON-LD availability InStock.</summary>
@@ -52,12 +52,11 @@ public record ProductDetailDto
     public double? AverageRating { get; init; }
 }
 
-/// <summary>Một biến thể để chọn (dung lượng × màu) — mỗi cái có slug/URL riêng.</summary>
+/// <summary>Một biến thể (Product con) để chọn — nhãn ghép từ thuộc tính; mỗi cái có slug/URL riêng.</summary>
 public record VariantOptionDto(
     long Id,
     string Slug,
-    string? Storage,
-    string? Color,
+    string Label,
     string Sku,
     bool IsSelected);
 

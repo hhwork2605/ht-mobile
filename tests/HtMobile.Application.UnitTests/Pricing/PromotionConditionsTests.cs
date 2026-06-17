@@ -6,8 +6,8 @@ namespace HtMobile.Application.UnitTests.Pricing;
 
 public class PromotionConditionsTests
 {
-    // variant 100, product 10, category 1
-    private static readonly PricingContext Ctx = new(VariantId: 100, ProductId: 10, CategoryId: 1);
+    // biến thể (con) 100, model cha 10, category 1
+    private static readonly PricingContext Ctx = new(ProductId: 100, ParentProductId: 10, CategoryId: 1);
 
     [Theory]
     [InlineData(null)]

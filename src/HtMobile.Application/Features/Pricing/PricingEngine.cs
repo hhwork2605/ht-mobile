@@ -24,32 +24,32 @@ public class PricingEngine : IPricingService
         _clock = clock;
     }
 
-    public Task<EffectivePrice> GetEffectivePriceAsync(long variantId, CancellationToken ct = default)
+    public Task<EffectivePrice> GetEffectivePriceAsync(long productId, CancellationToken ct = default)
     {
         return _cache.GetOrCreateAsync(
-            CacheKeys.VariantPrice(variantId),
-            () => ComputeAsync(variantId, ct),
+            CacheKeys.ProductPrice(productId),
+            () => ComputeAsync(productId, ct),
             CacheTtl,
             ct);
     }
 
-    public Task InvalidateAsync(long variantId, CancellationToken ct = default)
-        => _cache.RemoveAsync(CacheKeys.VariantPrice(variantId), ct);
+    public Task InvalidateAsync(long productId, CancellationToken ct = default)
+        => _cache.RemoveAsync(CacheKeys.ProductPrice(productId), ct);
 
-    private async Task<EffectivePrice> ComputeAsync(long variantId, CancellationToken ct)
+    private async Task<EffectivePrice> ComputeAsync(long productId, CancellationToken ct)
     {
-        // Giá lấy trực tiếp từ variant (giá duy nhất, không phân theo vùng) + ngữ cảnh để lọc KM theo điều kiện.
-        var variant = await _db.ProductVariants
+        // Giá lấy trực tiếp từ Product (biến thể con) + ngữ cảnh (parent + category) để lọc KM theo điều kiện.
+        var product = await _db.Products
             .AsNoTracking()
-            .Where(v => v.Id == variantId)
-            .Select(v => new { v.BasePrice, v.CompareAtPrice, v.ProductId, v.Product.CategoryId })
+            .Where(p => p.Id == productId)
+            .Select(p => new { p.BasePrice, p.CompareAtPrice, p.ProductParentId, p.CategoryId })
             .FirstOrDefaultAsync(ct);
 
         var now = _clock.Now;
-        if (variant is null)
-            return PriceCalculator.Calculate(variantId, 0m, null, Array.Empty<Domain.Entities.Pricing.Promotion>(), now);
+        if (product is null)
+            return PriceCalculator.Calculate(productId, 0m, null, Array.Empty<Domain.Entities.Pricing.Promotion>(), now);
 
-        var ctx = new PricingContext(variantId, variant.ProductId, variant.CategoryId);
+        var ctx = new PricingContext(productId, product.ProductParentId, product.CategoryId);
 
         var active = await _db.Promotions
             .AsNoTracking()
@@ -59,6 +59,6 @@ public class PricingEngine : IPricingService
         // Lọc theo ConditionsJson (in-memory; danh sách KM đang chạy nhỏ).
         var applicable = active.Where(p => PromotionConditions.Matches(p.ConditionsJson, ctx)).ToList();
 
-        return PriceCalculator.Calculate(variantId, variant.BasePrice, variant.CompareAtPrice, applicable, now);
+        return PriceCalculator.Calculate(productId, product.BasePrice, product.CompareAtPrice, applicable, now);
     }
 }

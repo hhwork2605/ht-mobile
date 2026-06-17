@@ -7,6 +7,8 @@ namespace HtMobile.Application.Features.Catalog;
 
 /// <summary>
 /// Đọc dữ liệu catalog cho storefront (menu, trang danh mục, PDP). Giá luôn lấy qua <see cref="IPricingService"/>.
+/// Mô hình mới (ADR 0003): "sản phẩm" hiển thị = Product cha (ProductParentId == null); "biến thể" = Product con.
+/// Thuộc tính (dung lượng/màu…) lấy từ <see cref="ProductAttribute"/>.
 /// </summary>
 public class CatalogService
 {
@@ -75,7 +77,7 @@ public class CatalogService
         };
     }
 
-    /// <summary>Danh sách URL cho sitemap.xml: danh mục + variant chuẩn (mặc định) của mỗi sản phẩm.</summary>
+    /// <summary>Danh sách URL cho sitemap.xml: danh mục + biến thể mặc định của mỗi sản phẩm (model cha).</summary>
     public async Task<IReadOnlyList<SitemapEntryDto>> GetSitemapEntriesAsync(CancellationToken ct = default)
     {
         var categories = await _db.Categories
@@ -86,9 +88,10 @@ public class CatalogService
 
         var products = await _db.Products
             .AsNoTracking()
+            .Where(p => p.ProductParentId == null)
             .Select(p => new
             {
-                Slug = p.Variants.OrderBy(v => v.Id).Select(v => v.Slug).FirstOrDefault(),
+                Slug = p.Children.OrderBy(v => v.Id).Select(v => v.Slug).FirstOrDefault(),
                 Modified = p.UpdatedAt ?? p.CreatedAt
             })
             .ToListAsync(ct);
@@ -100,7 +103,7 @@ public class CatalogService
         return entries;
     }
 
-    /// <summary>Trang kết quả tìm kiếm theo từ khóa (khớp tên sản phẩm).</summary>
+    /// <summary>Trang kết quả tìm kiếm theo từ khóa (khớp tên sản phẩm model).</summary>
     public async Task<SearchPageDto> SearchAsync(string query, int take = 24, CancellationToken ct = default)
     {
         query = query?.Trim() ?? string.Empty;
@@ -113,40 +116,56 @@ public class CatalogService
         return new SearchPageDto { Query = query, Products = products };
     }
 
-    /// <summary>PDP theo slug của 1 biến thể (URL riêng cho mỗi variant).</summary>
+    /// <summary>PDP theo slug của 1 biến thể (Product con) — slug riêng từng biến thể.</summary>
     public async Task<ProductDetailDto?> GetByVariantSlugAsync(string variantSlug, CancellationToken ct = default)
     {
-        var variant = await _db.ProductVariants
+        var hit = await _db.Products
             .AsNoTracking()
-            .FirstOrDefaultAsync(v => v.Slug == variantSlug, ct);
-        if (variant is null) return null;
+            .Where(p => p.Slug == variantSlug)
+            .Select(p => new { p.Id, p.ProductParentId })
+            .FirstOrDefaultAsync(ct);
+        if (hit is null) return null;
 
-        return await BuildDetailAsync(variant.ProductId, variant.Id, ct);
+        // Nếu slug trỏ model cha → chọn con đầu; nếu trỏ con → model = cha của nó.
+        if (hit.ProductParentId is null)
+            return await GetByProductSlugInternalAsync(hit.Id, ct);
+
+        return await BuildDetailAsync(hit.ProductParentId.Value, hit.Id, ct);
     }
 
-    /// <summary>PDP theo slug sản phẩm — chọn biến thể đầu tiên làm mặc định.</summary>
+    /// <summary>PDP theo slug sản phẩm (model cha) — chọn biến thể con đầu tiên làm mặc định.</summary>
     public async Task<ProductDetailDto?> GetByProductSlugAsync(string productSlug, CancellationToken ct = default)
     {
-        var product = await _db.Products
+        var model = await _db.Products
             .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Slug == productSlug, ct);
-        if (product is null) return null;
-
-        var firstVariant = await _db.ProductVariants
-            .AsNoTracking()
-            .Where(v => v.ProductId == product.Id)
-            .OrderBy(v => v.Id)
+            .Where(p => p.Slug == productSlug)
+            .Select(p => new { p.Id, p.ProductParentId })
             .FirstOrDefaultAsync(ct);
-        if (firstVariant is null) return null;
+        if (model is null) return null;
 
-        return await BuildDetailAsync(product.Id, firstVariant.Id, ct);
+        // Slug là con → suy ra cha; slug là cha → dùng chính nó.
+        var modelId = model.ProductParentId ?? model.Id;
+        return await GetByProductSlugInternalAsync(modelId, ct);
     }
 
-    private async Task<ProductDetailDto?> BuildDetailAsync(long productId, long selectedVariantId, CancellationToken ct)
+    private async Task<ProductDetailDto?> GetByProductSlugInternalAsync(long modelId, CancellationToken ct)
+    {
+        var firstChildId = await _db.Products
+            .AsNoTracking()
+            .Where(p => p.ProductParentId == modelId)
+            .OrderBy(p => p.Id)
+            .Select(p => (long?)p.Id)
+            .FirstOrDefaultAsync(ct);
+        if (firstChildId is null) return null;
+
+        return await BuildDetailAsync(modelId, firstChildId.Value, ct);
+    }
+
+    private async Task<ProductDetailDto?> BuildDetailAsync(long modelId, long selectedVariantId, CancellationToken ct)
     {
         var now = DateTime.Now;
 
-        var product = await _db.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == productId, ct);
+        var product = await _db.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == modelId, ct);
         if (product is null) return null;
 
         var category = await _db.Categories
@@ -155,15 +174,23 @@ public class CatalogService
             .Select(c => new { c.Name, c.Slug })
             .FirstOrDefaultAsync(ct);
 
-        var variantRows = await _db.ProductVariants
+        // Biến thể = Product con của model; nhãn ghép từ ProductAttribute (theo SortOrder của Attribute).
+        var variantRows = await _db.Products
             .AsNoTracking()
-            .Where(v => v.ProductId == productId)
-            .OrderBy(v => v.Id)
-            .Select(v => new { v.Id, v.Slug, v.Storage, v.Color, v.Sku, v.Status })
+            .Where(p => p.ProductParentId == modelId)
+            .OrderBy(p => p.Id)
+            .Select(p => new
+            {
+                p.Id,
+                p.Slug,
+                p.Sku,
+                p.Status,
+                Attrs = p.Attributes.OrderBy(a => a.Attribute.SortOrder).ThenBy(a => a.AttributeId).Select(a => a.Value).ToList()
+            })
             .ToListAsync(ct);
 
         var variants = variantRows
-            .Select(v => new VariantOptionDto(v.Id, v.Slug, v.Storage, v.Color, v.Sku, v.Id == selectedVariantId))
+            .Select(v => new VariantOptionDto(v.Id, v.Slug, JoinAttrs(v.Attrs), v.Sku ?? string.Empty, v.Id == selectedVariantId))
             .ToList();
 
         var selected = variantRows.FirstOrDefault(v => v.Id == selectedVariantId);
@@ -171,14 +198,14 @@ public class CatalogService
 
         var images = await _db.ProductImages
             .AsNoTracking()
-            .Where(i => i.ProductId == productId)
+            .Where(i => i.ProductId == modelId)
             .OrderBy(i => i.SortOrder)
             .Select(i => i.Url)
             .ToListAsync(ct);
 
         var videos = await _db.ProductVideos
             .AsNoTracking()
-            .Where(v => v.ProductId == productId)
+            .Where(v => v.ProductId == modelId)
             .Select(v => v.YoutubeUrl)
             .ToListAsync(ct);
 
@@ -196,15 +223,16 @@ public class CatalogService
             .Select(p => new PaymentOfferDto(p.Bank, p.Title, p.Description, p.EndsAt))
             .ToListAsync(ct);
 
+        // Đánh giá gộp theo model: review của bất kỳ biến thể con nào thuộc model này.
         var reviewStats = await _db.Reviews
             .AsNoTracking()
-            .Where(r => r.Variant.ProductId == productId)
+            .Where(r => r.Product.ProductParentId == modelId || r.ProductId == modelId)
             .GroupBy(_ => 1)
             .Select(g => new { Count = g.Count(), Avg = (double?)g.Average(x => x.Rating) })
             .FirstOrDefaultAsync(ct);
 
         var price = await _pricing.GetEffectivePriceAsync(selectedVariantId, ct);
-        var bundle = await _bundles.GetForProductAsync(productId, ct);
+        var bundle = await _bundles.GetForProductAsync(modelId, ct);
 
         return new ProductDetailDto
         {
@@ -219,10 +247,9 @@ public class CatalogService
             CategorySlug = category?.Slug ?? string.Empty,
             SelectedVariantId = selectedVariantId,
             CanonicalSlug = canonicalSlug,
-            SelectedStorage = selected?.Storage,
-            SelectedColor = selected?.Color,
+            SelectedVariantLabel = selected is null ? null : JoinAttrsOrNull(selected.Attrs),
             SelectedSku = selected?.Sku ?? string.Empty,
-            InStock = selected?.Status == Domain.Enums.VariantStatus.Active,
+            InStock = selected?.Status == Domain.Enums.ProductStatus.Active,
             Price = price,
             Variants = variants,
             Images = images,
@@ -235,13 +262,17 @@ public class CatalogService
         };
     }
 
-    /// <summary>Dựng thẻ sản phẩm: lấy biến thể đại diện của mỗi sản phẩm + giá hiệu lực.</summary>
+    private static string JoinAttrs(IEnumerable<string> values) => string.Join(" · ", values);
+    private static string? JoinAttrsOrNull(IReadOnlyCollection<string> values) => values.Count == 0 ? null : string.Join(" · ", values);
+
+    /// <summary>Dựng thẻ sản phẩm: mỗi model (cha) + biến thể con đại diện (con đầu) + giá hiệu lực.</summary>
     private async Task<IReadOnlyList<ProductCardDto>> BuildCardsAsync(
         System.Linq.Expressions.Expression<Func<Product, bool>> filter, int take, CancellationToken ct)
     {
         var now = DateTime.Now;
         var products = await _db.Products
             .AsNoTracking()
+            .Where(p => p.ProductParentId == null)
             .Where(filter)
             .OrderByDescending(p => p.Id)
             .Take(take)
@@ -252,7 +283,7 @@ public class CatalogService
                 p.Tagline,
                 p.Slug,
                 p.CreatedAt,
-                Variant = p.Variants.OrderBy(v => v.Id).Select(v => new { v.Id, v.Slug }).FirstOrDefault(),
+                Variant = p.Children.OrderBy(v => v.Id).Select(v => new { v.Id, v.Slug }).FirstOrDefault(),
                 Thumbnail = p.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).FirstOrDefault()
             })
             .ToListAsync(ct);

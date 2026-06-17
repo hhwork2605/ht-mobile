@@ -18,9 +18,9 @@ public class StockNotificationServiceTests
             .Options;
         var db = new AppDbContext(options);
         db.Products.Add(new Product { Id = 1, CategoryId = 1, Name = "iPhone 17", Slug = "iphone-17" });
-        db.ProductVariants.AddRange(
-            new ProductVariant { Id = 10, ProductId = 1, Sku = "A", Slug = "v-oos", BasePrice = 1m, Status = VariantStatus.OutOfStock },
-            new ProductVariant { Id = 11, ProductId = 1, Sku = "B", Slug = "v-active", BasePrice = 1m, Status = VariantStatus.Active });
+        db.Products.AddRange(
+            new Product { Id = 10, ProductParentId = 1, CategoryId = 1, Name = "iPhone 17", Sku = "A", Slug = "v-oos", BasePrice = 1m, Status = ProductStatus.OutOfStock },
+            new Product { Id = 11, ProductParentId = 1, CategoryId = 1, Name = "iPhone 17", Sku = "B", Slug = "v-active", BasePrice = 1m, Status = ProductStatus.Active });
         db.SaveChanges();
         return db;
     }

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HtMobile.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260616092420_Initial")]
+    [Migration("20260617100137_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -25,6 +25,30 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.Attribute", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Attributes");
+                });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.Category", b =>
                 {
@@ -77,12 +101,20 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<decimal>("BasePrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
                     b.Property<string>("Brand")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
                     b.Property<long>("CategoryId")
                         .HasColumnType("bigint");
+
+                    b.Property<decimal?>("CompareAtPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
@@ -95,6 +127,13 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
 
+                    b.Property<long?>("ProductParentId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Sku")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(300)
@@ -102,6 +141,9 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("SpecsJson")
                         .HasColumnType("jsonb");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Tagline")
                         .HasMaxLength(200)
@@ -114,10 +156,48 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("ProductParentId");
+
+                    b.HasIndex("Sku")
+                        .IsUnique()
+                        .HasFilter("\"Sku\" IS NOT NULL");
+
                     b.HasIndex("Slug")
                         .IsUnique();
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.ProductAttribute", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AttributeId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttributeId");
+
+                    b.HasIndex("ProductId", "AttributeId")
+                        .IsUnique();
+
+                    b.ToTable("ProductAttributes");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.ProductImage", b =>
@@ -139,71 +219,11 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<long?>("VariantId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("VariantId");
 
                     b.ToTable("ProductImages");
-                });
-
-            modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.ProductVariant", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<decimal>("BasePrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<string>("Color")
-                        .HasMaxLength(60)
-                        .HasColumnType("character varying(60)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Sku")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)");
-
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasMaxLength(320)
-                        .HasColumnType("character varying(320)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Storage")
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("Sku")
-                        .IsUnique();
-
-                    b.HasIndex("Slug")
-                        .IsUnique();
-
-                    b.ToTable("ProductVariants");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.ProductVideo", b =>
@@ -407,6 +427,9 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
@@ -416,14 +439,11 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<long>("VariantId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("StoreId");
+                    b.HasIndex("ProductId");
 
-                    b.HasIndex("VariantId");
+                    b.HasIndex("StoreId");
 
                     b.ToTable("Inventories");
                 });
@@ -454,9 +474,6 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Phone")
                         .HasColumnType("text");
-
-                    b.Property<long?>("RegionId")
-                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
@@ -542,44 +559,6 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                     b.ToTable("PaymentPromotions");
                 });
 
-            modelBuilder.Entity("HtMobile.Domain.Entities.Pricing.PriceByRegion", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<decimal?>("CompareAtPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<long>("RegionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<long>("VariantId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RegionId");
-
-                    b.HasIndex("VariantId", "RegionId")
-                        .IsUnique();
-
-                    b.ToTable("PricesByRegion");
-                });
-
             modelBuilder.Entity("HtMobile.Domain.Entities.Pricing.Promotion", b =>
                 {
                     b.Property<long>("Id")
@@ -622,32 +601,6 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                     b.ToTable("Promotions");
                 });
 
-            modelBuilder.Entity("HtMobile.Domain.Entities.Pricing.Region", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("Regions");
-                });
-
             modelBuilder.Entity("HtMobile.Domain.Entities.Reviews.Review", b =>
                 {
                     b.Property<long>("Id")
@@ -665,18 +618,18 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                     b.Property<long?>("CustomerId")
                         .HasColumnType("bigint");
 
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("Rating")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<long>("VariantId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("VariantId");
+                    b.HasIndex("ProductId");
 
                     b.ToTable("Reviews");
                 });
@@ -713,7 +666,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("AccessoryVariantId")
+                    b.Property<long>("AccessoryProductId")
                         .HasColumnType("bigint");
 
                     b.Property<long>("BundleId")
@@ -725,7 +678,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccessoryVariantId");
+                    b.HasIndex("AccessoryProductId");
 
                     b.HasIndex("BundleId");
 
@@ -754,6 +707,14 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CustomerId")
+                        .IsUnique()
+                        .HasFilter("\"CustomerId\" IS NOT NULL");
+
+                    b.HasIndex("SessionId")
+                        .IsUnique()
+                        .HasFilter("\"SessionId\" IS NOT NULL");
+
                     b.ToTable("Carts");
                 });
 
@@ -768,6 +729,9 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                     b.Property<long>("CartId")
                         .HasColumnType("bigint");
 
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
@@ -775,14 +739,16 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
-                    b.Property<long>("VariantId")
-                        .HasColumnType("bigint");
+                    b.Property<decimal?>("UnitPriceOverride")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CartId");
+                    b.HasIndex("ProductId");
 
-                    b.HasIndex("VariantId");
+                    b.HasIndex("CartId", "ProductId")
+                        .IsUnique();
 
                     b.ToTable("CartItems");
                 });
@@ -798,14 +764,11 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<long>("CustomerId")
+                    b.Property<long?>("CustomerId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("PaymentMethod")
                         .HasColumnType("text");
-
-                    b.Property<long?>("RegionId")
-                        .HasColumnType("bigint");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -833,6 +796,9 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                     b.Property<long>("OrderId")
                         .HasColumnType("bigint");
 
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
@@ -840,14 +806,11 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
-                    b.Property<long>("VariantId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 
-                    b.HasIndex("VariantId");
+                    b.HasIndex("ProductId");
 
                     b.ToTable("OrderItems");
                 });
@@ -978,15 +941,15 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                     b.Property<bool>("Notified")
                         .HasColumnType("boolean");
 
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<long>("VariantId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("VariantId");
+                    b.HasIndex("ProductId");
 
                     b.ToTable("StockNotifications");
                 });
@@ -1247,31 +1210,39 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("HtMobile.Domain.Entities.Catalog.Product", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ProductParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Category");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.ProductAttribute", b =>
+                {
+                    b.HasOne("HtMobile.Domain.Entities.Catalog.Attribute", "Attribute")
+                        .WithMany("ProductAttributes")
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HtMobile.Domain.Entities.Catalog.Product", "Product")
+                        .WithMany("Attributes")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Attribute");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.ProductImage", b =>
                 {
                     b.HasOne("HtMobile.Domain.Entities.Catalog.Product", "Product")
                         .WithMany("Images")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("HtMobile.Domain.Entities.Catalog.ProductVariant", "Variant")
-                        .WithMany("Images")
-                        .HasForeignKey("VariantId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Product");
-
-                    b.Navigation("Variant");
-                });
-
-            modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.ProductVariant", b =>
-                {
-                    b.HasOne("HtMobile.Domain.Entities.Catalog.Product", "Product")
-                        .WithMany("Variants")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1292,51 +1263,32 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Inventory.Inventory", b =>
                 {
+                    b.HasOne("HtMobile.Domain.Entities.Catalog.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("HtMobile.Domain.Entities.Inventory.Store", "Store")
                         .WithMany("Inventories")
                         .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HtMobile.Domain.Entities.Catalog.ProductVariant", "Variant")
-                        .WithMany("Inventories")
-                        .HasForeignKey("VariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Product");
 
                     b.Navigation("Store");
-
-                    b.Navigation("Variant");
-                });
-
-            modelBuilder.Entity("HtMobile.Domain.Entities.Pricing.PriceByRegion", b =>
-                {
-                    b.HasOne("HtMobile.Domain.Entities.Pricing.Region", "Region")
-                        .WithMany("Prices")
-                        .HasForeignKey("RegionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("HtMobile.Domain.Entities.Catalog.ProductVariant", "Variant")
-                        .WithMany("Prices")
-                        .HasForeignKey("VariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Region");
-
-                    b.Navigation("Variant");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Reviews.Review", b =>
                 {
-                    b.HasOne("HtMobile.Domain.Entities.Catalog.ProductVariant", "Variant")
+                    b.HasOne("HtMobile.Domain.Entities.Catalog.Product", "Product")
                         .WithMany()
-                        .HasForeignKey("VariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Variant");
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Sales.Bundle", b =>
@@ -1352,10 +1304,10 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Sales.BundleItem", b =>
                 {
-                    b.HasOne("HtMobile.Domain.Entities.Catalog.ProductVariant", "AccessoryVariant")
+                    b.HasOne("HtMobile.Domain.Entities.Catalog.Product", "AccessoryProduct")
                         .WithMany()
-                        .HasForeignKey("AccessoryVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("AccessoryProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("HtMobile.Domain.Entities.Sales.Bundle", "Bundle")
@@ -1364,7 +1316,7 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("AccessoryVariant");
+                    b.Navigation("AccessoryProduct");
 
                     b.Navigation("Bundle");
                 });
@@ -1377,15 +1329,15 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HtMobile.Domain.Entities.Catalog.ProductVariant", "Variant")
+                    b.HasOne("HtMobile.Domain.Entities.Catalog.Product", "Product")
                         .WithMany()
-                        .HasForeignKey("VariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Cart");
 
-                    b.Navigation("Variant");
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Sales.OrderItem", b =>
@@ -1396,15 +1348,15 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HtMobile.Domain.Entities.Catalog.ProductVariant", "Variant")
+                    b.HasOne("HtMobile.Domain.Entities.Catalog.Product", "Product")
                         .WithMany()
-                        .HasForeignKey("VariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Order");
 
-                    b.Navigation("Variant");
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Sales.Payment", b =>
@@ -1431,13 +1383,13 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Services.StockNotification", b =>
                 {
-                    b.HasOne("HtMobile.Domain.Entities.Catalog.ProductVariant", "Variant")
+                    b.HasOne("HtMobile.Domain.Entities.Catalog.Product", "Product")
                         .WithMany()
-                        .HasForeignKey("VariantId")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Variant");
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<long>", b =>
@@ -1491,6 +1443,11 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.Attribute", b =>
+                {
+                    b.Navigation("ProductAttributes");
+                });
+
             modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.Category", b =>
                 {
                     b.Navigation("Children");
@@ -1500,30 +1457,18 @@ namespace HtMobile.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.Product", b =>
                 {
-                    b.Navigation("Images");
+                    b.Navigation("Attributes");
 
-                    b.Navigation("Variants");
+                    b.Navigation("Children");
+
+                    b.Navigation("Images");
 
                     b.Navigation("Videos");
-                });
-
-            modelBuilder.Entity("HtMobile.Domain.Entities.Catalog.ProductVariant", b =>
-                {
-                    b.Navigation("Images");
-
-                    b.Navigation("Inventories");
-
-                    b.Navigation("Prices");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Inventory.Store", b =>
                 {
                     b.Navigation("Inventories");
-                });
-
-            modelBuilder.Entity("HtMobile.Domain.Entities.Pricing.Region", b =>
-                {
-                    b.Navigation("Prices");
                 });
 
             modelBuilder.Entity("HtMobile.Domain.Entities.Sales.Bundle", b =>

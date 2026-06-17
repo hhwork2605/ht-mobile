@@ -27,7 +27,8 @@ public class SlugResolver : ISlugResolver
         if (await _db.Categories.AnyAsync(c => c.Slug == slug, ct))
             return new SlugMatch(SlugKind.Category, slug);
 
-        if (await _db.ProductVariants.AnyAsync(v => v.Slug == slug, ct))
+        // Biến thể = Product con; cũng nhận slug model cha → đều mở PDP (SlugKind.Variant).
+        if (await _db.Products.AnyAsync(p => p.Slug == slug, ct))
             return new SlugMatch(SlugKind.Variant, slug);
 
         if (await _db.Articles.AnyAsync(a => a.Slug == slug, ct))

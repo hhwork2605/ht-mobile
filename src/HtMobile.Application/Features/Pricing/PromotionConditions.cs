@@ -2,13 +2,17 @@ using System.Text.Json;
 
 namespace HtMobile.Application.Features.Pricing;
 
-/// <summary>Ngữ cảnh định giá 1 variant để xét điều kiện khuyến mãi.</summary>
-public readonly record struct PricingContext(long VariantId, long ProductId, long CategoryId);
+/// <summary>
+/// Ngữ cảnh định giá 1 biến thể (Product con) để xét điều kiện khuyến mãi.
+/// ProductId = Id biến thể con (bán); ParentProductId = model cha (null nếu đứng độc lập).
+/// </summary>
+public readonly record struct PricingContext(long ProductId, long? ParentProductId, long CategoryId);
 
 /// <summary>
 /// Parse + khớp <c>Promotion.ConditionsJson</c> (THUẦN, dễ test). Schema (mọi trường optional):
 /// <c>{ "categoryIds":[], "productIds":[], "variantIds":[] }</c>.
-/// null/rỗng = áp toàn bộ; có danh sách thì variant phải khớp ≥1 trong các danh sách được khai.
+/// null/rỗng = áp toàn bộ; có danh sách thì phải khớp ≥1. Ngữ nghĩa mới: <c>variantIds</c> khớp Id biến thể con
+/// (<see cref="PricingContext.ProductId"/>), <c>productIds</c> khớp model cha (<see cref="PricingContext.ParentProductId"/>).
 /// </summary>
 public static class PromotionConditions
 {
@@ -37,8 +41,11 @@ public static class PromotionConditions
 
         // OR: khớp ≥1 danh sách được khai.
         if (hasCat && c.CategoryIds!.Contains(ctx.CategoryId)) return true;
-        if (hasProd && c.ProductIds!.Contains(ctx.ProductId)) return true;
-        if (hasVar && c.VariantIds!.Contains(ctx.VariantId)) return true;
+        // productIds = model cha; nếu biến thể đứng độc lập (không cha) thì so với chính nó.
+        var modelId = ctx.ParentProductId ?? ctx.ProductId;
+        if (hasProd && c.ProductIds!.Contains(modelId)) return true;
+        // variantIds = Id biến thể con (sản phẩm bán thực sự).
+        if (hasVar && c.VariantIds!.Contains(ctx.ProductId)) return true;
         return false;
     }
 }

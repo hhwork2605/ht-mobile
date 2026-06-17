@@ -9,8 +9,8 @@ public class OrderFactoryTests
 {
     private static readonly OrderLineInput[] TwoLines =
     {
-        new(VariantId: 10, UnitPrice: 1_000_000m, Quantity: 2),  // 2.000.000
-        new(VariantId: 11, UnitPrice: 500_000m, Quantity: 1),    //   500.000
+        new(ProductId: 10, UnitPrice: 1_000_000m, Quantity: 2),  // 2.000.000
+        new(ProductId: 11, UnitPrice: 500_000m, Quantity: 1),    //   500.000
     };
 
     [Fact]
@@ -32,7 +32,7 @@ public class OrderFactoryTests
         order.PaymentMethod.Should().Be("COD");
 
         order.Items.Should().HaveCount(2);
-        order.Items.Should().ContainSingle(i => i.VariantId == 10 && i.Quantity == 2 && i.UnitPrice == 1_000_000m);
+        order.Items.Should().ContainSingle(i => i.ProductId == 10 && i.Quantity == 2 && i.UnitPrice == 1_000_000m);
 
         order.Shipment.Should().NotBeNull();
         order.Shipment!.Address.Should().Be("Nguyen · 0900 · Hà Nội");

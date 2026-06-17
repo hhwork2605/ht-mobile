@@ -21,16 +21,18 @@ public class PostgresSearchService : ISearchService
 
         var pattern = $"%{query}%";
 
-        var rows = await _db.ProductVariants
+        // Gợi ý biến thể (Product con) khớp tên model cha hoặc slug. Tên/ảnh lấy từ model cha.
+        var rows = await _db.Products
             .AsNoTracking()
-            .Where(v => EF.Functions.ILike(v.Product.Name, pattern) || EF.Functions.ILike(v.Slug, pattern))
+            .Where(v => v.ProductParentId != null
+                && (EF.Functions.ILike(v.Parent!.Name, pattern) || EF.Functions.ILike(v.Slug, pattern)))
             .OrderBy(v => v.Id)
             .Take(limit)
             .Select(v => new ProductSuggestion(
                 v.Id,
-                v.Product.Name,
+                v.Parent!.Name,
                 v.Slug,
-                v.Product.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).FirstOrDefault(),
+                v.Parent.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).FirstOrDefault(),
                 v.BasePrice,
                 v.CompareAtPrice))
             .ToListAsync(ct);

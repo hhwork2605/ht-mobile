@@ -6,7 +6,8 @@ namespace HtMobile.Domain.Entities.Sales;
 public class CartItem : BaseEntity
 {
     public long CartId { get; set; }
-    public long VariantId { get; set; }
+    /// <summary>Biến thể trong giỏ = Product con. (Trước đây là VariantId → ProductVariant.)</summary>
+    public long ProductId { get; set; }
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
 
@@ -14,5 +15,5 @@ public class CartItem : BaseEntity
     public decimal? UnitPriceOverride { get; set; }
 
     public Cart Cart { get; set; } = null!;
-    public ProductVariant Variant { get; set; } = null!;
+    public Product Product { get; set; } = null!;
 }

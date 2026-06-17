@@ -11,6 +11,7 @@ using HtMobile.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using AttributeEntity = HtMobile.Domain.Entities.Catalog.Attribute;
 using InventoryEntity = HtMobile.Domain.Entities.Inventory.Inventory;
 using StoreEntity = HtMobile.Domain.Entities.Inventory.Store;
 
@@ -27,7 +28,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<long
     // Catalog
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Product> Products => Set<Product>();
-    public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+    public DbSet<AttributeEntity> Attributes => Set<AttributeEntity>();
+    public DbSet<ProductAttribute> ProductAttributes => Set<ProductAttribute>();
     public DbSet<ProductImage> ProductImages => Set<ProductImage>();
     public DbSet<ProductVideo> ProductVideos => Set<ProductVideo>();
 

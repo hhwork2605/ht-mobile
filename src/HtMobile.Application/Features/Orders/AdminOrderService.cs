@@ -32,7 +32,7 @@ public class AdminOrderService
                 o.Status,
                 o.CreatedAt,
                 Recipient = o.Shipment != null ? o.Shipment.Address : null,
-                Items = o.Items.Select(i => new { i.Quantity, Name = i.Variant.Product.Name }).ToList()
+                Items = o.Items.Select(i => new { i.Quantity, Name = i.Product.Parent != null ? i.Product.Parent.Name : i.Product.Name }).ToList()
             })
             .ToListAsync(ct);
 
@@ -80,9 +80,8 @@ public class AdminOrderService
                 {
                     i.Quantity,
                     i.UnitPrice,
-                    Name = i.Variant.Product.Name,
-                    i.Variant.Storage,
-                    i.Variant.Color
+                    Name = i.Product.Parent != null ? i.Product.Parent.Name : i.Product.Name,
+                    Attrs = i.Product.Attributes.OrderBy(a => a.Attribute.SortOrder).ThenBy(a => a.AttributeId).Select(a => a.Value).ToList()
                 }).ToList()
             })
             .FirstOrDefaultAsync(ct);
@@ -100,7 +99,7 @@ public class AdminOrderService
             Items = o.Items.Select(i => new AdminOrderLine
             {
                 ProductName = i.Name,
-                VariantText = string.Join(" · ", new[] { i.Color, i.Storage }.Where(s => !string.IsNullOrWhiteSpace(s))),
+                VariantText = string.Join(" · ", i.Attrs),
                 Quantity = i.Quantity,
                 UnitPrice = i.UnitPrice,
                 LineTotal = i.UnitPrice * i.Quantity

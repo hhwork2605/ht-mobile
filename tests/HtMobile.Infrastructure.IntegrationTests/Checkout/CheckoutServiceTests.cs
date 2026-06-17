@@ -26,10 +26,10 @@ public class CheckoutServiceTests
         var product = new Product { Id = 1, CategoryId = 1, Name = "iPhone 17", Slug = "iphone-17" };
         product.Images.Add(new ProductImage { Id = 1, ProductId = 1, Url = "/img.png", SortOrder = 0 });
         db.Products.Add(product);
-        db.ProductVariants.Add(new ProductVariant
+        db.Products.Add(new Product
         {
-            Id = 10, ProductId = 1, Sku = "A", Slug = "iphone-17-256",
-            Storage = "256GB", Color = "Đen", BasePrice = Unit, Status = VariantStatus.Active
+            Id = 10, ProductParentId = 1, CategoryId = 1, Name = "iPhone 17", Sku = "A", Slug = "iphone-17-256",
+            BasePrice = Unit, Status = ProductStatus.Active
         });
         db.SaveChanges();
 
@@ -75,9 +75,9 @@ public class CheckoutServiceTests
 
     private sealed class StubPricing : IPricingService
     {
-        public Task<EffectivePrice> GetEffectivePriceAsync(long variantId, CancellationToken ct = default)
-            => Task.FromResult(new EffectivePrice { VariantId = variantId, ListPrice = Unit, FinalPrice = Unit });
+        public Task<EffectivePrice> GetEffectivePriceAsync(long productId, CancellationToken ct = default)
+            => Task.FromResult(new EffectivePrice { ProductId = productId, ListPrice = Unit, FinalPrice = Unit });
 
-        public Task InvalidateAsync(long variantId, CancellationToken ct = default) => Task.CompletedTask;
+        public Task InvalidateAsync(long productId, CancellationToken ct = default) => Task.CompletedTask;
     }
 }

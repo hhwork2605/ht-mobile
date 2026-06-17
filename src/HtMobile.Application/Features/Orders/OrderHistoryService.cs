@@ -26,18 +26,16 @@ public class OrderHistoryService
                 o.Total,
                 Items = o.Items.Select(i => new
                 {
-                    i.VariantId,
+                    i.ProductId,
                     i.Quantity,
                     i.UnitPrice,
-                    ProductName = i.Variant.Product.Name,
-                    i.Variant.Storage,
-                    i.Variant.Color,
-                    VariantSlug = i.Variant.Slug,
-                    // Ưu tiên ảnh đúng variant; fallback ảnh chung của sản phẩm (bỏ ảnh của variant khác).
-                    Thumbnail = i.Variant.Product.Images
-                        .Where(im => im.VariantId == null || im.VariantId == i.VariantId)
-                        .OrderBy(im => im.VariantId == i.VariantId ? 0 : 1)
-                        .ThenBy(im => im.SortOrder)
+                    // ProductName = model cha (nếu biến thể có cha), ảnh gallery cũng ở model cha.
+                    ProductName = i.Product.Parent != null ? i.Product.Parent.Name : i.Product.Name,
+                    Attrs = i.Product.Attributes.OrderBy(a => a.Attribute.SortOrder).ThenBy(a => a.AttributeId).Select(a => a.Value).ToList(),
+                    VariantSlug = i.Product.Slug,
+                    // Ảnh gallery ở model cha (biến thể con không có ảnh riêng).
+                    Thumbnail = i.Product.Parent!.Images
+                        .OrderBy(im => im.SortOrder)
                         .Select(im => im.Url)
                         .FirstOrDefault()
                 }).ToList()
@@ -53,8 +51,7 @@ public class OrderHistoryService
             Items = o.Items.Select(i => new OrderLineView
             {
                 ProductName = i.ProductName,
-                VariantText = string.Join(" · ",
-                    new[] { i.Color, i.Storage }.Where(s => !string.IsNullOrWhiteSpace(s))),
+                VariantText = string.Join(" · ", i.Attrs),
                 VariantSlug = i.VariantSlug,
                 ThumbnailUrl = i.Thumbnail,
                 Quantity = i.Quantity,

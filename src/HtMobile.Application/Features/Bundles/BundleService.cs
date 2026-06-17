@@ -29,16 +29,17 @@ public class BundleService
             .AsNoTracking()
             .Where(b => b.MainProductId == productId)
             .Select(b => b.Items
-                .Where(i => i.AccessoryVariant.Status == Domain.Enums.VariantStatus.Active)
+                .Where(i => i.AccessoryProduct.Status == Domain.Enums.ProductStatus.Active)
                 .Select(i => new
             {
-                i.AccessoryVariantId,
+                i.AccessoryProductId,
                 i.BundlePrice,
-                ProductName = i.AccessoryVariant.Product.Name,
-                i.AccessoryVariant.Storage,
-                i.AccessoryVariant.Color,
-                Slug = i.AccessoryVariant.Slug,
-                Thumb = i.AccessoryVariant.Product.Images.OrderBy(im => im.SortOrder).Select(im => im.Url).FirstOrDefault()
+                // Tên hiển thị = model cha của phụ kiện (nếu có), ảnh gallery cũng ở model cha.
+                ProductName = i.AccessoryProduct.Parent != null ? i.AccessoryProduct.Parent.Name : i.AccessoryProduct.Name,
+                Slug = i.AccessoryProduct.Slug,
+                Attrs = i.AccessoryProduct.Attributes.OrderBy(a => a.Attribute.SortOrder).ThenBy(a => a.AttributeId).Select(a => a.Value).ToList(),
+                // Ảnh gallery ở model cha (biến thể con không có ảnh riêng). Parent null → null (an toàn, dịch được).
+                Thumb = i.AccessoryProduct.Parent!.Images.OrderBy(im => im.SortOrder).Select(im => im.Url).FirstOrDefault()
             }).ToList())
             .FirstOrDefaultAsync(ct);
 
@@ -47,14 +48,14 @@ public class BundleService
         var accessories = new List<BundleAccessoryView>();
         foreach (var it in bundle)
         {
-            var listed = (await _pricing.GetEffectivePriceAsync(it.AccessoryVariantId, ct)).FinalPrice;
+            var listed = (await _pricing.GetEffectivePriceAsync(it.AccessoryProductId, ct)).FinalPrice;
             var saving = listed - it.BundlePrice;
             if (saving < 0) saving = 0m;
             accessories.Add(new BundleAccessoryView
             {
-                VariantId = it.AccessoryVariantId,
+                VariantId = it.AccessoryProductId,
                 ProductName = it.ProductName,
-                VariantText = string.Join(" · ", new[] { it.Color, it.Storage }.Where(s => !string.IsNullOrWhiteSpace(s))),
+                VariantText = string.Join(" · ", it.Attrs),
                 ThumbnailUrl = it.Thumb,
                 VariantSlug = it.Slug,
                 ListedPrice = listed,
@@ -78,25 +79,26 @@ public class BundleService
     {
         await _cart.AddItemAsync(owner, mainVariantId, 1, null, ct);
 
-        var mainProductId = await _db.ProductVariants
-            .Where(v => v.Id == mainVariantId)
-            .Select(v => (long?)v.ProductId)
+        // Bundle gắn với model (cha). Biến thể chính là Product con → model = ProductParentId (hoặc chính nó).
+        var mainModelId = await _db.Products
+            .Where(p => p.Id == mainVariantId)
+            .Select(p => (long?)(p.ProductParentId ?? p.Id))
             .FirstOrDefaultAsync(ct);
-        if (mainProductId is null) return await _cart.GetCountAsync(owner, ct);
+        if (mainModelId is null) return await _cart.GetCountAsync(owner, ct);
 
         var selected = accessoryVariantIds.Distinct().ToHashSet();
         if (selected.Count == 0) return await _cart.GetCountAsync(owner, ct);
 
         // Giá mua kèm LẤY TỪ DB, chỉ cho phụ kiện thực sự thuộc bundle của sản phẩm chính.
         var bundleItems = await _db.Bundles
-            .Where(b => b.MainProductId == mainProductId)
+            .Where(b => b.MainProductId == mainModelId)
             .SelectMany(b => b.Items)
-            .Where(i => selected.Contains(i.AccessoryVariantId))
-            .Select(i => new { i.AccessoryVariantId, i.BundlePrice })
+            .Where(i => selected.Contains(i.AccessoryProductId))
+            .Select(i => new { i.AccessoryProductId, i.BundlePrice })
             .ToListAsync(ct);
 
         foreach (var bi in bundleItems)
-            await _cart.AddItemAsync(owner, bi.AccessoryVariantId, 1, bi.BundlePrice, ct);
+            await _cart.AddItemAsync(owner, bi.AccessoryProductId, 1, bi.BundlePrice, ct);
 
         return await _cart.GetCountAsync(owner, ct);
     }

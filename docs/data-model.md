@@ -29,7 +29,7 @@ Cột `Id` được bỏ qua ở các bảng bên dưới (mọi bảng đều c
 
 ## 1. Catalog — `Domain/Entities/Catalog`
 
-Cây danh mục → sản phẩm (model) → biến thể (SKU) → ảnh/video.
+Cây danh mục → sản phẩm (model cha) → biến thể (Product con) + thuộc tính (EAV) → ảnh/video. Xem ADR 0003.
 
 ### `Categories` ✅ Audit — danh mục dạng cây (iPhone, iPad, Mac…)
 
@@ -43,41 +43,54 @@ Cây danh mục → sản phẩm (model) → biến thể (SKU) → ảnh/video.
 
 Quan hệ điều hướng: `Parent`, `Children`, `Products`.
 
-### `Products` ✅ Audit — sản phẩm/model (vd "iPhone 15 Pro")
+### `Products` ✅ Audit — sản phẩm. Tự tham chiếu cha–con (ADR 0003)
+
+> **Mô hình (ADR [0003](decisions/0003-product-attribute-eav.md)):** `ProductParentId == null` = **model cha** (gom + hiển thị,
+> **không bán trực tiếp**, giá 0, không SKU). `ProductParentId` có giá trị = **biến thể con** (đơn vị **bán**: có giá/SKU/tồn kho).
+> Thuộc tính phân biệt biến thể (dung lượng, màu, RAM…) lưu ở [`ProductAttributes`](#productattributes--giá-trị-thuộc-tính-eav). **Không còn bảng `ProductVariants`.**
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
-| `CategoryId` | `long` | FK → `Categories.Id`, `OnDelete: Restrict` | Danh mục chứa sản phẩm. |
-| `Name` | `string` | `varchar(300)`, NOT NULL | Tên sản phẩm. |
-| `Slug` | `string` | `varchar(300)`, NOT NULL, **UNIQUE** | Slug URL SEO của trang sản phẩm. |
-| `Tagline` | `string?` | `varchar(200)` | Khẩu hiệu ngắn cho ProductCard (vd "Titan. Mạnh mẽ. Chuyên nghiệp."). |
+| `CategoryId` | `long` | FK → `Categories.Id`, `OnDelete: Restrict` | Danh mục. |
+| `ProductParentId` | `long?` | FK → `Products.Id` (self), `OnDelete: Restrict` | `null` = model cha; có giá trị = biến thể con của model này. |
+| `Name` | `string` | `varchar(300)`, NOT NULL | Tên sản phẩm (con dùng chung tên model cha). |
+| `Slug` | `string` | `varchar(300)`, NOT NULL, **UNIQUE** | Slug URL SEO (cha + mỗi con đều có slug riêng). |
+| `Sku` | `string?` | `varchar(80)`, **UNIQUE (lọc NOT NULL)** | Mã SKU — chỉ đặt cho biến thể con. |
+| `BasePrice` | `decimal(18,2)` | | Giá bán niêm yết của biến thể con (cha = 0). Giá hiệu lực qua `IPricingService`. |
+| `CompareAtPrice` | `decimal(18,2)?` | | Giá gạch ngang; `null` = không hiển thị. |
+| `Status` | `ProductStatus` (int) | mặc định `Active` | `Active`/`OutOfStock`/`Discontinued` (trước là `VariantStatus`). |
+| `Tagline` | `string?` | `varchar(200)` | Khẩu hiệu ngắn cho ProductCard. |
 | `Description` | `string?` | `text` | Mô tả dài. |
-| `Brand` | `string?` | `varchar(100)` | Thương hiệu (Apple, phụ kiện bên thứ ba…). |
-| `SpecsJson` | `string?` | **`jsonb`** | Thông số kỹ thuật dạng JSON (chip, camera, màn hình…). |
+| `Brand` | `string?` | `varchar(100)` | Thương hiệu. |
+| `SpecsJson` | `string?` | **`jsonb`** | Thông số kỹ thuật JSON. |
 
-Quan hệ: `Category`, `Variants`, `Images`, `Videos`.
+Quan hệ: `Category`, `Parent`/`Children` (self), `Attributes`, `Images`, `Videos`.
 
-### `ProductVariants` ✅ Audit — biến thể/SKU = 1 tổ hợp dung lượng × màu
+### `Attributes` — định nghĩa loại thuộc tính (master, EAV) *(không audit)*
 
-| Cột | Kiểu | Ràng buộc | Ý nghĩa |
-|---|---|---|---|
-| `ProductId` | `long` | FK → `Products.Id`, `OnDelete: Cascade` | Sản phẩm mẹ. Xóa sản phẩm → xóa biến thể. |
-| `Sku` | `string` | `varchar(80)`, NOT NULL, **UNIQUE** | Mã SKU nội bộ. |
-| `Storage` | `string?` | `varchar(40)` | Dung lượng (256GB / 512GB / 1TB…). |
-| `Color` | `string?` | `varchar(60)` | Màu sắc. |
-| `Slug` | `string` | `varchar(320)`, NOT NULL, **UNIQUE** | Slug URL riêng cho biến thể. |
-| `BasePrice` | `decimal(18,2)` | | Giá bán niêm yết (giá **duy nhất**, không phân theo vùng). Giá hiệu lực sau khuyến mãi tính qua `IPricingService`. |
-| `CompareAtPrice` | `decimal(18,2)?` | | Giá gạch ngang (giá gốc cao hơn) để hiển thị giảm giá; `null` = không hiển thị. |
-| `Status` | `VariantStatus` (int) | mặc định `Active` | Trạng thái: `Active`/`OutOfStock`/`Discontinued`. |
-
-Quan hệ: `Product`, `Images`, `Inventories`.
-
-### `ProductImages` — ảnh sản phẩm/biến thể *(không audit)*
+> CLR class `Attribute` (alias `AttributeEntity` để tránh trùng `System.Attribute`).
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
-| `ProductId` | `long` | FK → `Products.Id` (cascade theo convention) | Sản phẩm chứa ảnh. |
-| `VariantId` | `long?` | FK → `ProductVariants.Id`, `OnDelete: SetNull` | Ảnh gắn riêng cho 1 biến thể (màu); `null` = ảnh chung sản phẩm. |
+| `Name` | `string` | `varchar(100)`, NOT NULL, **UNIQUE** | Tên loại thuộc tính (vd "Dung lượng", "Màu", "RAM"). |
+| `SortOrder` | `int` | | Thứ tự hiển thị (ghép nhãn biến thể theo thứ tự này). |
+
+### `ProductAttributes` — giá trị thuộc tính (EAV) *(không audit)*
+
+| Cột | Kiểu | Ràng buộc | Ý nghĩa |
+|---|---|---|---|
+| `AttributeId` | `long` | FK → `Attributes.Id`, `OnDelete: Restrict` | Loại thuộc tính. |
+| `ProductId` | `long` | FK → `Products.Id`, `OnDelete: Cascade` | Sản phẩm/biến thể mang giá trị. |
+| `Value` | `string` | `varchar(500)`, NOT NULL | Giá trị (vd "256GB", "Đen"). |
+| `CreatedDate` | `DateTime` | NOT NULL | Thời điểm tạo (giờ server). |
+
+UNIQUE `(ProductId, AttributeId)` — mỗi sản phẩm 1 giá trị/loại thuộc tính.
+
+### `ProductImages` — ảnh sản phẩm *(không audit)*
+
+| Cột | Kiểu | Ràng buộc | Ý nghĩa |
+|---|---|---|---|
+| `ProductId` | `long` | FK → `Products.Id` (cascade theo convention) | Sản phẩm chứa ảnh (gallery gắn ở model cha). |
 | `Url` | `string` | `varchar(500)`, NOT NULL | Đường dẫn ảnh. |
 | `SortOrder` | `int` | | Thứ tự hiển thị trong gallery. |
 
@@ -93,7 +106,8 @@ Quan hệ: `Product`, `Images`, `Inventories`.
 ## 2. Pricing — `Domain/Entities/Pricing`
 
 Khuyến mãi nhiều tầng (SPEC §4.2). **Giá không phân theo vùng** — giá bán nằm trực tiếp trên
-`ProductVariant.BasePrice` (+ `CompareAtPrice`), không còn bảng `Region`/`PriceByRegion`.
+`Product.BasePrice` (+ `CompareAtPrice`) của biến thể con, không còn bảng `Region`/`PriceByRegion`.
+Điều kiện KM (`ConditionsJson`): `variantIds` khớp Id biến thể con, `productIds` khớp Id model cha, `categoryIds` khớp danh mục.
 
 ### `Promotions` ✅ Audit — khuyến mãi nhiều tầng
 
@@ -143,7 +157,7 @@ Pricing (`IPricingService`): áp **1 `Percentage` tốt nhất → rồi 1 `Fixe
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
-| `VariantId` | `long` | FK → `ProductVariants.Id` | Biến thể. |
+| `ProductId` | `long` | FK → `Products.Id` (cascade theo convention) | Biến thể (Product con) được tính tồn. |
 | `StoreId` | `long` | FK → `Stores.Id` | Cửa hàng. |
 | `Quantity` | `int` | | Số lượng tồn ("cửa hàng có sẵn"). |
 
@@ -167,7 +181,7 @@ Quan hệ: `Items` (CartItem). Lưu ý: giỏ khách vãng lai có thể cache �
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
 | `CartId` | `long` | FK → `Carts.Id` | Giỏ chứa dòng. |
-| `VariantId` | `long` | FK → `ProductVariants.Id` | Biến thể được thêm. |
+| `ProductId` | `long` | FK → `Products.Id` | Biến thể (Product con) được thêm. |
 | `Quantity` | `int` | | Số lượng. |
 | `UnitPrice` | `decimal(18,2)` | | Đơn giá snapshot lúc thêm. **Hiển thị giỏ dùng giá hiệu lực hiện tại qua `IPricingService`** (phản ánh KM đang chạy), không tin cột này — tránh giá cũ. Chốt cứng khi đặt hàng (`OrderItem.UnitPrice`). |
 | `UnitPriceOverride` | `decimal(18,2)?` | | Giá cố định cho dòng (P3-01 mua kèm = `BundleItem.BundlePrice`). `null` = dùng giá hiệu lực `IPricingService`; có giá trị = giỏ/checkout **dùng đúng giá này** (không định giá lại). |
@@ -188,7 +202,7 @@ Quan hệ: `Items` (OrderItem), `Payments`, `Shipment` (0..1).
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
 | `OrderId` | `long` | FK → `Orders.Id` | Đơn chứa dòng. |
-| `VariantId` | `long` | FK → `ProductVariants.Id` | Biến thể mua. |
+| `ProductId` | `long` | FK → `Products.Id`, `OnDelete: Restrict` | Biến thể (Product con) đã mua. Restrict: không cascade xoá lịch sử đơn. |
 | `Quantity` | `int` | | Số lượng. |
 | `UnitPrice` | `decimal(18,2)` | | Đơn giá chốt tại thời điểm đặt (snapshot). |
 
@@ -226,7 +240,7 @@ Quan hệ: `Items` (BundleItem).
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
 | `BundleId` | `long` | FK → `Bundles.Id` | Combo cha. |
-| `AccessoryVariantId` | `long` | FK → `ProductVariants.Id` | Biến thể phụ kiện mua kèm. |
+| `AccessoryProductId` | `long` | FK → `Products.Id`, `OnDelete: Restrict` | Biến thể phụ kiện (Product con) mua kèm. |
 | `BundlePrice` | `decimal(18,2)` | | Giá ưu đãi khi mua kèm. |
 
 ---
@@ -251,7 +265,7 @@ Quan hệ: `Items` (BundleItem).
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
-| `VariantId` | `long` | FK → `ProductVariants.Id` | Biến thể được đánh giá. |
+| `ProductId` | `long` | FK → `Products.Id`, `OnDelete: Restrict` | Biến thể (Product con) được đánh giá. |
 | `CustomerId` | `long?` | | Người đánh giá; `null` nếu ẩn danh/khách vãng lai. |
 | `Rating` | `int` | 1..5 | Số sao. |
 | `Content` | `string?` | `text` | Nội dung nhận xét. |
@@ -322,7 +336,7 @@ Phương thức domain: `IsActiveAt(at)` → `IsActive` **và** `at` nằm trong
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
-| `VariantId` | `long` | FK → `ProductVariants.Id` | Biến thể hết hàng được theo dõi. |
+| `ProductId` | `long` | FK → `Products.Id` | Biến thể (Product con) hết hàng được theo dõi. |
 | `Contact` | `string` | `text`, NOT NULL | Email hoặc SĐT nhận thông báo. |
 | `Notified` | `bool` | | Đã gửi thông báo chưa. |
 
@@ -375,7 +389,7 @@ Lưu DB dưới dạng `int` (giá trị trong ngoặc).
 | `PaymentStatus` | `Pending(0)`, `Authorized(1)`, `Paid(2)`, `Failed(3)`, `Refunded(4)` |
 | `ShipmentStatus` | `Pending(0)`, `Preparing(1)`, `Shipped(2)`, `Delivered(3)`, `Returned(4)` |
 | `PromotionType` | `Percentage(0)`, `FixedAmount(1)`, `Gift(2)`, `Voucher(3)`, `Combo(4)`, `BankOffer(5)` |
-| `VariantStatus` | `Active(0)`, `OutOfStock(1)`, `Discontinued(2)` |
+| `ProductStatus` | `Active(0)`, `OutOfStock(1)`, `Discontinued(2)` (trước là `VariantStatus`) |
 | `TradeInStatus` | `Pending(0)`, `Quoted(1)`, `Accepted(2)`, `Rejected(3)`, `Completed(4)` |
 
 ---
@@ -386,8 +400,10 @@ Lưu DB dưới dạng `int` (giá trị trong ngoặc).
 |---|---|---|
 | `Category.Parent` → `Category` | **Restrict** | Tránh xóa dây chuyền cả nhánh cây. |
 | `Product.Category` | **Restrict** | Không cho xóa danh mục còn sản phẩm. |
-| `ProductVariant.Product` | **Cascade** | Xóa sản phẩm → xóa mọi biến thể. |
-| `ProductImage.Variant` | **SetNull** | Xóa biến thể → ảnh trở thành ảnh chung. |
+| `Product.Parent` → `Product` (self) | **Restrict** | Xóa model cha không tự xoá biến thể con (xử lý ở nghiệp vụ). |
+| `ProductAttribute.Product` | **Cascade** | Xóa sản phẩm/biến thể → xoá giá trị thuộc tính của nó. |
+| `ProductAttribute.Attribute` | **Restrict** | Không cho xoá loại thuộc tính còn được dùng. |
+| `OrderItem.Product` / `Review.Product` / `CartItem.Product` / `BundleItem.AccessoryProduct` | **Restrict** | Không cascade xoá lịch sử đơn/đánh giá/giỏ/bundle khi xoá sản phẩm (ADR 0003). |
 
 Các FK khác dùng quy ước mặc định của EF Core (`Cascade` cho FK bắt buộc, `SetNull`/`Restrict` cho FK nullable tùy ngữ cảnh).
 
@@ -395,8 +411,8 @@ Các FK khác dùng quy ước mặc định của EF Core (`Cascade` cho FK b�
 
 ## 13. Chỉ mục & extension đáng chú ý
 
-- **UNIQUE slug**: `Categories.Slug`, `Products.Slug`, `ProductVariants.Slug`, `Articles.Slug`, `Pages.Slug`.
-- **UNIQUE khác**: `ProductVariants.Sku`, `Translations(Entity, EntityId, Lang, Field)`.
+- **UNIQUE slug**: `Categories.Slug`, `Products.Slug` (cha + con), `Articles.Slug`, `Pages.Slug`.
+- **UNIQUE khác**: `Products.Sku` (lọc `IS NOT NULL`), `Attributes.Name`, `ProductAttributes(ProductId, AttributeId)`, `Translations(Entity, EntityId, Lang, Field)`.
 - **Index lọc**: `Promotions(StartsAt, EndsAt)`, `Banners(IsActive, SortOrder)`.
 - **Extension Postgres**: `pg_trgm` (phục vụ full-text/trigram autocomplete — SPEC §6).
 

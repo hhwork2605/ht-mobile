@@ -3,7 +3,7 @@ using HtMobile.Domain.Entities.Sales;
 namespace HtMobile.Application.Features.Checkout;
 
 /// <summary>Một dòng đơn đã có giá hiệu lực (lấy qua IPricingService trước khi gọi factory).</summary>
-public readonly record struct OrderLineInput(long VariantId, decimal UnitPrice, int Quantity);
+public readonly record struct OrderLineInput(long ProductId, decimal UnitPrice, int Quantity);
 
 /// <summary>
 /// Dựng <see cref="Order"/> (THUẦN, không DB) từ các dòng đã định giá + thông tin giao + phương thức thanh toán.
@@ -31,7 +31,7 @@ public static class OrderFactory
         {
             order.Items.Add(new OrderItem
             {
-                VariantId = l.VariantId,
+                ProductId = l.ProductId,
                 Quantity = l.Quantity,
                 UnitPrice = l.UnitPrice
             });

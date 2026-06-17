@@ -25,13 +25,14 @@ public class CartServiceTests
             .Options;
         var db = new AppDbContext(options);
 
+        // Model cha (id 1) + 3 biến thể con (10 Active, 11 Active, 99 Discontinued) — mô hình ADR 0003.
         var product = new Product { Id = 1, CategoryId = 1, Name = "iPhone 17", Slug = "iphone-17" };
         product.Images.Add(new ProductImage { Id = 1, ProductId = 1, Url = "/img.png", SortOrder = 0 });
         db.Products.Add(product);
-        db.ProductVariants.AddRange(
-            new ProductVariant { Id = 10, ProductId = 1, Sku = "A", Slug = "iphone-17-256", Storage = "256GB", Color = "Đen", BasePrice = Unit, Status = VariantStatus.Active },
-            new ProductVariant { Id = 11, ProductId = 1, Sku = "B", Slug = "iphone-17-512", Storage = "512GB", Color = "Trắng", BasePrice = Unit, Status = VariantStatus.Active },
-            new ProductVariant { Id = 99, ProductId = 1, Sku = "C", Slug = "iphone-17-old", Storage = "128GB", Color = "Xám", BasePrice = Unit, Status = VariantStatus.Discontinued });
+        db.Products.AddRange(
+            new Product { Id = 10, ProductParentId = 1, CategoryId = 1, Name = "iPhone 17", Sku = "A", Slug = "iphone-17-256", BasePrice = Unit, Status = ProductStatus.Active },
+            new Product { Id = 11, ProductParentId = 1, CategoryId = 1, Name = "iPhone 17", Sku = "B", Slug = "iphone-17-512", BasePrice = Unit, Status = ProductStatus.Active },
+            new Product { Id = 99, ProductParentId = 1, CategoryId = 1, Name = "iPhone 17", Sku = "C", Slug = "iphone-17-old", BasePrice = Unit, Status = ProductStatus.Discontinued });
         db.SaveChanges();
         return db;
     }
@@ -117,9 +118,9 @@ public class CartServiceTests
 
     private sealed class StubPricing : IPricingService
     {
-        public Task<EffectivePrice> GetEffectivePriceAsync(long variantId, CancellationToken ct = default)
-            => Task.FromResult(new EffectivePrice { VariantId = variantId, ListPrice = Unit, FinalPrice = Unit });
+        public Task<EffectivePrice> GetEffectivePriceAsync(long productId, CancellationToken ct = default)
+            => Task.FromResult(new EffectivePrice { ProductId = productId, ListPrice = Unit, FinalPrice = Unit });
 
-        public Task InvalidateAsync(long variantId, CancellationToken ct = default) => Task.CompletedTask;
+        public Task InvalidateAsync(long productId, CancellationToken ct = default) => Task.CompletedTask;
     }
 }

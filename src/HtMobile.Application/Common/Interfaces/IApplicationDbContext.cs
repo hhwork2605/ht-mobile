@@ -7,6 +7,7 @@ using HtMobile.Domain.Entities.Reviews;
 using HtMobile.Domain.Entities.Sales;
 using HtMobile.Domain.Entities.Services;
 using Microsoft.EntityFrameworkCore;
+using AttributeEntity = HtMobile.Domain.Entities.Catalog.Attribute;
 using InventoryEntity = HtMobile.Domain.Entities.Inventory.Inventory;
 using StoreEntity = HtMobile.Domain.Entities.Inventory.Store;
 
@@ -21,7 +22,8 @@ public interface IApplicationDbContext
     // Catalog
     DbSet<Category> Categories { get; }
     DbSet<Product> Products { get; }
-    DbSet<ProductVariant> ProductVariants { get; }
+    DbSet<AttributeEntity> Attributes { get; }
+    DbSet<ProductAttribute> ProductAttributes { get; }
     DbSet<ProductImage> ProductImages { get; }
     DbSet<ProductVideo> ProductVideos { get; }
 

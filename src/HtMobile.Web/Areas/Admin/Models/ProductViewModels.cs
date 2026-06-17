@@ -34,7 +34,7 @@ public class ProductCreateVm : IValidatableObject
     public decimal BasePrice { get; set; }
     [Range(0, double.MaxValue, ErrorMessage = "Giá gạch phải ≥ 0.")]
     public decimal? CompareAtPrice { get; set; }
-    public VariantStatus Status { get; set; } = VariantStatus.Active;
+    public ProductStatus Status { get; set; } = ProductStatus.Active;
 
     public IReadOnlyList<AdminCategoryOption> Categories { get; set; } = new List<AdminCategoryOption>();
 
@@ -69,7 +69,7 @@ public class VariantEditVm : IValidatableObject
     public decimal BasePrice { get; set; }
     [Range(0, double.MaxValue, ErrorMessage = "Giá gạch phải ≥ 0.")]
     public decimal? CompareAtPrice { get; set; }
-    public VariantStatus Status { get; set; }
+    public ProductStatus Status { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext _)
         => PriceRule.Check(BasePrice, CompareAtPrice, nameof(CompareAtPrice));
@@ -86,7 +86,7 @@ public class VariantAddVm : IValidatableObject
     public decimal BasePrice { get; set; }
     [Range(0, double.MaxValue, ErrorMessage = "Giá gạch phải ≥ 0.")]
     public decimal? CompareAtPrice { get; set; }
-    public VariantStatus Status { get; set; } = VariantStatus.Active;
+    public ProductStatus Status { get; set; } = ProductStatus.Active;
 
     public IEnumerable<ValidationResult> Validate(ValidationContext _)
         => PriceRule.Check(BasePrice, CompareAtPrice, nameof(CompareAtPrice));

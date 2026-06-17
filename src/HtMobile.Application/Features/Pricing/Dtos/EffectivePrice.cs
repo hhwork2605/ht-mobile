@@ -1,9 +1,9 @@
 namespace HtMobile.Application.Features.Pricing.Dtos;
 
-/// <summary>Giá hiệu lực của 1 variant, sau khi áp khuyến mãi.</summary>
+/// <summary>Giá hiệu lực của 1 biến thể (Product con), sau khi áp khuyến mãi.</summary>
 public record EffectivePrice
 {
-    public long VariantId { get; init; }
+    public long ProductId { get; init; }
 
     /// <summary>Giá niêm yết (trước khuyến mãi).</summary>
     public decimal ListPrice { get; init; }

@@ -41,18 +41,18 @@ public class CartService : ICartService
         {
             // Giá cố định (mua kèm bundle) thì dùng đúng; ngược lại lấy giá hiệu lực qua IPricingService.
             var unitPrice = item.UnitPriceOverride
-                ?? (await _pricing.GetEffectivePriceAsync(item.VariantId, ct)).FinalPrice;
-            var variant = item.Variant;
-            var product = variant.Product;
-            var variantText = string.Join(" · ",
-                new[] { variant.Color, variant.Storage }.Where(s => !string.IsNullOrWhiteSpace(s)));
-            var thumb = product.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).FirstOrDefault();
+                ?? (await _pricing.GetEffectivePriceAsync(item.ProductId, ct)).FinalPrice;
+            var variant = item.Product;            // biến thể = Product con
+            var model = variant.Parent ?? variant; // model cha (tên + ảnh gallery)
+            var variantText = string.Join(" · ", variant.Attributes
+                .OrderBy(a => a.Attribute.SortOrder).ThenBy(a => a.AttributeId).Select(a => a.Value));
+            var thumb = model.Images.OrderBy(i => i.SortOrder).Select(i => i.Url).FirstOrDefault();
 
             lines.Add(new CartLineDto
             {
                 Id = item.Id,
-                VariantId = item.VariantId,
-                ProductName = product.Name,
+                VariantId = item.ProductId,
+                ProductName = model.Name,
                 VariantText = variantText,
                 ThumbnailUrl = thumb,
                 VariantSlug = variant.Slug,
@@ -79,15 +79,15 @@ public class CartService : ICartService
     {
         if (quantity <= 0) quantity = 1;
 
-        // Chỉ thêm biến thể có thật + đang bán.
-        var sellable = await _db.ProductVariants
+        // Chỉ thêm biến thể (Product con — ProductParentId != null) có thật + đang bán. Model cha không bán trực tiếp.
+        var sellable = await _db.Products
             .AsNoTracking()
-            .AnyAsync(v => v.Id == variantId && v.Status == VariantStatus.Active, ct);
+            .AnyAsync(p => p.Id == variantId && p.ProductParentId != null && p.Status == ProductStatus.Active, ct);
         if (!sellable) return await GetCountAsync(owner, ct);
 
         var cart = await FindCartAsync(owner, track: true, ct) ?? await CreateCartAsync(owner, ct);
 
-        var existing = cart.Items.FirstOrDefault(i => i.VariantId == variantId);
+        var existing = cart.Items.FirstOrDefault(i => i.ProductId == variantId);
         if (existing is not null)
         {
             existing.Quantity += quantity;
@@ -105,7 +105,7 @@ public class CartService : ICartService
             var unit = unitPriceOverride ?? (await _pricing.GetEffectivePriceAsync(variantId, ct)).FinalPrice;
             cart.Items.Add(new CartItem
             {
-                VariantId = variantId,
+                ProductId = variantId,
                 Quantity = quantity,
                 UnitPrice = unit,                       // snapshot lúc thêm
                 UnitPriceOverride = unitPriceOverride   // null = theo giá hiệu lực
@@ -176,32 +176,32 @@ public class CartService : ICartService
         }
 
         var merged = CartMath.Merge(
-            user.Items.Select(i => (i.VariantId, i.Quantity)),
-            guest.Items.Select(i => (i.VariantId, i.Quantity)));
+            user.Items.Select(i => (i.ProductId, i.Quantity)),
+            guest.Items.Select(i => (i.ProductId, i.Quantity)));
 
         // Giá snapshot cho dòng mới: ưu tiên dòng giỏ user, sau đó dòng guest (tránh UnitPrice=0).
         var unitPriceByVariant = user.Items.Concat(guest.Items)
-            .GroupBy(i => i.VariantId)
+            .GroupBy(i => i.ProductId)
             .ToDictionary(g => g.Key, g => g.First().UnitPrice);
 
-        // Chỉ giữ biến thể còn bán khi gộp.
+        // Chỉ giữ biến thể (Product con) còn bán khi gộp.
         var variantIds = merged.Select(m => m.VariantId).ToList();
-        var activeIds = (await _db.ProductVariants
-                .Where(v => variantIds.Contains(v.Id) && v.Status == VariantStatus.Active)
-                .Select(v => v.Id)
+        var activeIds = (await _db.Products
+                .Where(p => variantIds.Contains(p.Id) && p.Status == ProductStatus.Active)
+                .Select(p => p.Id)
                 .ToListAsync(ct))
             .ToHashSet();
 
         foreach (var (variantId, qty) in merged)
         {
             if (!activeIds.Contains(variantId)) continue;
-            var line = user.Items.FirstOrDefault(i => i.VariantId == variantId);
+            var line = user.Items.FirstOrDefault(i => i.ProductId == variantId);
             if (line is not null)
                 line.Quantity = qty;
             else
                 user.Items.Add(new CartItem
                 {
-                    VariantId = variantId,
+                    ProductId = variantId,
                     Quantity = qty,
                     UnitPrice = unitPriceByVariant.GetValueOrDefault(variantId)
                 });
@@ -216,7 +216,8 @@ public class CartService : ICartService
     private async Task<Domain.Entities.Sales.Cart?> FindCartAsync(CartOwner owner, bool track, CancellationToken ct)
     {
         IQueryable<Domain.Entities.Sales.Cart> q = _db.Carts
-            .Include(c => c.Items).ThenInclude(i => i.Variant).ThenInclude(v => v.Product).ThenInclude(p => p.Images);
+            .Include(c => c.Items).ThenInclude(i => i.Product).ThenInclude(p => p.Attributes).ThenInclude(a => a.Attribute)
+            .Include(c => c.Items).ThenInclude(i => i.Product).ThenInclude(p => p.Parent).ThenInclude(pp => pp!.Images);
         if (!track) q = q.AsNoTracking();
 
         return owner.IsUser

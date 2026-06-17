@@ -40,7 +40,8 @@ public enum PromotionType
     BankOffer = 5     // ưu đãi theo ngân hàng/ví
 }
 
-public enum VariantStatus
+/// <summary>Trạng thái 1 sản phẩm/biến thể (biến thể = Product con). Trước đây là VariantStatus.</summary>
+public enum ProductStatus
 {
     Active = 0,
     OutOfStock = 1,

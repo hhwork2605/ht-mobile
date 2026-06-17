@@ -37,7 +37,7 @@ public class AdminVariantRow
     public string? Color { get; set; }
     public decimal BasePrice { get; set; }
     public decimal? CompareAtPrice { get; set; }
-    public VariantStatus Status { get; set; }
+    public ProductStatus Status { get; set; }
 }
 
 /// <summary>Dữ liệu cho màn sửa SP: field SP + danh sách biến thể + danh mục.</summary>
@@ -58,10 +58,10 @@ public class AdminProductEditDto
 public record ProductInput(string Name, string? Slug, long CategoryId, string? Brand, string? Tagline, string? Description);
 
 /// <summary>Input 1 biến thể mới.</summary>
-public record VariantInput(string Sku, string? Storage, string? Color, decimal BasePrice, decimal? CompareAtPrice, VariantStatus Status);
+public record VariantInput(string Sku, string? Storage, string? Color, decimal BasePrice, decimal? CompareAtPrice, ProductStatus Status);
 
 /// <summary>Sửa 1 biến thể có sẵn (chỉ giá + trạng thái).</summary>
-public record VariantEdit(long Id, decimal BasePrice, decimal? CompareAtPrice, VariantStatus Status);
+public record VariantEdit(long Id, decimal BasePrice, decimal? CompareAtPrice, ProductStatus Status);
 
 /// <summary>Kết quả thao tác ghi SP.</summary>
 public enum AdminProductResult { Ok, SlugExists, SkuExists, NotFound }

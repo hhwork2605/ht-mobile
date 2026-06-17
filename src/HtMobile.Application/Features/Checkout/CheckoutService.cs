@@ -34,7 +34,7 @@ public class CheckoutService
         if (cart.IsEmpty) return null;
 
         var lines = cart.Items
-            .Select(i => new OrderLineInput(i.VariantId, i.UnitPrice, i.Quantity))
+            .Select(i => new OrderLineInput(i.VariantId, i.UnitPrice, i.Quantity))   // CartLineDto.VariantId = Id Product con
             .ToList();
 
         var order = OrderFactory.Create(lines, owner.CustomerId, shippingAddress, CodPaymentMethod);

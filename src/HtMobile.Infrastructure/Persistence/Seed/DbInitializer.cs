@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using AttributeEntity = HtMobile.Domain.Entities.Catalog.Attribute;
 
 namespace HtMobile.Infrastructure.Persistence.Seed;
 
@@ -121,6 +122,11 @@ public class DbInitializer
             StartsAt = now.AddDays(-1),
             EndsAt = now.AddMonths(1)
         });
+
+        // Thuộc tính master dùng chung (EAV — ADR 0003). EF tự gán Id khi SaveChanges.
+        _storageAttr = new AttributeEntity { Name = "Dung lượng", SortOrder = 1 };
+        _colorAttr = new AttributeEntity { Name = "Màu", SortOrder = 2 };
+        _db.Attributes.AddRange(_storageAttr, _colorAttr);
 
         AddProductWithVariants(
             iphone.Id,
@@ -250,32 +256,38 @@ public class DbInitializer
         if (await _db.Bundles.AnyAsync()) return;
 
         var iphone = await _db.Products.FirstOrDefaultAsync(p => p.Slug == "dien-thoai-iphone-17-pro-max");
-        var airpods = await _db.ProductVariants.FirstOrDefaultAsync(v => v.Slug == "airpods-pro-2-usb-c");
+        var airpods = await _db.Products.FirstOrDefaultAsync(v => v.Slug == "airpods-pro-2-usb-c");
         if (iphone is null || airpods is null) return;
 
         var bundle = new Bundle { MainProductId = iphone.Id };
         // AirPods niêm yết 5.490.000 (−10% KM = 4.941.000) → giá mua kèm 4.490.000.
-        bundle.Items.Add(new BundleItem { AccessoryVariantId = airpods.Id, BundlePrice = 4_490_000m });
+        bundle.Items.Add(new BundleItem { AccessoryProductId = airpods.Id, BundlePrice = 4_490_000m });
         _db.Bundles.Add(bundle);
         await _db.SaveChangesAsync();
     }
 
     private async Task SeedStockDemoAsync()
     {
-        // Demo "theo dõi hàng về": đảm bảo có ≥1 variant hết hàng.
-        if (await _db.ProductVariants.AnyAsync(v => v.Status == VariantStatus.OutOfStock)) return;
+        // Demo "theo dõi hàng về": đảm bảo có ≥1 biến thể (Product con) hết hàng.
+        if (await _db.Products.AnyAsync(v => v.Status == ProductStatus.OutOfStock)) return;
 
-        var variant = await _db.ProductVariants.FirstOrDefaultAsync(v => v.Slug == "dien-thoai-iphone-17-256gb");
+        var variant = await _db.Products.FirstOrDefaultAsync(v => v.Slug == "dien-thoai-iphone-17-256gb");
         if (variant is null) return;
-        variant.Status = VariantStatus.OutOfStock;
+        variant.Status = ProductStatus.OutOfStock;
         await _db.SaveChangesAsync();
     }
+
+    private AttributeEntity _storageAttr = null!;
+    private AttributeEntity _colorAttr = null!;
 
     private void AddProductWithVariants(
         long categoryId, string name, string slug, string tagline, decimal basePrice, decimal compareAt,
         (string Storage, string Color)[] variants)
     {
-        var product = new Product
+        var now = DateTime.Now;
+
+        // Model cha (gom + ảnh gallery; không bán trực tiếp → giá 0, không SKU).
+        var parent = new Product
         {
             CategoryId = categoryId,
             Name = name,
@@ -284,28 +296,31 @@ public class DbInitializer
             Brand = "Apple",
             Description = $"{name} chính hãng Apple, nguyên seal 100%, đầy đủ phụ kiện. Bảo hành 12 tháng, " +
                           "hỗ trợ trả góp 0% và thu cũ đổi mới.",
-            SpecsJson = "{}"
+            SpecsJson = "{}",
+            Status = ProductStatus.Active
         };
-        product.Images.Add(new ProductImage { Url = "/images/placeholder.svg", SortOrder = 0 });
+        parent.Images.Add(new ProductImage { Url = "/images/placeholder.svg", SortOrder = 0 });
 
         var i = 0;
         foreach (var (storage, color) in variants)
         {
-            var price = basePrice + i * 4_000_000m;
-            var variant = new ProductVariant
+            // Biến thể = Product con; thuộc tính Dung lượng/Màu lưu ở ProductAttribute.
+            var child = new Product
             {
-                Sku = $"{slug}-{storage}".ToUpperInvariant(),
-                Storage = storage,
-                Color = color,
+                CategoryId = categoryId,
+                Name = name,
                 Slug = $"{slug}-{storage.ToLowerInvariant()}",
-                BasePrice = price,
+                Sku = $"{slug}-{storage}".ToUpperInvariant(),
+                BasePrice = basePrice + i * 4_000_000m,
                 CompareAtPrice = compareAt + i * 4_000_000m,
-                Status = VariantStatus.Active
+                Status = ProductStatus.Active
             };
-            product.Variants.Add(variant);
+            child.Attributes.Add(new ProductAttribute { Attribute = _storageAttr, Value = storage, CreatedDate = now });
+            child.Attributes.Add(new ProductAttribute { Attribute = _colorAttr, Value = color, CreatedDate = now });
+            parent.Children.Add(child);
             i++;
         }
 
-        _db.Products.Add(product);
+        _db.Products.Add(parent);
     }
 }

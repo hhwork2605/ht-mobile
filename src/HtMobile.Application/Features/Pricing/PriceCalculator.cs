@@ -12,7 +12,7 @@ namespace HtMobile.Application.Features.Pricing;
 public static class PriceCalculator
 {
     public static EffectivePrice Calculate(
-        long variantId,
+        long productId,
         decimal listPrice,
         decimal? compareAtPrice,
         IEnumerable<Promotion> promotions,
@@ -59,7 +59,7 @@ public static class PriceCalculator
 
         return new EffectivePrice
         {
-            VariantId = variantId,
+            ProductId = productId,
             ListPrice = listPrice,
             CompareAtPrice = compareAtPrice,
             FinalPrice = finalPrice,

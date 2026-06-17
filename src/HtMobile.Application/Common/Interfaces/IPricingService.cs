@@ -8,8 +8,9 @@ namespace HtMobile.Application.Common.Interfaces;
 /// </summary>
 public interface IPricingService
 {
-    Task<EffectivePrice> GetEffectivePriceAsync(long variantId, CancellationToken ct = default);
+    /// <summary>Giá hiệu lực của 1 biến thể (Product con). productId = Id của Product bán thực sự.</summary>
+    Task<EffectivePrice> GetEffectivePriceAsync(long productId, CancellationToken ct = default);
 
-    /// <summary>Xoá cache giá khi cập nhật giá/khuyến mãi của variant.</summary>
-    Task InvalidateAsync(long variantId, CancellationToken ct = default);
+    /// <summary>Xoá cache giá khi cập nhật giá/khuyến mãi của 1 Product (biến thể).</summary>
+    Task InvalidateAsync(long productId, CancellationToken ct = default);
 }
