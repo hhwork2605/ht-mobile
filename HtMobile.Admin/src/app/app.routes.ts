@@ -12,6 +12,7 @@ import { PromotionFormComponent } from './pages/promotions/promotion-form.compon
 import { UsersListComponent } from './pages/users/users-list.component';
 import { CategoriesListComponent } from './pages/categories/categories-list.component';
 import { CategoryFormComponent } from './pages/categories/category-form.component';
+import { InventoryComponent } from './pages/inventory/inventory.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -27,6 +28,7 @@ export const routes: Routes = [
       { path: 'categories', component: CategoriesListComponent },
       { path: 'categories/new', component: CategoryFormComponent },
       { path: 'categories/:id', component: CategoryFormComponent },
+      { path: 'inventory', component: InventoryComponent },
       { path: 'orders', component: OrdersListComponent },
       { path: 'orders/:id', component: OrderDetailComponent },
       { path: 'promotions', component: PromotionsListComponent },
