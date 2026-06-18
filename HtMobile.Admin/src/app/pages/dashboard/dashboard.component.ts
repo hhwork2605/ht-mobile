@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
+import { ChartModule } from 'primeng/chart';
 import { DashboardService } from '../../core/dashboard.service';
 import { DashboardStats } from '../../core/dashboard.models';
 import { ORDER_STATUSES, OrderStatus, orderStatusLabel, orderStatusSeverity } from '../../core/order.models';
@@ -10,7 +11,7 @@ import { ORDER_STATUSES, OrderStatus, orderStatusLabel, orderStatusSeverity } fr
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [DatePipe, RouterLink, TableModule, TagModule],
+  imports: [DatePipe, RouterLink, TableModule, TagModule, ChartModule],
   template: `
     <h1 class="h1">Bảng điều khiển</h1>
 
@@ -40,6 +41,61 @@ import { ORDER_STATUSES, OrderStatus, orderStatusLabel, orderStatusSeverity } fr
 
       <div class="grid">
         <section class="card">
+          <h2 class="h2">Doanh thu 14 ngày</h2>
+          <p-chart type="line" [data]="chartData" [options]="chartOptions" height="240px" />
+        </section>
+
+        <section class="card side">
+          <div class="lowstock-head">
+            <h2 class="h2">Tồn kho thấp</h2>
+            <p-tag [value]="s.lowStockCount + ''" [severity]="s.lowStockCount ? 'danger' : 'success'" />
+          </div>
+          @if (s.lowStock.length === 0) {
+            <p class="muted sm">Không có biến thể nào dưới ngưỡng ({{ s.lowStockThreshold }}).</p>
+          } @else {
+            @for (l of s.lowStock; track l.productId) {
+              <div class="lrow">
+                <div class="lname"><span class="strong">{{ l.name }}</span> <span class="muted">{{ l.variantLabel }}</span></div>
+                <p-tag [value]="l.totalQuantity + ''" [severity]="l.totalQuantity === 0 ? 'danger' : 'warn'" />
+              </div>
+            }
+            <a class="link" routerLink="/inventory">Cập nhật tồn kho →</a>
+          }
+        </section>
+      </div>
+
+      <div class="grid">
+        <section class="card">
+          <h2 class="h2">Sản phẩm bán chạy (30 ngày)</h2>
+          <p-table [value]="s.topProducts" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+              <tr><th style="width:3rem">#</th><th>Sản phẩm</th><th class="ta-c">SL bán</th><th class="ta-r">Doanh thu</th></tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-p let-i="rowIndex">
+              <tr>
+                <td class="muted">{{ i + 1 }}</td>
+                <td><span class="strong">{{ p.name }}</span> <span class="muted">{{ p.variantLabel }}</span></td>
+                <td class="ta-c strong">{{ p.quantitySold }}</td>
+                <td class="ta-r">{{ vnd(p.revenue) }}</td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage"><tr><td colspan="4" class="empty">Chưa có dữ liệu bán.</td></tr></ng-template>
+          </p-table>
+        </section>
+
+        <section class="card side">
+          <h2 class="h2">Đơn theo trạng thái</h2>
+          @for (st of statuses; track st) {
+            <div class="srow">
+              <p-tag [value]="label(st)" [severity]="sev(st)" />
+              <span class="snum">{{ count(s, st) }}</span>
+            </div>
+          }
+        </section>
+      </div>
+
+      <div class="grid">
+        <section class="card">
           <h2 class="h2">Đơn hàng gần đây</h2>
           <p-table [value]="s.recentOrders" styleClass="p-datatable-sm">
             <ng-template pTemplate="header">
@@ -56,16 +112,6 @@ import { ORDER_STATUSES, OrderStatus, orderStatusLabel, orderStatusSeverity } fr
             </ng-template>
             <ng-template pTemplate="emptymessage"><tr><td colspan="5" class="empty">Chưa có đơn hàng.</td></tr></ng-template>
           </p-table>
-        </section>
-
-        <section class="card side">
-          <h2 class="h2">Đơn theo trạng thái</h2>
-          @for (st of statuses; track st) {
-            <div class="srow">
-              <p-tag [value]="label(st)" [severity]="sev(st)" />
-              <span class="snum">{{ count(s, st) }}</span>
-            </div>
-          }
         </section>
       </div>
     }
@@ -88,16 +134,40 @@ import { ORDER_STATUSES, OrderStatus, orderStatusLabel, orderStatusSeverity } fr
     .empty { text-align: center; padding: 20px; color: var(--ht-ink4); }
     .srow { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--ht-line); }
     .snum { font-weight: 700; }
+    .lowstock-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .lowstock-head .h2 { margin: 0; }
+    .lrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--ht-line); }
+    .lname { font-size: 12.5px; min-width: 0; }
+    .sm { font-size: 13px; } .link { display: inline-block; margin-top: 10px; font-size: 13px; color: var(--ht-brand); text-decoration: none; }
     @media(max-width:1100px){ .kpis { grid-template-columns: repeat(2,1fr); } }
   `],
 })
 export class DashboardComponent implements OnInit {
   stats = signal<DashboardStats | null>(null);
   statuses = ORDER_STATUSES;
+  chartData: any = {};
+  chartOptions: any = {
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, ticks: { callback: (v: number) => (v / 1_000_000).toLocaleString('vi-VN') + 'M' } } },
+  };
 
   constructor(private api: DashboardService) {}
 
-  ngOnInit(): void { this.api.get().subscribe((s) => this.stats.set(s)); }
+  ngOnInit(): void {
+    this.api.get().subscribe((s) => {
+      this.stats.set(s);
+      this.chartData = {
+        labels: s.revenueByDay.map((d) => this.dayLabel(d.date)),
+        datasets: [{
+          label: 'Doanh thu', data: s.revenueByDay.map((d) => d.revenue),
+          borderColor: '#0070F4', backgroundColor: 'rgba(0,112,244,.12)', fill: true, tension: 0.35, pointRadius: 2,
+        }],
+      };
+    });
+  }
+
+  private dayLabel(iso: string): string { const d = new Date(iso); return `${d.getDate()}/${d.getMonth() + 1}`; }
 
   count(s: DashboardStats, st: OrderStatus): number { return s.statusCounts[OrderStatus[st]] ?? s.statusCounts[String(st)] ?? 0; }
   label = orderStatusLabel;
