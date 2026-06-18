@@ -48,9 +48,10 @@ export class AuthService {
     return this.refresh$;
   }
 
-  /** Thu hồi refresh token ở server (best-effort) rồi xoá phiên cục bộ. */
+  /** Thu hồi đúng phiên (refresh token) ở server (best-effort) rồi xoá phiên cục bộ. Phiên khác giữ nguyên. */
   logout(): void {
-    if (this.token) this.http.post(`${environment.apiBase}/auth/logout`, {}).subscribe({ error: () => {} });
+    const rt = localStorage.getItem(REFRESH_KEY);
+    if (rt) this.http.post(`${environment.apiBase}/auth/logout`, { refreshToken: rt }).subscribe({ error: () => {} });
     this.clear();
   }
 

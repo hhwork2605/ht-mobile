@@ -3,7 +3,9 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using HtMobile.Infrastructure.Identity;
+using HtMobile.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -15,75 +17,86 @@ public class JwtOptions
     public string Issuer { get; set; } = "HtMobile";
     public string Audience { get; set; } = "HtMobile.Admin";
     public string Key { get; set; } = string.Empty;
-    public int ExpireMinutes { get; set; } = 15;        // access token ngắn hạn
-    public int RefreshTokenDays { get; set; } = 14;      // refresh token dài hạn
+    public int ExpireMinutes { get; set; } = 15;
+    public int RefreshTokenDays { get; set; } = 14;
 }
 
-/// <summary>Cặp token trả về client.</summary>
 public record TokenPair(string AccessToken, DateTime AccessExpiresAt, string RefreshToken, DateTime RefreshExpiresAt);
 
 /// <summary>
-/// Phát hành/đối chiếu token cho Ht.Admin. Access = JWT ngắn hạn. Refresh = chuỗi ngẫu nhiên dài hạn,
-/// LƯU DẠNG HASH ở AspNetUserTokens (Identity) — không cần bảng/migration mới; xoay vòng mỗi lần refresh,
-/// thu hồi khi logout. Refresh token gửi cho client có dạng "{userId}.{random}" để tra user mà không quét.
+/// Phát hành/đối chiếu token cho Ht.Admin. Access = JWT ngắn hạn. Refresh = ĐA PHIÊN: mỗi phiên là 1 dòng
+/// <see cref="RefreshToken"/> (lưu HASH); login tạo dòng mới (không đụng phiên khác), refresh xoay vòng
+/// (revoke dòng cũ + tạo dòng mới), logout revoke đúng phiên. Token client = "{userId}.{random}".
 /// </summary>
 public class JwtTokenService
 {
-    private const string Provider = "HtMobile";
-    private const string RefreshName = "refresh";
-
     private readonly JwtOptions _opt;
     private readonly UserManager<ApplicationUser> _users;
+    private readonly AppDbContext _db;
 
-    public JwtTokenService(IOptions<JwtOptions> opt, UserManager<ApplicationUser> users)
+    public JwtTokenService(IOptions<JwtOptions> opt, UserManager<ApplicationUser> users, AppDbContext db)
     {
         _opt = opt.Value;
         _users = users;
+        _db = db;
     }
 
-    /// <summary>Tạo access + refresh mới, lưu hash refresh (ghi đè refresh cũ = xoay vòng).</summary>
-    public async Task<TokenPair> IssueAsync(ApplicationUser user)
+    /// <summary>Tạo access + 1 phiên refresh mới. Nếu <paramref name="rotateFrom"/> có giá trị → revoke phiên cũ đó.</summary>
+    public async Task<TokenPair> IssueAsync(ApplicationUser user, string? rotateFrom = null, CancellationToken ct = default)
     {
-        var (access, accessExp) = await CreateAccessTokenAsync(user);
+        var now = DateTime.UtcNow;
 
+        if (rotateFrom is not null && Parse(rotateFrom) is { } old && old.UserId == user.Id)
+        {
+            var oldRow = await _db.RefreshTokens.FirstOrDefaultAsync(t => t.TokenHash == Sha256(old.Random) && t.RevokedAt == null, ct);
+            if (oldRow is not null) oldRow.RevokedAt = now;
+        }
+
+        // Dọn phiên đã hết hạn của user (housekeeping rẻ).
+        var expired = await _db.RefreshTokens.Where(t => t.UserId == user.Id && t.ExpiresAt < now).ToListAsync(ct);
+        if (expired.Count > 0) _db.RefreshTokens.RemoveRange(expired);
+
+        var (access, accessExp) = await CreateAccessTokenAsync(user);
         var random = Base64Url(RandomNumberGenerator.GetBytes(32));
-        var refreshExp = DateTime.UtcNow.AddDays(_opt.RefreshTokenDays);
-        var stored = $"{Sha256(random)}:{new DateTimeOffset(refreshExp).ToUnixTimeSeconds()}";
-        await _users.RemoveAuthenticationTokenAsync(user, Provider, RefreshName);
-        await _users.SetAuthenticationTokenAsync(user, Provider, RefreshName, stored);
+        var refreshExp = now.AddDays(_opt.RefreshTokenDays);
+        _db.RefreshTokens.Add(new RefreshToken { UserId = user.Id, TokenHash = Sha256(random), ExpiresAt = refreshExp, CreatedAt = now });
+        await _db.SaveChangesAsync(ct);
 
         return new TokenPair(access, accessExp, $"{user.Id}.{random}", refreshExp);
     }
 
-    /// <summary>Đối chiếu refresh token; trả user nếu hợp lệ (chưa hết hạn, khớp hash), ngược lại null.</summary>
-    public async Task<ApplicationUser?> ValidateRefreshAsync(string? refreshToken)
+    /// <summary>Trả user nếu refresh token ứng với 1 phiên còn hiệu lực (chưa revoke, chưa hết hạn).</summary>
+    public async Task<ApplicationUser?> ValidateRefreshAsync(string? refreshToken, CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(refreshToken)) return null;
-        var dot = refreshToken.IndexOf('.');
-        if (dot <= 0) return null;
-        if (!long.TryParse(refreshToken[..dot], out var userId)) return null;
-        var random = refreshToken[(dot + 1)..];
-
-        var user = await _users.FindByIdAsync(userId.ToString());
-        if (user is null) return null;
-
-        var stored = await _users.GetAuthenticationTokenAsync(user, Provider, RefreshName);
-        if (string.IsNullOrEmpty(stored)) return null;
-        var sep = stored.LastIndexOf(':');
-        if (sep <= 0) return null;
-
-        var hash = stored[..sep];
-        if (!long.TryParse(stored[(sep + 1)..], out var expUnix)) return null;
-        if (DateTimeOffset.FromUnixTimeSeconds(expUnix) < DateTimeOffset.UtcNow) return null;
-
-        var presented = Sha256(random);
-        if (!CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(hash), Encoding.UTF8.GetBytes(presented)))
-            return null;
-
-        return user;
+        if (Parse(refreshToken) is not { } p) return null;
+        var hash = Sha256(p.Random);
+        var now = DateTime.UtcNow;
+        var row = await _db.RefreshTokens.AsNoTracking()
+            .FirstOrDefaultAsync(t => t.TokenHash == hash && t.UserId == p.UserId && t.RevokedAt == null && t.ExpiresAt > now, ct);
+        if (row is null) return null;
+        return await _users.FindByIdAsync(p.UserId.ToString());
     }
 
-    public Task RevokeAsync(ApplicationUser user) => _users.RemoveAuthenticationTokenAsync(user, Provider, RefreshName);
+    /// <summary>Revoke đúng 1 phiên (logout). Trả true nếu có phiên để revoke.</summary>
+    public async Task<bool> RevokeAsync(string? refreshToken, CancellationToken ct = default)
+    {
+        if (Parse(refreshToken) is not { } p) return false;
+        var hash = Sha256(p.Random);
+        var row = await _db.RefreshTokens.FirstOrDefaultAsync(t => t.TokenHash == hash && t.UserId == p.UserId && t.RevokedAt == null, ct);
+        if (row is null) return false;
+        row.RevokedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
+        return true;
+    }
+
+    /// <summary>Revoke toàn bộ phiên của 1 user (đổi mật khẩu / khoá tài khoản).</summary>
+    public async Task RevokeAllAsync(long userId, CancellationToken ct = default)
+    {
+        var now = DateTime.UtcNow;
+        var rows = await _db.RefreshTokens.Where(t => t.UserId == userId && t.RevokedAt == null).ToListAsync(ct);
+        foreach (var r in rows) r.RevokedAt = now;
+        if (rows.Count > 0) await _db.SaveChangesAsync(ct);
+    }
 
     private async Task<(string Token, DateTime ExpiresAt)> CreateAccessTokenAsync(ApplicationUser user)
     {
@@ -104,9 +117,14 @@ public class JwtTokenService
         return (new JwtSecurityTokenHandler().WriteToken(token), expires);
     }
 
-    private static string Sha256(string input)
-        => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(input)));
+    private static (long UserId, string Random)? Parse(string? token)
+    {
+        if (string.IsNullOrWhiteSpace(token)) return null;
+        var dot = token.IndexOf('.');
+        if (dot <= 0) return null;
+        return long.TryParse(token[..dot], out var uid) ? (uid, token[(dot + 1)..]) : null;
+    }
 
-    private static string Base64Url(byte[] bytes)
-        => Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+    private static string Sha256(string input) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(input)));
+    private static string Base64Url(byte[] bytes) => Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 }

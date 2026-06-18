@@ -409,9 +409,27 @@ Các FK khác dùng quy ước mặc định của EF Core (`Cascade` cho FK b�
 
 ---
 
+## 12b. Auth — `RefreshTokens` (Infrastructure/Identity) *(API admin)*
+
+Phiên đăng nhập admin (đa phiên) cho `HtMobile.Api`. **Không** thuộc domain storefront.
+
+| Cột | Kiểu | Ràng buộc | Ý nghĩa |
+|---|---|---|---|
+| `UserId` | `long` | FK → `AspNetUsers.Id`, `OnDelete: Cascade` | Chủ phiên. |
+| `TokenHash` | `string` | `varchar(128)`, NOT NULL, **UNIQUE** | SHA256 của phần ngẫu nhiên (không lưu token thô). |
+| `ExpiresAt` | `DateTime` | | Hết hạn (mặc định +14 ngày). |
+| `CreatedAt` | `DateTime` | | Lúc tạo phiên. |
+| `RevokedAt` | `DateTime?` | | ≠ null = đã thu hồi (xoay vòng/logout/khoá). |
+
+Refresh token trả client = `"{UserId}.{random}"`; mỗi login = 1 dòng; refresh xoay vòng (revoke dòng cũ + tạo dòng mới);
+logout revoke đúng phiên; mất quyền/khoá → revoke mọi phiên của user. Xem `Api/Auth/JwtTokenService`.
+
+---
+
 ## 13. Chỉ mục & extension đáng chú ý
 
 - **UNIQUE slug**: `Categories.Slug`, `Products.Slug` (cha + con), `Articles.Slug`, `Pages.Slug`.
+- **Auth**: `RefreshTokens.TokenHash` UNIQUE; index `RefreshTokens.UserId`.
 - **UNIQUE khác**: `Products.Sku` (lọc `IS NOT NULL`), `Attributes.Name`, `ProductAttributes(ProductId, AttributeId)`, `Translations(Entity, EntityId, Lang, Field)`.
 - **Index lọc**: `Promotions(StartsAt, EndsAt)`, `Banners(IsActive, SortOrder)`.
 - **Extension Postgres**: `pg_trgm` (phục vụ full-text/trigram autocomplete — SPEC §6).

@@ -45,7 +45,7 @@ public class AuthController : ControllerBase
         return Ok(await BuildResponseAsync(user, roles));
     }
 
-    /// <summary>Cấp lại access token bằng refresh token (xoay vòng refresh).</summary>
+    /// <summary>Cấp lại access token bằng refresh token (xoay vòng đúng phiên đó).</summary>
     [HttpPost("refresh")]
     [AllowAnonymous]
     public async Task<IActionResult> Refresh([FromBody] RefreshRequest req)
@@ -56,20 +56,19 @@ public class AuthController : ControllerBase
         var roles = await _users.GetRolesAsync(user);
         if (!roles.Contains(Roles.Admin) || await _users.IsLockedOutAsync(user))
         {
-            await _jwt.RevokeAsync(user);
+            await _jwt.RevokeAllAsync(user.Id);   // mất quyền/bị khoá → revoke mọi phiên
             return Unauthorized(new { message = "Tài khoản không còn quyền truy cập." });
         }
 
-        return Ok(await BuildResponseAsync(user, roles));
+        return Ok(await BuildResponseAsync(user, roles, rotateFrom: req.RefreshToken));
     }
 
-    /// <summary>Thu hồi refresh token hiện tại.</summary>
+    /// <summary>Đăng xuất: thu hồi đúng phiên (refresh token) hiện tại. Phiên khác không ảnh hưởng.</summary>
     [HttpPost("logout")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    public async Task<IActionResult> Logout()
+    [AllowAnonymous]
+    public async Task<IActionResult> Logout([FromBody] RefreshRequest req)
     {
-        var user = await _users.GetUserAsync(User);
-        if (user is not null) await _jwt.RevokeAsync(user);
+        await _jwt.RevokeAsync(req.RefreshToken);
         return NoContent();
     }
 
@@ -83,9 +82,9 @@ public class AuthController : ControllerBase
         return Ok(new { email = user.Email, fullName = user.FullName, roles });
     }
 
-    private async Task<AuthResponse> BuildResponseAsync(ApplicationUser user, IList<string> roles)
+    private async Task<AuthResponse> BuildResponseAsync(ApplicationUser user, IList<string> roles, string? rotateFrom = null)
     {
-        var pair = await _jwt.IssueAsync(user);
+        var pair = await _jwt.IssueAsync(user, rotateFrom);
         return new AuthResponse(
             pair.AccessToken, pair.AccessExpiresAt, pair.RefreshToken, pair.RefreshExpiresAt,
             user.Email ?? string.Empty, user.FullName ?? string.Empty, roles.ToArray());

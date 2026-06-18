@@ -68,6 +68,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<long
     // Localization
     public DbSet<Translation> Translations => Set<Translation>();
 
+    // Auth — phiên refresh token (đa phiên cho admin API)
+    public DbSet<HtMobile.Infrastructure.Identity.RefreshToken> RefreshTokens => Set<HtMobile.Infrastructure.Identity.RefreshToken>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
