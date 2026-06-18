@@ -59,7 +59,7 @@
 ### P1 — thiếu so với kỳ vọng & so với design
 - [x] **PDP: "Sản phẩm liên quan"** (✓, 2026-06-18) — `ProductDetailDto.Related` (4 model cùng danh mục, trừ chính nó; tái dùng `BuildCardsAsync`); khối lưới 4 cột `vc:product-card` cuối PDP.
 - [x] **Đánh giá sản phẩm: đọc + viết** (✓, 2026-06-18) — PDP: tổng điểm + thanh phân bố sao + danh sách review (join tên Customer); form "Viết đánh giá" (yêu cầu đăng nhập, star picker) qua `ReviewService` (1 review/khách/model, gửi lại = cập nhật); seed review demo.
-- [ ] **Trang nội dung + footer hết link chết** (✓) — 8 mục footer (Tra cứu đơn, Bảo hành, Trả góp 0%, Thu cũ đổi mới, Hệ thống cửa hàng, Tuyển dụng, Tin tức, Liên hệ) đang là text chết → cần trang CMS/chính sách + nối link.
+- [x] **Trang nội dung + footer hết link chết** (✓, 2026-06-18) — render `SlugKind.Page` qua `/{slug}` → view `ContentPage` (SEO + breadcrumb); seed 6 trang CMS (bảo hành, trả góp 0%, hệ thống cửa hàng, tuyển dụng, tin tức, liên hệ); footer 8 mục giờ là `<a>` thật (Thu cũ đổi mới→/thu-cu-doi-moi, Tra cứu đơn→/account). *Quản trị trang CMS để sau (Phase 5).*
 - [ ] **Chọn biến thể trực quan** — tách **màu (swatch)** và **dung lượng** riêng thay vì 1 nút gộp ("256GB · Titan Tự Nhiên"); theo đúng design PDP.
 - [ ] **Menu danh mục cho mobile** — header mobile chỉ có bottom-nav 4 mục; thêm drawer/hamburger + danh mục con.
 

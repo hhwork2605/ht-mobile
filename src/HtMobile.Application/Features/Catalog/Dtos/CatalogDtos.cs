@@ -36,6 +36,9 @@ public record HomePageDto
 /// <summary>Một URL trong sitemap.xml (slug gốc + lần sửa cuối).</summary>
 public record SitemapEntryDto(string Slug, DateTime? LastModified);
 
+/// <summary>Trang nội dung tĩnh/CMS (chính sách, bảo hành, liên hệ…). Body là HTML.</summary>
+public record ContentPageDto(string Slug, string Title, string? Body);
+
 /// <summary>Trang kết quả tìm kiếm: từ khóa + lưới sản phẩm khớp.</summary>
 public record SearchPageDto
 {

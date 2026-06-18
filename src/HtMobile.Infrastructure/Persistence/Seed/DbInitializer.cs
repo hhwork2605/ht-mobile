@@ -68,6 +68,7 @@ public class DbInitializer
         await BackfillProductSpecsAsync();
         await SeedVouchersAsync();
         await SeedReviewsAsync();
+        await SeedPagesAsync();
         await SeedBannersAsync();
         await SeedBundlesAsync();
         await SeedStockDemoAsync();
@@ -105,6 +106,48 @@ public class DbInitializer
             else
                 _logger.LogWarning("Tạo admin thất bại: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
         }
+    }
+
+    /// <summary>Trang nội dung tĩnh (CMS) cho link footer. Idempotent: thêm theo slug nếu chưa có.</summary>
+    private async Task SeedPagesAsync()
+    {
+        var pages = new (string Slug, string Title, string Body)[]
+        {
+            ("bao-hanh", "Chính sách bảo hành",
+                "<p>HtMobile bảo hành chính hãng theo tiêu chuẩn Apple cho toàn bộ sản phẩm.</p>" +
+                "<h2>Thời gian bảo hành</h2><ul><li>iPhone, iPad, Mac, Apple Watch: 12 tháng.</li>" +
+                "<li>Phụ kiện chính hãng: 12 tháng.</li></ul>" +
+                "<h2>Điều kiện</h2><p>Sản phẩm còn tem, không rơi vỡ/vào nước, lỗi do nhà sản xuất. Mang theo hoá đơn hoặc tra cứu đơn bằng số điện thoại.</p>"),
+            ("tra-gop-0", "Trả góp 0%",
+                "<p>Sở hữu sản phẩm Apple chính hãng với <strong>0đ trả trước</strong>, lãi suất 0%, duyệt nhanh trong 5 phút.</p>" +
+                "<h2>Hình thức</h2><ul><li>Trả góp qua thẻ tín dụng.</li><li>Trả góp qua công ty tài chính.</li></ul>" +
+                "<p>Liên hệ hotline 1800.0000 hoặc tới cửa hàng để được tư vấn kỳ hạn phù hợp.</p>"),
+            ("he-thong-cua-hang", "Hệ thống cửa hàng",
+                "<p>Hệ thống HtMobile có mặt tại các thành phố lớn.</p>" +
+                "<h2>Hà Nội</h2><p>123 Cầu Giấy, Q. Cầu Giấy — 8:00–21:30.</p>" +
+                "<h2>TP. Hồ Chí Minh</h2><p>456 Nguyễn Trãi, Q.5 — 8:00–21:30.</p>"),
+            ("tuyen-dung", "Tuyển dụng",
+                "<p>HtMobile luôn tìm kiếm những đồng đội đam mê công nghệ và dịch vụ khách hàng.</p>" +
+                "<h2>Vị trí đang tuyển</h2><ul><li>Tư vấn bán hàng.</li><li>Kỹ thuật viên.</li><li>Marketing.</li></ul>" +
+                "<p>Gửi CV về <a href=\"mailto:tuyendung@htmobile.local\">tuyendung@htmobile.local</a>.</p>"),
+            ("tin-tuc", "Tin tức",
+                "<p>Cập nhật tin tức sản phẩm Apple, khuyến mãi và mẹo sử dụng từ HtMobile.</p>" +
+                "<p>Chuyên mục tin tức đang được hoàn thiện — vui lòng quay lại sau.</p>"),
+            ("lien-he", "Liên hệ",
+                "<p>Mọi thắc mắc xin liên hệ:</p>" +
+                "<ul><li>Hotline: <strong>1800.0000</strong> (miễn phí)</li>" +
+                "<li>Email: <a href=\"mailto:cskh@htmobile.local\">cskh@htmobile.local</a></li>" +
+                "<li>Giờ làm việc: 8:00–21:30 tất cả các ngày.</li></ul>"),
+        };
+
+        var changed = false;
+        foreach (var (slug, title, body) in pages)
+            if (!await _db.Pages.AnyAsync(p => p.Slug == slug))
+            {
+                _db.Pages.Add(new Page { Slug = slug, Title = title, Body = body });
+                changed = true;
+            }
+        if (changed) await _db.SaveChangesAsync();
     }
 
     /// <summary>Đánh giá demo cho 1 model (anonymous) để PDP có sẵn danh sách + thanh phân bố. Idempotent.</summary>

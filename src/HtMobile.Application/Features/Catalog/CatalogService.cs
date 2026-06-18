@@ -78,6 +78,14 @@ public class CatalogService
     }
 
     /// <summary>Danh sách URL cho sitemap.xml: danh mục + biến thể mặc định của mỗi sản phẩm (model cha).</summary>
+    /// <summary>Trang nội dung tĩnh (CMS) theo slug; null nếu không có.</summary>
+    public Task<ContentPageDto?> GetPageAsync(string slug, CancellationToken ct = default)
+        => _db.Pages
+            .AsNoTracking()
+            .Where(p => p.Slug == slug)
+            .Select(p => new ContentPageDto(p.Slug, p.Title, p.Body))
+            .FirstOrDefaultAsync(ct);
+
     public async Task<IReadOnlyList<SitemapEntryDto>> GetSitemapEntriesAsync(CancellationToken ct = default)
     {
         var categories = await _db.Categories

@@ -51,7 +51,11 @@ public class CatalogController : Controller
                 var pdp = await _catalog.GetByVariantSlugAsync(slug, ct);
                 return pdp is null ? NotFound() : View("ProductDetail", pdp);
 
-            // TODO (vibe-code): Article / Page sẽ render ở Phase 4 (CMS)
+            case SlugKind.Page:
+                var page = await _catalog.GetPageAsync(slug, ct);
+                return page is null ? NotFound() : View("ContentPage", page);
+
+            // TODO (vibe-code): Article (blog tin tức) render khi làm CMS bài viết
             default:
                 return NotFound();
         }

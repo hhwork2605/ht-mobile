@@ -1,0 +1,39 @@
+@model ContentPageDto
+@{
+    ViewData["Title"] = Model.Title;
+    var plain = string.IsNullOrWhiteSpace(Model.Body)
+        ? Model.Title
+        : System.Text.RegularExpressions.Regex.Replace(Model.Body, "<.*?>", " ").Trim();
+    ViewData["MetaDescription"] = plain.Length > 160 ? plain[..157] + "…" : plain;
+
+    var req = Context.Request;
+    var baseUrl = $"{req.Scheme}://{req.Host}";
+    var canonical = $"{baseUrl}/{Model.Slug}";
+}
+
+@section Head {
+    <script type="application/ld+json">@Html.Raw(JsonLd.Breadcrumb(new[]
+    {
+        ("Trang chủ", baseUrl),
+        (Model.Title, canonical)
+    }))</script>
+}
+
+<div class="mx-auto max-w-[820px] px-4 sm:px-6 py-[22px] pb-[50px]">
+    <nav aria-label="Breadcrumb" class="mb-3.5 flex items-center gap-2 text-[13px] text-ink2">
+        <a href="/" class="hover:text-accent">Trang chủ</a><span>/</span><span class="text-ink" aria-current="page">@Model.Title</span>
+    </nav>
+
+    <h1 class="mb-5 text-[30px] font-bold tracking-[-.5px] text-ink">@Model.Title</h1>
+
+    <article class="prose max-w-none text-[15px] leading-[1.75] text-ink2 [&_h2]:mt-7 [&_h2]:mb-2.5 [&_h2]:text-[19px] [&_h2]:font-bold [&_h2]:text-ink [&_a]:text-accent [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mt-1.5">
+        @if (string.IsNullOrWhiteSpace(Model.Body))
+        {
+            <p>Nội dung đang được cập nhật.</p>
+        }
+        else
+        {
+            @Html.Raw(Model.Body)
+        }
+    </article>
+</div>

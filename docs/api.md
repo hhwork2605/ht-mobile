@@ -16,7 +16,8 @@ GET  /api/search/suggest?q=               # autocomplete (keyword + products)
 Route phẳng theo slug + trang SEO. Controller ở `Areas/Storefront`.
 ```
 GET  /                       # Trang chủ (banner, danh mục, SP nổi bật)
-GET  /{slug}                 # ISlugResolver → Category | PDP (variant) | 404
+GET  /{slug}                 # ISlugResolver → Category | PDP (variant) | Page (trang nội dung CMS) | 404
+POST /review                 # Gửi/cập nhật đánh giá SP (yêu cầu đăng nhập; productId+rating+content)
 GET  /search?q=              # Trang kết quả tìm kiếm (server-render, <meta robots=noindex>)
 GET  /search/suggest?q=      # Partial HTML cho htmx autocomplete (gợi ý SP + "xem tất cả")
 GET  /sitemap.xml            # Sitemap (danh mục + variant chuẩn mỗi SP)
