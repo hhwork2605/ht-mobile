@@ -69,7 +69,7 @@
     }))</script>
 }
 
-<div class="mx-auto max-w-[1180px] px-4 sm:px-6 py-[22px] pb-[50px]">
+<div class="mx-auto max-w-[1180px] px-4 sm:px-6 py-[22px] pb-[96px] md:pb-[50px]">
 
     <nav aria-label="Breadcrumb" class="mb-[18px] text-[13px] text-ink2">
         <ol class="flex flex-wrap items-center gap-2">
@@ -303,6 +303,28 @@
                 <div class="flex items-center gap-2.5"><i class="iks ik-shield-check text-[18px] text-accent"></i><span class="text-[13px] text-ink">Chính hãng · BH 12 tháng</span></div>
                 <div class="flex items-center gap-2.5"><i class="iks ik-credit-card text-[18px] text-accent"></i><span class="text-[13px] text-ink">Trả góp 0% duyệt nhanh</span></div>
                 <div class="flex items-center gap-2.5"><i class="iks ik-arrows-rotate text-[18px] text-accent"></i><span class="text-[13px] text-ink">Đổi trả 30 ngày</span></div>
+            </div>
+
+            @* ===== Thanh mua dính đáy (mobile) — tăng chuyển đổi khi cuộn (P7 #1) ===== *@
+            <div x-show="current.inStock" x-cloak
+                 class="fixed inset-x-0 bottom-[64px] z-30 flex items-center gap-2.5 border-t border-line bg-white/95 px-3 py-2.5 shadow-[0_-4px_16px_rgba(0,0,0,.08)] [backdrop-filter:blur(8px)] md:hidden">
+                <div class="min-w-0 flex-1">
+                    <div class="truncate text-[11px] leading-tight text-ink2">@Model.Name</div>
+                    <div class="text-[17px] font-extrabold leading-tight text-sale" x-text="money(current.finalPrice)"></div>
+                </div>
+                <form method="post" action="/cart/items" hx-post="/cart/items" hx-swap="none" class="flex-none">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="variantId" :value="current.id" />
+                    <input type="hidden" name="quantity" :value="qty" />
+                    <button type="submit" aria-label="Thêm vào giỏ" class="flex h-[44px] w-[44px] items-center justify-center rounded-xl border-[1.5px] border-ink bg-white text-ink"><i class="iks ik-cart-shopping text-[16px]"></i></button>
+                </form>
+                <form method="post" action="/cart/items" class="flex-none">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="variantId" :value="current.id" />
+                    <input type="hidden" name="quantity" :value="qty" />
+                    <input type="hidden" name="buyNow" value="true" />
+                    <button type="submit" class="rounded-xl bg-accent px-5 py-[12px] text-[15px] font-bold text-white">Mua ngay</button>
+                </form>
             </div>
         </div>
     </div>

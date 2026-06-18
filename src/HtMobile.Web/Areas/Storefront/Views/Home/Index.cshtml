@@ -41,28 +41,65 @@
             </aside>
 
             <div class="grid gap-3 [grid-template-columns:1fr_300px]">
-                @* Banner chính *@
-                @{ var hero = banners.Count > 0 ? banners[0] : null; }
-                <a href="@(hero?.LinkUrl ?? "/iphone")"
-                   class="relative flex h-[300px] flex-col justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#1d1d1f] to-[#3a3a3c] p-8 text-white">
-                    @if (hero != null && !string.IsNullOrWhiteSpace(hero.ImageUrl))
+                @* Banner chính — slider tự chạy (Alpine). Slide 0 server-render sẵn (SEO/no-JS), slide sau ẩn tới khi Alpine chạy *@
+                <div class="relative h-[300px] overflow-hidden rounded-2xl bg-[#1d1d1f]"
+                     x-data="{ i: 0, n: @Math.Max(1, banners.Count), t: null,
+                               go(d){ this.i = (this.i + d + this.n) % this.n; },
+                               start(){ if (this.n > 1) this.t = setInterval(() => this.go(1), 5000); },
+                               stop(){ if (this.t) { clearInterval(this.t); this.t = null; } } }"
+                     x-init="start()" @@mouseenter="stop()" @@mouseleave="start()">
+                    @{ var heroList = banners.Count > 0 ? banners : new List<HtMobile.Application.Features.Catalog.Dtos.BannerDto>(); }
+                    @if (heroList.Count == 0)
                     {
-                        <img src="@hero.ImageUrl" alt="@hero.Title" class="absolute inset-0 h-full w-full object-cover" />
-                        <div class="absolute inset-0 bg-gradient-to-r from-black/55 to-transparent"></div>
+                        <a href="/iphone" class="absolute inset-0 flex flex-col justify-center bg-gradient-to-br from-[#1d1d1f] to-[#3a3a3c] p-8 text-white">
+                            <div class="relative max-w-[60%]">
+                                <h1 class="text-[30px] font-bold leading-[1.1] tracking-tight">Apple chính hãng — giá tốt mỗi ngày</h1>
+                                <span class="mt-4 inline-block rounded-full bg-white px-5 py-2.5 text-[13.5px] font-semibold text-ink">Mua ngay</span>
+                            </div>
+                        </a>
                     }
-                    <div class="relative max-w-[60%]">
-                        @if (!string.IsNullOrWhiteSpace(hero?.Eyebrow))
-                        {
-                            <div class="text-[13px] font-semibold tracking-wide text-white/80">@hero.Eyebrow</div>
-                        }
-                        <h1 class="mt-1 text-[30px] font-bold leading-[1.1] tracking-tight">@(hero?.Title ?? "Apple chính hãng — giá tốt mỗi ngày")</h1>
-                        @if (!string.IsNullOrWhiteSpace(hero?.Subtitle))
-                        {
-                            <p class="mt-2 text-[15px] text-white/80">@hero.Subtitle</p>
-                        }
-                        <span class="mt-4 inline-block rounded-full bg-white px-5 py-2.5 text-[13.5px] font-semibold text-ink">@(string.IsNullOrWhiteSpace(hero?.CtaText) ? "Mua ngay" : hero!.CtaText)</span>
+                    @for (var bi = 0; bi < heroList.Count; bi++)
+                    {
+                        var b = heroList[bi];
+                        <a href="@(b.LinkUrl ?? "/iphone")" x-show="i === @bi" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                           style="@(bi == 0 ? "" : "display:none")"
+                           class="absolute inset-0 flex flex-col justify-center overflow-hidden bg-gradient-to-br from-[#1d1d1f] to-[#3a3a3c] p-8 text-white">
+                            @if (!string.IsNullOrWhiteSpace(b.ImageUrl))
+                            {
+                                <img src="@b.ImageUrl" alt="@b.Title" class="absolute inset-0 h-full w-full object-cover" />
+                                <div class="absolute inset-0 bg-gradient-to-r from-black/55 to-transparent"></div>
+                            }
+                            <div class="relative max-w-[60%]">
+                                @if (!string.IsNullOrWhiteSpace(b.Eyebrow))
+                                {
+                                    <div class="text-[13px] font-semibold tracking-wide text-white/80">@b.Eyebrow</div>
+                                }
+                                @if (bi == 0)
+                                {
+                                    <h1 class="mt-1 text-[30px] font-bold leading-[1.1] tracking-tight">@b.Title</h1>
+                                }
+                                else
+                                {
+                                    <div class="mt-1 text-[30px] font-bold leading-[1.1] tracking-tight">@b.Title</div>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(b.Subtitle))
+                                {
+                                    <p class="mt-2 text-[15px] text-white/80">@b.Subtitle</p>
+                                }
+                                <span class="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white px-5 py-2.5 text-[13.5px] font-semibold text-ink shadow-lg">@(string.IsNullOrWhiteSpace(b.CtaText) ? "Mua ngay" : b.CtaText)<i class="iks ik-chevron-right text-[11px]"></i></span>
+                            </div>
+                        </a>
+                    }
+
+                    @* Mũi tên + chấm chỉ slide *@
+                    <button type="button" @@click.prevent="go(-1)" x-show="n > 1" aria-label="Banner trước" class="absolute left-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/25 text-white backdrop-blur hover:bg-white/40"><i class="iks ik-chevron-left text-[13px]"></i></button>
+                    <button type="button" @@click.prevent="go(1)" x-show="n > 1" aria-label="Banner sau" class="absolute right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/25 text-white backdrop-blur hover:bg-white/40"><i class="iks ik-chevron-right text-[13px]"></i></button>
+                    <div class="absolute bottom-3.5 left-1/2 z-10 flex -translate-x-1/2 gap-1.5" x-show="n > 1">
+                        <template x-for="d in n" :key="d">
+                            <button type="button" @@click="i = d - 1" :aria-label="'Banner ' + d" :class="i === d - 1 ? 'w-5 bg-white' : 'w-1.5 bg-white/50'" class="h-1.5 rounded-full transition-all"></button>
+                        </template>
                     </div>
-                </a>
+                </div>
                 @* 2 banner phụ *@
                 <div class="flex flex-col gap-3">
                     @{ var p1 = banners.Count > 1 ? banners[1] : null; var p2 = banners.Count > 2 ? banners[2] : null; }
@@ -86,17 +123,48 @@
             </div>
         </div>
 
-        @* --- Mobile: banner + cuộn danh mục --- *@
+        @* --- Mobile: banner slider + cuộn danh mục --- *@
         <div class="md:hidden">
-            @{ var mhero = banners.Count > 0 ? banners[0] : null; }
-            <a href="@(mhero?.LinkUrl ?? "/iphone")" class="relative flex h-[172px] flex-col justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#1d1d1f] to-[#3a3a3c] p-5 text-white">
-                @if (mhero != null && !string.IsNullOrWhiteSpace(mhero.ImageUrl))
-                { <img src="@mhero.ImageUrl" alt="@mhero.Title" class="absolute inset-0 h-full w-full object-cover" /><div class="absolute inset-0 bg-black/40"></div> }
-                <div class="relative">
-                    <h1 class="text-[20px] font-bold leading-tight">@(mhero?.Title ?? "Apple chính hãng")</h1>
-                    <span class="mt-2 inline-block rounded-full bg-white px-4 py-1.5 text-[12px] font-semibold text-ink">Mua ngay</span>
+            <div class="relative h-[172px] overflow-hidden rounded-2xl bg-[#1d1d1f]"
+                 x-data="{ i: 0, n: @Math.Max(1, banners.Count), t: null,
+                           start(){ if (this.n > 1) this.t = setInterval(() => this.i = (this.i + 1) % this.n, 5000); },
+                           stop(){ if (this.t) { clearInterval(this.t); this.t = null; } } }"
+                 x-init="start()">
+                @{ var mList = banners.Count > 0 ? banners : new List<HtMobile.Application.Features.Catalog.Dtos.BannerDto>(); }
+                @if (mList.Count == 0)
+                {
+                    <a href="/iphone" class="absolute inset-0 flex flex-col justify-center bg-gradient-to-br from-[#1d1d1f] to-[#3a3a3c] p-5 text-white">
+                        <h1 class="text-[20px] font-bold leading-tight">Apple chính hãng</h1>
+                        <span class="mt-2 inline-block rounded-full bg-white px-4 py-1.5 text-[12px] font-semibold text-ink">Mua ngay</span>
+                    </a>
+                }
+                @for (var mi = 0; mi < mList.Count; mi++)
+                {
+                    var mb = mList[mi];
+                    <a href="@(mb.LinkUrl ?? "/iphone")" x-show="i === @mi" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                       style="@(mi == 0 ? "" : "display:none")"
+                       class="absolute inset-0 flex flex-col justify-center overflow-hidden bg-gradient-to-br from-[#1d1d1f] to-[#3a3a3c] p-5 text-white">
+                        @if (!string.IsNullOrWhiteSpace(mb.ImageUrl))
+                        { <img src="@mb.ImageUrl" alt="@mb.Title" class="absolute inset-0 h-full w-full object-cover" /><div class="absolute inset-0 bg-black/40"></div> }
+                        <div class="relative">
+                            @if (mi == 0)
+                            {
+                                <h1 class="text-[20px] font-bold leading-tight">@mb.Title</h1>
+                            }
+                            else
+                            {
+                                <div class="text-[20px] font-bold leading-tight">@mb.Title</div>
+                            }
+                            <span class="mt-2 inline-block rounded-full bg-white px-4 py-1.5 text-[12px] font-semibold text-ink">@(string.IsNullOrWhiteSpace(mb.CtaText) ? "Mua ngay" : mb.CtaText)</span>
+                        </div>
+                    </a>
+                }
+                <div class="absolute bottom-2.5 left-1/2 z-10 flex -translate-x-1/2 gap-1.5" x-show="n > 1">
+                    <template x-for="d in n" :key="d">
+                        <span :class="i === d - 1 ? 'w-4 bg-white' : 'w-1.5 bg-white/50'" class="h-1.5 rounded-full transition-all"></span>
+                    </template>
                 </div>
-            </a>
+            </div>
             <div class="no-scrollbar mt-3.5 flex gap-2.5 overflow-x-auto pb-1">
                 @foreach (var c in Model.Categories)
                 {

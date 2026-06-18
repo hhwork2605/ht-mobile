@@ -82,12 +82,12 @@
 - [ ] **Tin cậy gần nút Mua (PDP)** — đưa badge bảo hành chính hãng / đổi trả 30 ngày / thời gian giao dự kiến lên cạnh giá–nút mua (hiện trust grid ở xa phía dưới).
 
 ### P1 — kỳ vọng chuẩn TMĐT
-- [ ] **Sticky "Thêm vào giỏ" trên mobile PDP** — thanh mua dính đáy khi cuộn (tăng chuyển đổi mobile).
-- [ ] **Lọc + sort cho trang Tìm kiếm** — `/search` hiện là lưới trơn; thêm sort + lọc giá như trang danh mục.
-- [ ] **Hero mạnh hơn** — banner chính có value-prop + CTA nổi bật + ảnh; bật slider nhiều banner (đang chỉ 1).
-- [ ] **Bước tiến trình + ghi chú ở Checkout** — chỉ dẫn Thông tin→Giao hàng→Thanh toán + ô "Ghi chú đơn hàng".
-- [ ] **Freeship threshold / cross-sell ở giỏ** — "Mua thêm X để freeship" hoặc "Có thể bạn thích" trong giỏ (hiện "Miễn phí" cứng).
-- [ ] **Icon phương thức thanh toán + cam kết bảo mật** ở footer/checkout (tăng tin cậy).
+- [x] **Sticky "Thêm vào giỏ" trên mobile PDP** (✓, 2026-06-18) — thanh mua dính đáy (`bottom-[64px]`, md:hidden, trên bottom-nav) trong scope `pdpBuyBox()`: tên + giá (`current.finalPrice`) + nút Thêm (hx-post, không reload) + Mua ngay; chỉ hiện khi còn hàng; thêm `pb-[96px] md:pb-[50px]` tránh che nội dung.
+- [x] **Lọc + sort cho trang Tìm kiếm** (✓, 2026-06-18) — `/search` thêm chip lọc khoảng giá + `<select>` sắp xếp (Liên quan / giá ↑ / giá ↓) client-side (Alpine, `data-price`/`data-idx`, reorder DOM) như trang danh mục.
+- [x] **Hero mạnh hơn + slider** (✓, 2026-06-18) — banner chính (desktop + mobile) thành carousel Alpine tự chạy 5s (mũi tên + chấm, hover dừng); slide 0 server-render sẵn (SEO/no-JS, giữ đúng 1 `<h1>`/khối), slide sau `display:none` tới khi Alpine chạy; CTA pill nổi + chevron.
+- [x] **Bước tiến trình + ghi chú ở Checkout** (✓, 2026-06-18) — thanh 3 bước (Giỏ hàng ✓ → Thông tin & thanh toán → Hoàn tất) + ô "Ghi chú đơn hàng" (`CheckoutVm.Note`, ≤500 ký tự); note đính vào địa chỉ giao khi đặt (`· Ghi chú: …`, chưa thêm cột → tránh migration).
+- [x] **Freeship threshold ở giỏ** (✓, 2026-06-18) — `_CartBody` thêm thanh tiến trình freeship (ngưỡng 500.000₫): đạt → "Đơn được miễn phí vận chuyển!", chưa đạt → "Mua thêm X để freeship" + progress bar. *(Cross-sell "Có thể bạn thích" để sau.)*
+- [x] **Icon phương thức thanh toán + cam kết bảo mật** (✓, 2026-06-18) — partial `_PaymentMethods` (VISA/Mastercard/JCB badge + ATM/COD icon + "Thanh toán an toàn & bảo mật") dùng chung ở footer + mục thanh toán checkout.
 
 ### P2 — nâng cao
 - [ ] **Đã xem gần đây / gợi ý cá nhân hoá** (cross-sell, tăng quay lại).

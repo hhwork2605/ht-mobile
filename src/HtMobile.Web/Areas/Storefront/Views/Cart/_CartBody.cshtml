@@ -57,6 +57,28 @@
                     <span>Phí vận chuyển</span>
                     <span class="font-semibold text-[color:var(--success)]">Miễn phí</span>
                 </div>
+
+                @* Nhắc miễn phí vận chuyển (P7 #5) — ngưỡng freeship, gợi mua thêm. *@
+                @{
+                    const decimal Freeship = 500_000m;
+                    var reached = Model.Subtotal >= Freeship;
+                    var pct = reached ? 100 : (int)Math.Round(Model.Subtotal * 100 / Freeship);
+                    var missing = Math.Max(0, Freeship - Model.Subtotal);
+                }
+                <div class="my-3 rounded-xl bg-surface2 p-3">
+                    @if (reached)
+                    {
+                        <div class="flex items-center gap-2 text-[12.5px] font-semibold text-[color:var(--success)]"><i class="iks ik-truck"></i>Đơn của bạn được miễn phí vận chuyển!</div>
+                    }
+                    else
+                    {
+                        <div class="text-[12.5px] text-ink2">Mua thêm <span class="font-bold text-ink">@missing.ToString("#,##0")₫</span> để được <span class="font-semibold text-ink">miễn phí vận chuyển</span></div>
+                    }
+                    <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-line">
+                        <span class="block h-full rounded-full bg-[color:var(--success)] transition-all" style="width:@(pct)%"></span>
+                    </div>
+                </div>
+
                 @if (Model.Discount > 0)
                 {
                     <div class="mt-1 flex justify-between text-sm text-ink2">

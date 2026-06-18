@@ -8,7 +8,25 @@
 @section Head { <meta name="robots" content="noindex, nofollow" /> }
 
 <div class="mx-auto max-w-[1180px] px-4 sm:px-6 py-6">
-    <h1 class="mb-5 text-[28px] font-bold tracking-tight text-ink">Thanh toán</h1>
+    <h1 class="mb-4 text-[28px] font-bold tracking-tight text-ink">Thanh toán</h1>
+
+    @* Các bước đặt hàng — Giỏ hàng ✓ → Thông tin (hiện tại) → Hoàn tất *@
+    <ol class="mb-6 flex items-center gap-2 text-[12.5px] font-semibold sm:gap-3 sm:text-[13.5px]">
+        <li class="flex items-center gap-2 text-[color:var(--success)]">
+            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-[color:var(--success)] text-white"><i class="iks ik-circle-check text-[12px]"></i></span>
+            Giỏ hàng
+        </li>
+        <li class="h-px w-5 bg-line sm:w-8" aria-hidden="true"></li>
+        <li class="flex items-center gap-2 text-accent">
+            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-[12px] text-white">2</span>
+            Thông tin &amp; thanh toán
+        </li>
+        <li class="h-px w-5 bg-line sm:w-8" aria-hidden="true"></li>
+        <li class="flex items-center gap-2 text-ink2">
+            <span class="flex h-6 w-6 items-center justify-center rounded-full border border-line text-[12px]">3</span>
+            Hoàn tất
+        </li>
+    </ol>
 
     <form method="post" action="/checkout" class="flex flex-wrap items-start gap-7"
           x-data="{ placing: false }" @@submit="placing = true">
@@ -56,6 +74,13 @@
                     <span class="text-sm font-semibold text-ink">Thanh toán khi nhận hàng (COD)</span>
                 </div>
                 <p class="mt-1.5 text-[12.5px] text-ink2">Các phương thức khác (chuyển khoản, thẻ, trả góp) sẽ sớm có.</p>
+                <div class="mt-3"><partial name="_PaymentMethods" /></div>
+            </section>
+
+            <section>
+                <h2 class="mb-3 text-base font-bold text-ink">Ghi chú đơn hàng <span class="font-normal text-ink2">(tuỳ chọn)</span></h2>
+                <textarea asp-for="Note" rows="3" maxlength="500" class="@input" placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi đến…"></textarea>
+                <span asp-validation-for="Note" class="text-xs text-sale"></span>
             </section>
         </div>
 

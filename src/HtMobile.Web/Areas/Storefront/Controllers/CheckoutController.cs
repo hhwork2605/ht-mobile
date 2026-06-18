@@ -59,6 +59,8 @@ public class CheckoutController : Controller
 
         var shipLabel = vm.ShipMethod == "store" ? "Nhận tại cửa hàng" : "Giao tận nơi";
         var address = $"{vm.FullName} · {vm.Phone} · {vm.Address} ({shipLabel})";
+        if (!string.IsNullOrWhiteSpace(vm.Note))
+            address += $" · Ghi chú: {vm.Note.Trim()}";
 
         var result = await _checkout.PlaceOrderAsync(owner, address, ct);
         if (result is null) return Redirect("/cart");

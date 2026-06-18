@@ -44,11 +44,51 @@
     }
     else
     {
-        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            @foreach (var p in Model.Products)
-            {
-                <vc:product-card product="p"></vc:product-card>
-            }
+        <div x-data="{ range: 'all', sort: 'relevant',
+                       inRange(p){ if(this.range==='all')return true; const [lo,hi]=this.range.split('-').map(Number); return p>=lo && p<hi; },
+                       applySort(){ const g=$refs.grid; const items=[...g.children]; const v=this.sort;
+                         items.sort((a,b)=>{ const pa=+a.dataset.price, pb=+b.dataset.price, na=+a.dataset.idx, nb=+b.dataset.idx;
+                           if(v==='price-asc')return pa-pb; if(v==='price-desc')return pb-pa; return na-nb; });
+                         items.forEach(el=>g.appendChild(el)); } }">
+            @* --- Thanh lọc giá + sắp xếp --- *@
+            <div class="mb-5 flex flex-wrap items-center gap-2">
+                @{
+                    var ranges = new (string Id, string Label)[]
+                    {
+                        ("all", "Mọi mức giá"),
+                        ("0-10000000", "Dưới 10 triệu"),
+                        ("10000000-20000000", "10 – 20 triệu"),
+                        ("20000000-30000000", "20 – 30 triệu"),
+                        ("30000000-999000000000", "Trên 30 triệu"),
+                    };
+                }
+                @foreach (var r in ranges)
+                {
+                    <button type="button" @@click="range='@r.Id'"
+                            :class="range==='@r.Id' ? 'border-accent bg-accent/5 text-accent' : 'border-line text-ink hover:border-accent'"
+                            class="rounded-full border px-3.5 py-1.5 text-[13px] font-medium transition">@r.Label</button>
+                }
+                <div class="ml-auto flex items-center gap-2">
+                    <span class="text-[13px] text-ink2">Sắp xếp:</span>
+                    <select x-model="sort" @@change="applySort()"
+                            class="rounded-full border border-line bg-white px-3 py-1.5 text-[13px] font-semibold text-ink outline-none focus:border-accent">
+                        <option value="relevant">Liên quan</option>
+                        <option value="price-asc">Giá thấp → cao</option>
+                        <option value="price-desc">Giá cao → thấp</option>
+                    </select>
+                </div>
+            </div>
+
+            <div x-ref="grid" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                @{ var idx = 0; }
+                @foreach (var p in Model.Products)
+                {
+                    <div data-price="@p.FinalPrice.ToString("0")" data-idx="@idx" x-show="inRange(@p.FinalPrice.ToString("0"))" x-transition.opacity>
+                        <vc:product-card product="p"></vc:product-card>
+                    </div>
+                    idx++;
+                }
+            </div>
         </div>
     }
 </div>
