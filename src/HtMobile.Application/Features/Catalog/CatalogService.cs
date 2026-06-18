@@ -193,13 +193,21 @@ public class CatalogService
                 p.Slug,
                 p.Sku,
                 p.Status,
-                Attrs = p.Attributes.OrderBy(a => a.Attribute.SortOrder).ThenBy(a => a.AttributeId).Select(a => a.Value).ToList()
+                Attrs = p.Attributes.OrderBy(a => a.Attribute.SortOrder).ThenBy(a => a.AttributeId)
+                    .Select(a => new { a.Attribute.Name, a.Attribute.SortOrder, a.Value }).ToList()
             })
             .ToListAsync(ct);
 
         var variants = variantRows
-            .Select(v => new VariantOptionDto(v.Id, v.Slug, JoinAttrs(v.Attrs), v.Sku ?? string.Empty, v.Id == selectedVariantId))
+            .Select(v => new VariantOptionDto(v.Id, v.Slug, JoinAttrs(v.Attrs.Select(a => a.Value)), v.Sku ?? string.Empty, v.Id == selectedVariantId))
             .ToList();
+
+        // Bộ chọn tách theo trục thuộc tính (Dung lượng / Màu…).
+        var variantInfos = variantRows
+            .Select(v => new VariantInfo(v.Id, v.Slug, v.Status == Domain.Enums.ProductStatus.Active,
+                v.Attrs.Select(a => new VariantAttr(a.Name, a.SortOrder, a.Value)).ToList()))
+            .ToList();
+        var variantAxes = VariantAxisBuilder.Build(variantInfos, selectedVariantId);
 
         var selected = variantRows.FirstOrDefault(v => v.Id == selectedVariantId);
         var canonicalSlug = variantRows.FirstOrDefault()?.Slug ?? product.Slug;
@@ -274,11 +282,12 @@ public class CatalogService
             CategorySlug = category?.Slug ?? string.Empty,
             SelectedVariantId = selectedVariantId,
             CanonicalSlug = canonicalSlug,
-            SelectedVariantLabel = selected is null ? null : JoinAttrsOrNull(selected.Attrs),
+            SelectedVariantLabel = selected is null ? null : JoinAttrsOrNull(selected.Attrs.Select(a => a.Value).ToList()),
             SelectedSku = selected?.Sku ?? string.Empty,
             InStock = selected?.Status == Domain.Enums.ProductStatus.Active,
             Price = price,
             Variants = variants,
+            VariantAxes = variantAxes,
             Images = images,
             YoutubeUrls = videos,
             Offers = offers,

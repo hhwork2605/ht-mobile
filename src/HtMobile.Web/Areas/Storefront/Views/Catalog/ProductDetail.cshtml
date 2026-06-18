@@ -147,21 +147,56 @@
                 <div class="mt-2 mb-[22px] text-[13px] text-ink2">Hoặc trả góp 0% chỉ từ <span class="font-semibold text-ink">@monthlyFrom.ToString("#,##0")₫</span>/tháng</div>
             }
 
-            @* VariantSelector: mỗi tổ hợp dung lượng×màu là 1 SKU có URL riêng *@
-            @if (Model.Variants.Count > 1)
+            @* VariantSelector: tách theo từng trục thuộc tính (Dung lượng / Màu…); mỗi lựa chọn là 1 SKU có URL riêng *@
+            @{
+                string ColorHex(string name)
+                {
+                    var n = name.ToLowerInvariant();
+                    if (n.Contains("titan sa mạc")) return "#bda88f";
+                    if (n.Contains("titan trắng")) return "#e8e6e1";
+                    if (n.Contains("titan đen")) return "#3a3a3c";
+                    if (n.Contains("titan")) return "#b6b2ab";
+                    if (n.Contains("trắng") || n.Contains("bạc")) return "#e3e4e6";
+                    if (n.Contains("đen")) return "#2b2b2e";
+                    if (n.Contains("xám")) return "#8e8e93";
+                    if (n.Contains("xanh dương")) return "#4a7fd6";
+                    if (n.Contains("xanh")) return "#a7c7e7";
+                    if (n.Contains("hồng")) return "#f4c9d2";
+                    if (n.Contains("tím")) return "#cdc3ed";
+                    if (n.Contains("vàng")) return "#f0e6a8";
+                    if (n.Contains("đỏ")) return "#e0322f";
+                    return "#c4c4cc";
+                }
+            }
+            @if (Model.VariantAxes.Any(a => a.Options.Count > 1))
             {
-                <div class="mb-[22px]">
-                    <div class="mb-2.5 text-[13.5px] font-semibold text-ink">Phiên bản</div>
-                    <div class="flex flex-wrap gap-2.5">
-                        @foreach (var v in Model.Variants)
-                        {
-                            <a href="/@v.Slug" rel="@(v.IsSelected ? "canonical" : "nofollow")"
-                               class="rounded-xl border px-4 py-2.5 text-[14px] transition @(v.IsSelected ? "border-accent bg-accent/5 font-semibold text-accent" : "border-line text-ink hover:border-accent")">
-                                @v.Label
-                            </a>
-                        }
+                foreach (var axis in Model.VariantAxes)
+                {
+                    var isColor = axis.Name.ToLowerInvariant().Contains("màu");
+                    var selectedVal = axis.Options.FirstOrDefault(o => o.IsSelected)?.Value;
+                    <div class="mb-[22px]">
+                        <div class="mb-2.5 text-[13.5px] font-semibold text-ink">@axis.Name@(selectedVal is null ? "" : ":") <span class="font-normal text-ink2">@selectedVal</span></div>
+                        <div class="flex flex-wrap gap-2.5">
+                            @foreach (var opt in axis.Options)
+                            {
+                                var cls = opt.IsSelected ? "border-accent bg-accent/5 font-semibold text-accent" : "border-line text-ink hover:border-accent";
+                                var dim = opt.Available || opt.IsSelected ? "" : "opacity-40";
+                                if (isColor)
+                                {
+                                    <a href="@(opt.Slug is null ? "#" : "/" + opt.Slug)" title="@opt.Value"
+                                       class="flex items-center gap-2 rounded-xl border px-3 py-2 text-[13.5px] transition @cls @dim">
+                                        <span class="h-4 w-4 rounded-full border border-black/10" style="background:@ColorHex(opt.Value)"></span>@opt.Value
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="@(opt.Slug is null ? "#" : "/" + opt.Slug)"
+                                       class="rounded-xl border px-4 py-2.5 text-[14px] transition @cls @dim">@opt.Value</a>
+                                }
+                            }
+                        </div>
                     </div>
-                </div>
+                }
             }
 
             @* Hết hàng → form theo dõi hàng về (P3-04) thay khối mua *@
