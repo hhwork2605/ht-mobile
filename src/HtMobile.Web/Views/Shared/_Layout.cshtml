@@ -118,7 +118,9 @@
         <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     </environment>
 </head>
-<body class="min-h-screen bg-surface text-ink antialiased font-sans pb-[64px] md:pb-0" x-data="{ menuOpen: false }">
+<body class="min-h-screen bg-surface text-ink antialiased font-sans pb-[64px] md:pb-0"
+      x-data="{ menuOpen: false, cartToast: false }"
+      x-on:cart-added.window="cartToast = true; setTimeout(() => cartToast = false, 2600)">
 
     <div class="bg-surface2 text-ink2 text-center text-[12.5px] py-[7px] px-3 border-b border-line">
         @L["TopBar.Promo"]
@@ -158,7 +160,7 @@
             </a>
             <a href="/cart" class="relative flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-[rgba(128,128,128,.14)]" aria-label="@L["Nav.Cart"]">
                 <i class="ikr ik-cart-shopping text-lg"></i>
-                <vc:cart-badge></vc:cart-badge>
+                <span id="cart-badge-slot"><vc:cart-badge></vc:cart-badge></span>
             </a>
 
             @* LangSwitcher VI|EN (P3-05) — giữ trang hiện tại qua returnUrl *@
@@ -251,6 +253,15 @@
         </div>
     </footer>
 
+    @* Toast "đã thêm vào giỏ" (htmx kích hoạt sự kiện cart-added; không reload trang) *@
+    <div x-cloak x-show="cartToast"
+         x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="fixed left-1/2 bottom-[84px] md:bottom-6 z-[400] flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#16161a] px-5 py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(0,0,0,.25)]">
+        <i class="iks ik-circle-check text-[#4ade80]"></i>Đã thêm vào giỏ hàng
+        <a href="/cart" class="ml-1 underline underline-offset-2">Xem giỏ</a>
+    </div>
+
     @* Nút nổi: hotline / lên đầu trang (SPEC §9). Đẩy lên trên thanh nav mobile. *@
     <div class="fixed bottom-4 right-4 z-40 flex flex-col gap-2 md:bottom-4 [bottom:5.5rem] md:[bottom:1rem]">
         <a href="tel:18000000" class="rounded-full bg-accent px-4 py-2 text-sm font-medium text-white shadow-lg hover:bg-accent-press">
@@ -264,7 +275,7 @@
     <nav class="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-line bg-surface pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden">
         <a href="/" class="flex flex-col items-center gap-1 text-ink"><i class="iks ik-house text-[19px]"></i><span class="text-[10.5px] font-semibold">Trang chủ</span></a>
         <a href="/iphone" class="flex flex-col items-center gap-1 text-ink2"><i class="iks ik-grid-2 text-[19px]"></i><span class="text-[10.5px] font-semibold">Danh mục</span></a>
-        <a href="/cart" class="relative flex flex-col items-center gap-1 text-ink2"><span class="relative flex"><i class="iks ik-cart-shopping text-[19px]"></i><vc:cart-badge></vc:cart-badge></span><span class="text-[10.5px] font-semibold">Giỏ hàng</span></a>
+        <a href="/cart" class="relative flex flex-col items-center gap-1 text-ink2"><span class="relative flex"><i class="iks ik-cart-shopping text-[19px]"></i><span id="cart-badge-slot-m"><vc:cart-badge></vc:cart-badge></span></span><span class="text-[10.5px] font-semibold">Giỏ hàng</span></a>
         <a href="@(CurrentUser.IsAuthenticated ? "/account" : "/login")" class="flex flex-col items-center gap-1 text-ink2"><i class="iks ik-circle-user text-[19px]"></i><span class="text-[10.5px] font-semibold">Tài khoản</span></a>
     </nav>
 
@@ -275,6 +286,14 @@
         document.body.addEventListener('htmx:configRequest', function (e) {
             var m = document.querySelector('meta[name="xsrf-token"]');
             if (m) e.detail.headers['RequestVerificationToken'] = m.getAttribute('content');
+        });
+        // "Thêm vào giỏ" (POST /cart/items): badge cập nhật OOB; bắn sự kiện để hiện toast (không reload).
+        document.body.addEventListener('htmx:afterRequest', function (e) {
+            var d = e.detail || {};
+            var path = (d.requestConfig && d.requestConfig.path) || (d.pathInfo && d.pathInfo.requestPath) || '';
+            if (d.successful && /\/cart\/items$/.test(path)) {
+                window.dispatchEvent(new CustomEvent('cart-added'));
+            }
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)

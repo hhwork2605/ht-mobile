@@ -77,7 +77,7 @@
 > Một số mục trùng P2 ở trên — ghi chú để tránh làm lặp.
 
 ### P0 — ma sát / tin cậy ảnh hưởng chuyển đổi
-- [ ] **Mini-cart toast/drawer khi "Thêm vào giỏ"** — hiện add → reload sang `/cart`, gãy luồng lướt. Cần toast "Đã thêm vào giỏ" + cập nhật badge qua htmx (không rời trang); cân nhắc mini-cart drawer. (Design gốc có toast.)
+- [x] **Mini-cart toast khi "Thêm vào giỏ"** (✓, 2026-06-18) — "Thêm vào giỏ" (card + PDP) dùng `hx-post` (không reload); `CartController.Add` trả OOB badge (header + bottom-nav) cho htmx; layout nghe `htmx:afterRequest` (path `/cart/items`) → bắn `cart-added` → Alpine hiện toast "Đã thêm vào giỏ hàng" (tự ẩn 2.6s, có "Xem giỏ"). "Mua ngay" giữ điều hướng /checkout. *(Mini-cart drawer để sau nếu cần.)*
 - [ ] **Ảnh thật thay placeholder "HtMobile"** — banner/thẻ/gallery đang là ô xám trông như ảnh vỡ; hero text đè watermark. *(= P2 "Upload ảnh sản phẩm thật" — gộp; tối thiểu dùng skeleton/ảnh trung tính.)*
 - [ ] **Tin cậy gần nút Mua (PDP)** — đưa badge bảo hành chính hãng / đổi trả 30 ngày / thời gian giao dự kiến lên cạnh giá–nút mua (hiện trust grid ở xa phía dưới).
 

@@ -28,7 +28,15 @@ public class CartController : Controller
     public async Task<IActionResult> Add([FromForm] long variantId, [FromForm] int quantity = 1, [FromForm] bool buyNow = false, CancellationToken ct = default)
     {
         await _cart.AddItemAsync(_ctx.GetOwner(createGuestIfMissing: true), variantId, quantity, ct: ct);
-        // "Mua ngay" → tới thẳng thanh toán; "Thêm vào giỏ" → về trang giỏ.
+
+        // htmx (Thêm vào giỏ): không rời trang — cập nhật badge (OOB) + bắn sự kiện hiện toast.
+        if (!buyNow && Request.Headers.ContainsKey("HX-Request"))
+        {
+            Response.Headers["HX-Trigger"] = "cart-added";
+            return PartialView("_CartBadgesOob");
+        }
+
+        // Fallback (no-JS) hoặc "Mua ngay": "Mua ngay" → thẳng thanh toán; còn lại → trang giỏ.
         return buyNow ? Redirect("/checkout") : RedirectToAction(nameof(Index));
     }
 
