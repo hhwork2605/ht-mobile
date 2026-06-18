@@ -54,7 +54,7 @@
 - [ ] **Search tiếng Việt theo danh mục + từ đồng nghĩa** (✓) — "tai nghe" → 0 kết quả dù có AirPods; hiện chỉ khớp tiền tố tên. Cần khớp tên danh mục + bộ synonym (tai nghe→AirPods, điện thoại→iPhone, laptop→Mac…) + nhiều từ khoá. (`ISearchService`/Postgres FTS)
 - [x] **Luồng "Mua ngay" → thẳng thanh toán** (✓, 2026-06-18) — `CartController.Add` nhận cờ `buyNow` → add rồi redirect `/checkout`; PDP "Mua ngay" gắn `buyNow=true`, "Thêm vào giỏ" giữ về `/cart`.
 - [x] **Mã giảm giá ở giỏ/checkout** (✓, 2026-06-18) — `Promotion.Code` (voucher, unique) + `CouponCalculator` (validate hạn/đơn tối thiểu, %/fixed, chặn ≤ subtotal); `Cart.CouponCode` + apply/remove (htmx); Order lưu `Subtotal`/`DiscountAmount`/`CouponCode`; PricingEngine loại KM có Code khỏi auto-apply; admin Khuyến mãi + đơn hàng hiện mã/giảm; seed `GIAM5`/`GIAM500K`. (+8 unit test)
-- [ ] **Tra cứu đơn cho khách vãng lai (COD)** (✓) — không có trang tra cứu; guest đặt COD xong không xem được đơn. Cần trang `/tra-cuu-don` (mã đơn + SĐT).
+- [x] **Tra cứu đơn cho khách vãng lai (COD)** (✓, 2026-06-18) — trang `/tra-cuu-don` (mã đơn + SĐT); `OrderHistoryService.LookupAsync` verify SĐT khớp Shipment.Address (không lộ đơn nếu sai); tái dùng partial `_OrderCard` (Account cũng dùng chung). Footer "Tra cứu đơn hàng" → /tra-cuu-don.
 
 ### P1 — thiếu so với kỳ vọng & so với design
 - [x] **PDP: "Sản phẩm liên quan"** (✓, 2026-06-18) — `ProductDetailDto.Related` (4 model cùng danh mục, trừ chính nó; tái dùng `BuildCardsAsync`); khối lưới 4 cột `vc:product-card` cuối PDP.

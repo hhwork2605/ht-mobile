@@ -1,0 +1,52 @@
+@model OrderLookupVm
+@{
+    ViewData["Title"] = "Tra cứu đơn hàng";
+    ViewData["MetaDescription"] = "Tra cứu trạng thái đơn hàng HtMobile bằng mã đơn và số điện thoại.";
+    var input = "w-full rounded-xl border border-line px-3.5 py-3 text-[15px] text-ink outline-none focus:border-accent";
+}
+@section Head { <meta name="robots" content="noindex, follow" /> }
+
+<div class="mx-auto max-w-[620px] px-4 sm:px-6 py-[22px] pb-[50px]">
+    <nav aria-label="Breadcrumb" class="mb-3.5 flex items-center gap-2 text-[13px] text-ink2">
+        <a href="/" class="hover:text-accent">Trang chủ</a><span>/</span><span class="text-ink" aria-current="page">Tra cứu đơn hàng</span>
+    </nav>
+
+    <h1 class="text-[28px] font-bold tracking-[-.5px] text-ink">Tra cứu đơn hàng</h1>
+    <p class="mt-1 mb-5 text-[14px] text-ink2">Nhập mã đơn hàng và số điện thoại đã dùng khi đặt để xem trạng thái.</p>
+
+    <form method="post" action="/tra-cuu-don" class="rounded-2xl border border-line p-5">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="mb-2 text-sm font-medium text-sale"></div>
+        <div class="flex flex-col gap-3 sm:flex-row">
+            <div class="flex-1">
+                <input asp-for="Code" class="@input" placeholder="Mã đơn (VD: SD000005)" autocomplete="off" />
+                <span asp-validation-for="Code" class="text-xs text-sale"></span>
+            </div>
+            <div class="flex-1">
+                <input asp-for="Phone" class="@input" placeholder="Số điện thoại" autocomplete="tel" />
+                <span asp-validation-for="Phone" class="text-xs text-sale"></span>
+            </div>
+        </div>
+        <button type="submit" class="mt-3 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-press">Tra cứu</button>
+    </form>
+
+    @if (Model.Searched)
+    {
+        <div class="mt-6">
+            @if (Model.Result is not null)
+            {
+                <partial name="_OrderCard" model="Model.Result" />
+            }
+            else
+            {
+                <div class="rounded-2xl border border-line p-8 text-center">
+                    <i class="ikr ik-magnifying-glass text-[40px] text-ink2/40"></i>
+                    <p class="mt-3 text-[15px] text-ink">Không tìm thấy đơn hàng khớp mã và số điện thoại.</p>
+                    <p class="mt-1 text-[13px] text-ink2">Kiểm tra lại mã đơn (dạng SD…) và số điện thoại đã đặt, hoặc gọi hotline 1800.0000.</p>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

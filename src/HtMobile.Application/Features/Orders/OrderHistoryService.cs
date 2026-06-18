@@ -1,5 +1,6 @@
 using HtMobile.Application.Common.Interfaces;
 using HtMobile.Application.Features.Orders.Dtos;
+using HtMobile.Domain.Entities.Sales;
 using Microsoft.EntityFrameworkCore;
 
 namespace HtMobile.Application.Features.Orders;
@@ -12,12 +13,33 @@ public class OrderHistoryService
     public OrderHistoryService(IApplicationDbContext db) => _db = db;
 
     /// <summary>Đơn của 1 khách, mới nhất trước.</summary>
-    public async Task<IReadOnlyList<OrderSummaryDto>> GetMyOrdersAsync(long customerId, CancellationToken ct = default)
+    public Task<IReadOnlyList<OrderSummaryDto>> GetMyOrdersAsync(long customerId, CancellationToken ct = default)
+        => QuerySummariesAsync(_db.Orders.Where(o => o.CustomerId == customerId).OrderByDescending(o => o.Id), ct);
+
+    /// <summary>
+    /// Tra cứu đơn cho khách vãng lai: mã đơn (SDxxxxxx) + SĐT. Trả đơn nếu mã hợp lệ &amp; SĐT khớp
+    /// thông tin nhận hàng (Shipment.Address chứa SĐT). null nếu không khớp — không tiết lộ đơn tồn tại.
+    /// </summary>
+    public async Task<OrderSummaryDto?> LookupAsync(string code, string phone, CancellationToken ct = default)
     {
-        var orders = await _db.Orders
+        var id = ParseCode(code);
+        var digits = Digits(phone);
+        if (id is null || digits.Length < 6) return null;
+
+        var ship = await _db.Orders.AsNoTracking()
+            .Where(o => o.Id == id)
+            .Select(o => o.Shipment != null ? o.Shipment.Address : null)
+            .FirstOrDefaultAsync(ct);
+        if (ship is null || !Digits(ship).Contains(digits)) return null;
+
+        var list = await QuerySummariesAsync(_db.Orders.Where(o => o.Id == id), ct);
+        return list.Count > 0 ? list[0] : null;
+    }
+
+    private async Task<IReadOnlyList<OrderSummaryDto>> QuerySummariesAsync(IQueryable<Order> query, CancellationToken ct)
+    {
+        var orders = await query
             .AsNoTracking()
-            .Where(o => o.CustomerId == customerId)
-            .OrderByDescending(o => o.Id)
             .Select(o => new
             {
                 o.Id,
@@ -26,14 +48,12 @@ public class OrderHistoryService
                 o.Total,
                 Items = o.Items.Select(i => new
                 {
-                    i.ProductId,
                     i.Quantity,
                     i.UnitPrice,
                     // ProductName = model cha (nếu biến thể có cha), ảnh gallery cũng ở model cha.
                     ProductName = i.Product.Parent != null ? i.Product.Parent.Name : i.Product.Name,
                     Attrs = i.Product.Attributes.OrderBy(a => a.Attribute.SortOrder).ThenBy(a => a.AttributeId).Select(a => a.Value).ToList(),
                     VariantSlug = i.Product.Slug,
-                    // Ảnh gallery ở model cha (biến thể con không có ảnh riêng).
                     Thumbnail = i.Product.Parent!.Images
                         .OrderBy(im => im.SortOrder)
                         .Select(im => im.Url)
@@ -60,4 +80,13 @@ public class OrderHistoryService
             }).ToList()
         }).ToList();
     }
+
+    /// <summary>Tách số id từ mã đơn (chấp nhận "SD000005", "000005", "5").</summary>
+    private static long? ParseCode(string? code)
+    {
+        var s = Digits(code ?? string.Empty);
+        return long.TryParse(s, out var id) && id > 0 ? id : null;
+    }
+
+    private static string Digits(string s) => new(s.Where(char.IsDigit).ToArray());
 }
