@@ -52,6 +52,9 @@ public record ProductDetailDto
 
     /// <summary>Điểm trung bình (1..5); null nếu chưa có đánh giá.</summary>
     public double? AverageRating { get; init; }
+
+    /// <summary>Sản phẩm liên quan (cùng danh mục, trừ chính nó) — khối cross-sell cuối PDP.</summary>
+    public IReadOnlyList<ProductCardDto> Related { get; init; } = Array.Empty<ProductCardDto>();
 }
 
 /// <summary>Một biến thể (Product con) để chọn — nhãn ghép từ thuộc tính; mỗi cái có slug/URL riêng.</summary>

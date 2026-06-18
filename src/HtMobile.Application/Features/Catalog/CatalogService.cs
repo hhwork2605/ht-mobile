@@ -234,6 +234,9 @@ public class CatalogService
         var price = await _pricing.GetEffectivePriceAsync(selectedVariantId, ct);
         var bundle = await _bundles.GetForProductAsync(modelId, ct);
 
+        // Sản phẩm liên quan: cùng danh mục, trừ chính model này (tối đa 4).
+        var related = await BuildCardsAsync(p => p.CategoryId == product.CategoryId && p.Id != modelId, 4, ct);
+
         return new ProductDetailDto
         {
             ProductId = product.Id,
@@ -258,7 +261,8 @@ public class CatalogService
             PaymentOffers = paymentOffers,
             Bundle = bundle,
             ReviewCount = reviewStats?.Count ?? 0,
-            AverageRating = reviewStats?.Avg
+            AverageRating = reviewStats?.Avg,
+            Related = related
         };
     }
 

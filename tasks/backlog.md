@@ -57,7 +57,7 @@
 - [ ] **Tra cứu đơn cho khách vãng lai (COD)** (✓) — không có trang tra cứu; guest đặt COD xong không xem được đơn. Cần trang `/tra-cuu-don` (mã đơn + SĐT).
 
 ### P1 — thiếu so với kỳ vọng & so với design
-- [ ] **PDP: "Sản phẩm liên quan"** (✓) — design có, bản hiện tại bỏ; thêm khối 4 SP cùng danh mục (cross-sell).
+- [x] **PDP: "Sản phẩm liên quan"** (✓, 2026-06-18) — `ProductDetailDto.Related` (4 model cùng danh mục, trừ chính nó; tái dùng `BuildCardsAsync`); khối lưới 4 cột `vc:product-card` cuối PDP.
 - [ ] **Đánh giá sản phẩm: đọc + viết** (✓) — PDP chỉ có điểm tổng; thêm danh sách review + form "Viết đánh giá" (bảng `Review` đã có sẵn trong DB).
 - [ ] **Trang nội dung + footer hết link chết** (✓) — 8 mục footer (Tra cứu đơn, Bảo hành, Trả góp 0%, Thu cũ đổi mới, Hệ thống cửa hàng, Tuyển dụng, Tin tức, Liên hệ) đang là text chết → cần trang CMS/chính sách + nối link.
 - [ ] **Chọn biến thể trực quan** — tách **màu (swatch)** và **dung lượng** riêng thay vì 1 nút gộp ("256GB · Titan Tự Nhiên"); theo đúng design PDP.
