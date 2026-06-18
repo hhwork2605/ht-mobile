@@ -61,7 +61,7 @@
 - [x] **Đánh giá sản phẩm: đọc + viết** (✓, 2026-06-18) — PDP: tổng điểm + thanh phân bố sao + danh sách review (join tên Customer); form "Viết đánh giá" (yêu cầu đăng nhập, star picker) qua `ReviewService` (1 review/khách/model, gửi lại = cập nhật); seed review demo.
 - [x] **Trang nội dung + footer hết link chết** (✓, 2026-06-18) — render `SlugKind.Page` qua `/{slug}` → view `ContentPage` (SEO + breadcrumb); seed 6 trang CMS (bảo hành, trả góp 0%, hệ thống cửa hàng, tuyển dụng, tin tức, liên hệ); footer 8 mục giờ là `<a>` thật (Thu cũ đổi mới→/thu-cu-doi-moi, Tra cứu đơn→/account). *Quản trị trang CMS để sau (Phase 5).*
 - [x] **Chọn biến thể trực quan** (✓, 2026-06-18) — `VariantAxisBuilder` (thuần, +5 test) tách mỗi thuộc tính thành 1 trục; PDP render bộ chọn riêng **Dung lượng** (nút) + **Màu** (chip có chấm màu), đổi 1 trục giữ nguyên trục kia (fallback nếu tổ hợp không có). Bỏ nút gộp.
-- [ ] **Menu danh mục cho mobile** — header mobile chỉ có bottom-nav 4 mục; thêm drawer/hamburger + danh mục con.
+- [x] **Menu danh mục cho mobile** (✓, 2026-06-18) — thêm hamburger (ik-bars) + **drawer trượt** (Alpine, overlay, ESC/click đóng) chứa đầy đủ danh mục (`vc:menu`) + link nhanh (tra cứu đơn, thu cũ, trả góp, tài khoản).
 
 ### P2 — hoàn thiện trải nghiệm
 - [ ] **Upload ảnh sản phẩm thật** (✓) — hiện toàn placeholder.

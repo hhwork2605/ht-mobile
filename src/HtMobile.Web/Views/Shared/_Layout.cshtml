@@ -118,14 +118,18 @@
         <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     </environment>
 </head>
-<body class="min-h-screen bg-surface text-ink antialiased font-sans pb-[64px] md:pb-0">
+<body class="min-h-screen bg-surface text-ink antialiased font-sans pb-[64px] md:pb-0" x-data="{ menuOpen: false }">
 
     <div class="bg-surface2 text-ink2 text-center text-[12.5px] py-[7px] px-3 border-b border-line">
         @L["TopBar.Promo"]
     </div>
 
     <header class="sticky top-0 z-50 bg-header text-header-ink border-b border-header-border [backdrop-filter:saturate(180%)_blur(18px)] [-webkit-backdrop-filter:saturate(180%)_blur(18px)]">
-        <div class="mx-auto flex max-w-[1180px] items-center gap-4 md:gap-6 px-4 sm:px-6 h-[60px]">
+        <div class="mx-auto flex max-w-[1180px] items-center gap-3 md:gap-6 px-4 sm:px-6 h-[60px]">
+            <button type="button" @@click="menuOpen = true" aria-label="Mở menu"
+                    class="flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-[rgba(128,128,128,.14)] md:hidden">
+                <i class="ikr ik-bars text-lg"></i>
+            </button>
             <a href="/" class="flex items-center gap-2 text-xl font-bold tracking-[-.4px] text-header-ink">
                 <i class="ikb ik-apple text-[19px]"></i><span>HtMobile</span>
             </a>
@@ -165,6 +169,33 @@
             </div>
         </div>
     </header>
+
+    @* ===== Mobile drawer: menu danh mục (md:hidden) ===== *@
+    <div x-cloak x-show="menuOpen" class="fixed inset-0 z-[60] md:hidden" @@keydown.escape.window="menuOpen = false">
+        <div x-show="menuOpen" x-transition.opacity class="absolute inset-0 bg-black/40" @@click="menuOpen = false"></div>
+        <aside x-show="menuOpen"
+               x-transition:enter="transition ease-out duration-200" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
+               x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
+               class="absolute left-0 top-0 flex h-full w-[290px] max-w-[82%] flex-col bg-surface shadow-2xl">
+            <div class="flex items-center justify-between border-b border-line px-4 h-[56px]">
+                <span class="flex items-center gap-2 text-lg font-bold text-ink"><i class="ikb ik-apple"></i>HtMobile</span>
+                <button type="button" @@click="menuOpen = false" aria-label="Đóng menu" class="flex h-9 w-9 items-center justify-center rounded-full text-ink2 hover:bg-surface2"><i class="ikr ik-xmark text-lg"></i></button>
+            </div>
+            <div class="flex-1 overflow-y-auto py-2">
+                <div class="px-4 pb-1.5 pt-2 text-[11.5px] font-bold uppercase tracking-[.5px] text-ink2">Danh mục</div>
+                <nav class="flex flex-col px-2">
+                    <vc:menu></vc:menu>
+                </nav>
+                <div class="my-2 border-t border-line"></div>
+                <nav class="flex flex-col px-2 text-[13.5px] text-ink">
+                    <a href="/tra-cuu-don" class="rounded-lg px-3 py-2.5 hover:bg-surface2">Tra cứu đơn hàng</a>
+                    <a href="/thu-cu-doi-moi" class="rounded-lg px-3 py-2.5 hover:bg-surface2">Thu cũ đổi mới</a>
+                    <a href="/tra-gop-0" class="rounded-lg px-3 py-2.5 hover:bg-surface2">Trả góp 0%</a>
+                    <a href="@(CurrentUser.IsAuthenticated ? "/account" : "/login")" class="rounded-lg px-3 py-2.5 hover:bg-surface2">@(CurrentUser.IsAuthenticated ? "Tài khoản của tôi" : "Đăng nhập")</a>
+                </nav>
+            </div>
+        </aside>
+    </div>
 
     <main>
         @RenderBody()
