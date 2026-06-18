@@ -9,6 +9,9 @@ namespace HtMobile.Application.Features.Customers;
 /// <summary>Kết quả đăng ký tài khoản Customer storefront.</summary>
 public enum RegisterResult { Ok, EmailExists }
 
+/// <summary>Kết quả đổi mật khẩu.</summary>
+public enum ChangePasswordResult { Ok, WrongCurrent, NotFound }
+
 /// <summary>
 /// Nghiệp vụ tài khoản Customer (storefront): đăng ký, kiểm tra đăng nhập, đặt lại mật khẩu.
 /// Không phụ thuộc ASP.NET Identity — băm mật khẩu qua <see cref="IPasswordHasher"/>. Sign-in cookie xử lý ở Web.
@@ -58,6 +61,18 @@ public class CustomerAccountService
 
     public Task<Customer?> GetByIdAsync(long id, CancellationToken ct = default)
         => _db.Customers.FirstOrDefaultAsync(c => c.Id == id, ct);
+
+    /// <summary>Đổi mật khẩu: kiểm tra mật khẩu hiện tại rồi đặt mật khẩu mới.</summary>
+    public async Task<ChangePasswordResult> ChangePasswordAsync(long customerId, string currentPassword, string newPassword, CancellationToken ct = default)
+    {
+        var customer = await _db.Customers.FirstOrDefaultAsync(c => c.Id == customerId, ct);
+        if (customer is null) return ChangePasswordResult.NotFound;
+        if (!_hasher.Verify(customer.PasswordHash, currentPassword)) return ChangePasswordResult.WrongCurrent;
+
+        customer.PasswordHash = _hasher.Hash(newPassword);
+        await _db.SaveChangesAsync(ct);
+        return ChangePasswordResult.Ok;
+    }
 
     /// <summary>
     /// Sinh token đặt lại mật khẩu cho email (nếu tồn tại). Trả token THÔ (gửi qua email);

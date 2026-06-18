@@ -67,7 +67,7 @@
 - [ ] **Upload ảnh sản phẩm thật** (✓) — hiện toàn placeholder.
 - [ ] **Cổng thanh toán thật** — ngoài COD: chuyển khoản/thẻ/trả góp (trùng mục HOÃN ở Phase 3 — gộp khi làm).
 - [ ] **Phí & thời gian giao hàng theo địa chỉ** — hiện cứng "Miễn phí"; thêm chọn tỉnh/quận + tính phí/ETA.
-- [ ] **Tài khoản đầy đủ** — sổ địa chỉ, đổi mật khẩu, huỷ/mua lại đơn.
+- [~] **Tài khoản đầy đủ** — ✅ (2026-06-18) **Sổ địa chỉ** (CRUD + mặc định, `AddressService`; tự điền checkout) + **Đổi mật khẩu** (`CustomerAccountService.ChangePasswordAsync`). ⬜ Còn: huỷ đơn, mua lại đơn (chưa làm đợt này).
 - [ ] **Wishlist (yêu thích)** (✓) + **So sánh sản phẩm**.
 - [ ] **Hiển thị tồn kho** — số lượng còn / cảnh báo sắp hết (hiện chỉ "Còn hàng").
 - [ ] **Newsletter / đăng ký nhận tin**.

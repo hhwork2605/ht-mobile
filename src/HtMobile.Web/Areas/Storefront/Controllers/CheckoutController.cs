@@ -1,4 +1,6 @@
+using HtMobile.Application.Common.Interfaces;
 using HtMobile.Application.Features.Checkout;
+using HtMobile.Application.Features.Customers;
 using HtMobile.Web.Infrastructure;
 using HtMobile.Web.Models.Checkout;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +13,15 @@ public class CheckoutController : Controller
 {
     private readonly CheckoutService _checkout;
     private readonly CartContext _ctx;
+    private readonly AddressService _addresses;
+    private readonly ICurrentUser _user;
 
-    public CheckoutController(CheckoutService checkout, CartContext ctx)
+    public CheckoutController(CheckoutService checkout, CartContext ctx, AddressService addresses, ICurrentUser user)
     {
         _checkout = checkout;
         _ctx = ctx;
+        _addresses = addresses;
+        _user = user;
     }
 
     [HttpGet("/checkout")]
@@ -24,8 +30,17 @@ public class CheckoutController : Controller
         var cart = await _checkout.GetSummaryAsync(_ctx.GetOwner(), ct);
         if (cart.IsEmpty) return Redirect("/cart");
 
+        var vm = new CheckoutVm();
+        // Khách đăng nhập có địa chỉ mặc định → tự điền form nhận hàng.
+        if (_user.UserId is long customerId && await _addresses.GetDefaultAsync(customerId, ct) is { } addr)
+        {
+            vm.FullName = addr.Recipient;
+            vm.Phone = addr.Phone;
+            vm.Address = addr.AddressLine;
+        }
+
         ViewBag.Cart = cart;
-        return View(new CheckoutVm());
+        return View(vm);
     }
 
     [HttpPost("/checkout")]

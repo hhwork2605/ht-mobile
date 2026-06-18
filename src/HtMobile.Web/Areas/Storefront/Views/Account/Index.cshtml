@@ -7,7 +7,7 @@
 }
 @section Head { <meta name="robots" content="noindex, nofollow" /> }
 
-<div class="mx-auto max-w-[920px] px-4 sm:px-6 py-8" x-data="{ tab: 'orders' }">
+<div class="mx-auto max-w-[920px] px-4 sm:px-6 py-8" x-data="{ tab: '@Model.ActiveTab' }">
 
     @* Header *@
     <div class="mb-6 flex flex-wrap items-center gap-4">
@@ -22,11 +22,22 @@
         </form>
     </div>
 
+    @if (TempData["AccountMsg"] is string acctMsg)
+    {
+        <div class="mb-4 rounded-xl border border-[color:var(--success)]/40 bg-[color:var(--success)]/5 px-4 py-3 text-[13.5px] text-ink"><i class="iks ik-circle-check mr-1.5 text-[color:var(--success)]"></i>@acctMsg</div>
+    }
+
     @* Tabs *@
-    <div class="mb-6 flex gap-6 border-b border-line" role="tablist">
+    <div class="mb-6 flex flex-wrap gap-6 border-b border-line" role="tablist">
         <button type="button" role="tab" @@click="tab = 'orders'"
                 :class="tab === 'orders' ? 'border-accent text-ink' : 'border-transparent text-ink2'"
                 class="flex items-center gap-2 border-b-2 pb-3 text-sm font-semibold"><i class="iks ik-box"></i> Đơn hàng</button>
+        <button type="button" role="tab" @@click="tab = 'addresses'"
+                :class="tab === 'addresses' ? 'border-accent text-ink' : 'border-transparent text-ink2'"
+                class="flex items-center gap-2 border-b-2 pb-3 text-sm font-semibold"><i class="iks ik-location-dot"></i> Sổ địa chỉ</button>
+        <button type="button" role="tab" @@click="tab = 'password'"
+                :class="tab === 'password' ? 'border-accent text-ink' : 'border-transparent text-ink2'"
+                class="flex items-center gap-2 border-b-2 pb-3 text-sm font-semibold"><i class="iks ik-lock"></i> Đổi mật khẩu</button>
         <button type="button" role="tab" @@click="tab = 'info'"
                 :class="tab === 'info' ? 'border-accent text-ink' : 'border-transparent text-ink2'"
                 class="flex items-center gap-2 border-b-2 pb-3 text-sm font-semibold"><i class="ikr ik-circle-user"></i> Thông tin</button>
@@ -51,6 +62,79 @@
                 }
             </div>
         }
+    </div>
+
+    @* ===== Tab Sổ địa chỉ ===== *@
+    <div x-show="tab === 'addresses'" x-cloak class="max-w-[600px]">
+        @if (Model.Addresses.Count > 0)
+        {
+            <div class="mb-5 flex flex-col gap-3">
+                @foreach (var a in Model.Addresses)
+                {
+                    <div class="rounded-2xl border border-line p-4" x-data="{ edit: false }">
+                        <div x-show="!edit" class="flex items-start gap-3">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[14px] font-semibold text-ink">@a.Recipient</span>
+                                    @if (a.IsDefault)
+                                    {
+                                        <span class="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">Mặc định</span>
+                                    }
+                                </div>
+                                <div class="mt-0.5 text-[13px] text-ink2">@a.Phone</div>
+                                <div class="text-[13px] text-ink2">@a.AddressLine</div>
+                            </div>
+                            <div class="flex flex-none flex-col items-end gap-1.5 text-[12.5px]">
+                                <button type="button" @@click="edit = true" class="font-semibold text-accent">Sửa</button>
+                                @if (!a.IsDefault)
+                                {
+                                    <form method="post" action="/account/addresses/@a.Id/default">@Html.AntiForgeryToken()<button type="submit" class="text-ink2 hover:text-accent">Đặt mặc định</button></form>
+                                    <form method="post" action="/account/addresses/@a.Id/delete">@Html.AntiForgeryToken()<button type="submit" class="text-ink2 hover:text-sale">Xoá</button></form>
+                                }
+                            </div>
+                        </div>
+                        <form x-show="edit" x-cloak method="post" action="/account/addresses/@a.Id" class="flex flex-col gap-2.5">
+                            @Html.AntiForgeryToken()
+                            <input name="Recipient" value="@a.Recipient" placeholder="Người nhận" class="rounded-xl border border-line px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-accent" />
+                            <input name="Phone" value="@a.Phone" placeholder="Số điện thoại" class="rounded-xl border border-line px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-accent" />
+                            <input name="AddressLine" value="@a.AddressLine" placeholder="Địa chỉ" class="rounded-xl border border-line px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-accent" />
+                            <label class="flex items-center gap-2 text-[13px] text-ink2"><input type="checkbox" name="IsDefault" value="true" @(a.IsDefault ? "checked" : "") class="h-4 w-4" /> Đặt làm mặc định</label>
+                            <div class="flex gap-2">
+                                <button type="submit" class="rounded-full bg-accent px-5 py-2 text-[13px] font-semibold text-white hover:bg-accent-press">Lưu</button>
+                                <button type="button" @@click="edit = false" class="rounded-full border border-line px-5 py-2 text-[13px] font-semibold text-ink">Huỷ</button>
+                            </div>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="mb-5 text-[14px] text-ink2">Bạn chưa lưu địa chỉ nào.</p>
+        }
+
+        <div x-data="{ open: false }">
+            <button type="button" @@click="open = !open" class="flex items-center gap-1.5 text-[13.5px] font-semibold text-accent"><i class="iks ik-plus"></i>Thêm địa chỉ mới</button>
+            <form x-show="open" x-cloak method="post" action="/account/addresses" class="mt-3 flex flex-col gap-2.5 rounded-2xl border border-line p-4">
+                @Html.AntiForgeryToken()
+                <input name="Recipient" placeholder="Người nhận" class="rounded-xl border border-line px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-accent" />
+                <input name="Phone" placeholder="Số điện thoại" class="rounded-xl border border-line px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-accent" />
+                <input name="AddressLine" placeholder="Địa chỉ nhận hàng" class="rounded-xl border border-line px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-accent" />
+                <label class="flex items-center gap-2 text-[13px] text-ink2"><input type="checkbox" name="IsDefault" value="true" class="h-4 w-4" /> Đặt làm mặc định</label>
+                <button type="submit" class="self-start rounded-full bg-accent px-6 py-2.5 text-[13.5px] font-semibold text-white hover:bg-accent-press">Lưu địa chỉ</button>
+            </form>
+        </div>
+    </div>
+
+    @* ===== Tab Đổi mật khẩu ===== *@
+    <div x-show="tab === 'password'" x-cloak class="max-w-[420px]">
+        <form method="post" action="/account/password" class="flex flex-col gap-3">
+            @Html.AntiForgeryToken()
+            <input type="password" name="CurrentPassword" placeholder="Mật khẩu hiện tại" autocomplete="current-password" class="rounded-xl border border-line px-3.5 py-3 text-[15px] text-ink outline-none focus:border-accent" />
+            <input type="password" name="NewPassword" placeholder="Mật khẩu mới (≥ 6 ký tự)" autocomplete="new-password" class="rounded-xl border border-line px-3.5 py-3 text-[15px] text-ink outline-none focus:border-accent" />
+            <input type="password" name="ConfirmPassword" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password" class="rounded-xl border border-line px-3.5 py-3 text-[15px] text-ink outline-none focus:border-accent" />
+            <button type="submit" class="self-start rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-accent-press">Đổi mật khẩu</button>
+        </form>
     </div>
 
     @* ===== Tab Thông tin ===== *@

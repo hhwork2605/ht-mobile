@@ -17,6 +17,7 @@ namespace HtMobile.Web.Areas.Storefront.Controllers;
 public class AccountController : Controller
 {
     private readonly CustomerAccountService _accounts;
+    private readonly AddressService _addresses;
     private readonly ICurrentUser _currentUser;
     private readonly ICartService _cart;
     private readonly CartContext _cartCtx;
@@ -26,6 +27,7 @@ public class AccountController : Controller
 
     public AccountController(
         CustomerAccountService accounts,
+        AddressService addresses,
         ICurrentUser currentUser,
         ICartService cart,
         CartContext cartCtx,
@@ -34,6 +36,7 @@ public class AccountController : Controller
         ILogger<AccountController> logger)
     {
         _accounts = accounts;
+        _addresses = addresses;
         _currentUser = currentUser;
         _cart = cart;
         _cartCtx = cartCtx;
@@ -155,19 +158,92 @@ public class AccountController : Controller
 
     [Authorize]
     [HttpGet("/account")]
-    public async Task<IActionResult> Index(CancellationToken ct)
+    public async Task<IActionResult> Index(string? tab, CancellationToken ct)
     {
         if (_currentUser.UserId is not long customerId) return Redirect("/login");
         var customer = await _accounts.GetByIdAsync(customerId, ct);
         if (customer is null) return Redirect("/login");
 
-        var orders = await _orders.GetMyOrdersAsync(customerId, ct);
         return View(new AccountVm
         {
             FullName = customer.FullName,
             Email = customer.Email,
-            Orders = orders
+            Orders = await _orders.GetMyOrdersAsync(customerId, ct),
+            Addresses = await _addresses.ListAsync(customerId, ct),
+            ActiveTab = tab is "addresses" or "info" or "password" ? tab : "orders"
         });
+    }
+
+    [Authorize]
+    [HttpPost("/account/password")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ChangePasswordVm vm, CancellationToken ct)
+    {
+        if (_currentUser.UserId is not long customerId) return Redirect("/login");
+
+        if (!ModelState.IsValid)
+            TempData["AccountMsg"] = "Vui lòng kiểm tra lại thông tin mật khẩu.";
+        else
+        {
+            var result = await _accounts.ChangePasswordAsync(customerId, vm.CurrentPassword!, vm.NewPassword!, ct);
+            TempData["AccountMsg"] = result switch
+            {
+                ChangePasswordResult.Ok => "Đã đổi mật khẩu.",
+                ChangePasswordResult.WrongCurrent => "Mật khẩu hiện tại không đúng.",
+                _ => "Không đổi được mật khẩu."
+            };
+        }
+        return Redirect("/account?tab=password");
+    }
+
+    [Authorize]
+    [HttpPost("/account/addresses")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddAddress(AddressVm vm, CancellationToken ct)
+    {
+        if (_currentUser.UserId is not long customerId) return Redirect("/login");
+        if (ModelState.IsValid)
+        {
+            await _addresses.AddAsync(customerId, new AddressInput(vm.Recipient!, vm.Phone!, vm.AddressLine!, vm.IsDefault), ct);
+            TempData["AccountMsg"] = "Đã thêm địa chỉ.";
+        }
+        return Redirect("/account?tab=addresses");
+    }
+
+    [Authorize]
+    [HttpPost("/account/addresses/{id:long}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditAddress(long id, AddressVm vm, CancellationToken ct)
+    {
+        if (_currentUser.UserId is not long customerId) return Redirect("/login");
+        if (ModelState.IsValid)
+        {
+            await _addresses.UpdateAsync(customerId, id, new AddressInput(vm.Recipient!, vm.Phone!, vm.AddressLine!, vm.IsDefault), ct);
+            TempData["AccountMsg"] = "Đã cập nhật địa chỉ.";
+        }
+        return Redirect("/account?tab=addresses");
+    }
+
+    [Authorize]
+    [HttpPost("/account/addresses/{id:long}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteAddress(long id, CancellationToken ct)
+    {
+        if (_currentUser.UserId is not long customerId) return Redirect("/login");
+        await _addresses.DeleteAsync(customerId, id, ct);
+        TempData["AccountMsg"] = "Đã xoá địa chỉ.";
+        return Redirect("/account?tab=addresses");
+    }
+
+    [Authorize]
+    [HttpPost("/account/addresses/{id:long}/default")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SetDefaultAddress(long id, CancellationToken ct)
+    {
+        if (_currentUser.UserId is not long customerId) return Redirect("/login");
+        await _addresses.SetDefaultAsync(customerId, id, ct);
+        TempData["AccountMsg"] = "Đã đặt địa chỉ mặc định.";
+        return Redirect("/account?tab=addresses");
     }
 
     private async Task MergeGuestCartAsync(long customerId)
