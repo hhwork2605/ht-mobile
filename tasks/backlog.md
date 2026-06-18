@@ -90,7 +90,7 @@
 - [x] **Icon phương thức thanh toán + cam kết bảo mật** (✓, 2026-06-18) — partial `_PaymentMethods` (VISA/Mastercard/JCB badge + ATM/COD icon + "Thanh toán an toàn & bảo mật") dùng chung ở footer + mục thanh toán checkout.
 
 ### P2 — nâng cao
-- [ ] **Đã xem gần đây / gợi ý cá nhân hoá** (cross-sell, tăng quay lại).
-- [ ] **Bỏ/đổi dữ liệu trang trí gây hiểu nhầm** — thanh "Đang bán chạy" ở Flash Sale + rating tĩnh trên thẻ + đếm ngược Flash Sale tự reset: thay bằng dữ liệu thật (đã bán/đánh giá/mốc thật) hoặc ẩn.
-- [ ] **Gọn trang chủ khi chưa có ảnh** — nhiều khối cạnh tranh; cân nhắc gộp để giảm "ồn" (ổn khi đã có ảnh thật).
+- [x] **Đã xem gần đây** (✓, 2026-06-18) — partial `_RecentlyViewed` (Alpine, localStorage `htm_recent`): PDP tự đẩy SP vừa xem (`window.htmRecentPush`), rail hiện ở trang chủ + cuối PDP (loại chính nó); ẩn hoàn toàn khi trống (không gây "ồn" cho khách mới); có nút Xoá. *(Gợi ý cá nhân hoá server-side để sau.)*
+- [x] **Bỏ/đổi dữ liệu trang trí gây hiểu nhầm** (✓, 2026-06-18) — Flash Sale: bỏ thanh "Đang bán chạy" giả (random theo %) → thay bằng "Tiết kiệm X₫" (thật); đếm ngược đổi từ vòng lặp tự reset → đếm tới **hết ngày** (mốc thật). *(Rating tĩnh trên thẻ: ProductCard hiện không hiển thị rating nên không còn vấn đề.)*
+- [x] **Gọn trang chủ** (✓, 2026-06-18) — "Sản phẩm nổi bật" loại các SP đã xuất hiện ở Flash Sale (trước đây trùng hoàn toàn) → hết lặp lưới; "Đã xem gần đây" chỉ hiện khi có dữ liệu.
 > Trùng P2 đã có: Wishlist + So sánh (#14), Hiển thị tồn kho (#15), Newsletter (#16), Cổng thanh toán (#11), Phí/ETA giao hàng (#12).

@@ -521,6 +521,12 @@
     }
 </div>
 
+@* ===== Đã xem gần đây (loại chính sản phẩm này) ===== *@
+@{ ViewData["RecentExcludeSlug"] = Model.CanonicalSlug; }
+<div class="mx-auto max-w-[1180px]">
+    <partial name="_RecentlyViewed" />
+</div>
+
 @section Scripts {
     <script>
         // Bộ chọn biến thể: đổi giá/khuyến mãi/nút mua/URL tức thì client-side (không reload).
@@ -557,5 +563,19 @@
                 money(n) { return (n === null || n === undefined || n === '') ? '' : Number(n).toLocaleString('vi-VN') + '₫'; }
             };
         }
+
+        // Lưu sản phẩm vừa xem vào "Đã xem gần đây" (localStorage; htmRecentPush định nghĩa ở _RecentlyViewed).
+        (function () {
+            var push = window.htmRecentPush;
+            if (typeof push === 'function') {
+                push({
+                    slug: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CanonicalSlug, jsonOpts)),
+                    name: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Name, jsonOpts)),
+                    finalPrice: @((long)Model.Price.FinalPrice),
+                    discount: @Model.Price.DiscountPercent,
+                    img: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(images[0], jsonOpts))
+                });
+            }
+        })();
     </script>
 }

@@ -1,0 +1,50 @@
+@*
+    "Đã xem gần đây" (P7 P2) — dữ liệu lưu client-side ở localStorage 'htm_recent'
+    (PDP tự đẩy vào khi xem). Ẩn hoàn toàn khi chưa có gì → không gây "ồn" cho khách mới.
+    ViewData["RecentExcludeSlug"]: bỏ qua slug đang xem (để PDP không hiện lại chính nó).
+*@
+@{
+    var excludeSlug = ViewData["RecentExcludeSlug"] as string ?? "";
+}
+<section x-data="recentlyViewed('@excludeSlug')" x-init="load()" x-show="items.length > 0" x-cloak class="pt-7">
+    <div class="mx-auto max-w-[1180px] px-4 sm:px-6">
+        <div class="mb-3.5 flex items-center justify-between border-b border-line pb-2.5">
+            <h2 class="m-0 flex items-center gap-2 text-[19px] font-bold text-ink"><i class="iks ik-clock-rotate-left text-[18px] text-accent"></i>Đã xem gần đây</h2>
+            <button type="button" @@click="clear()" class="border-0 bg-transparent text-[13px] font-medium text-ink2 hover:text-sale">Xoá</button>
+        </div>
+        <div class="grid gap-3 [grid-template-columns:repeat(2,1fr)] sm:[grid-template-columns:repeat(3,1fr)] lg:[grid-template-columns:repeat(5,1fr)]">
+            <template x-for="p in items" :key="p.slug">
+                <a :href="'/' + p.slug" class="group flex h-full flex-col rounded-card border border-line bg-white p-3 transition hover:-translate-y-1 hover:border-accent hover:shadow-[0_14px_34px_rgba(0,0,0,.10)]">
+                    <div class="relative mb-2.5 flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-surface2">
+                        <span x-show="p.discount > 0" class="absolute left-2.5 top-2.5 rounded-md bg-sale px-2 py-0.5 text-[11px] font-bold text-white" x-text="'-' + p.discount + '%'"></span>
+                        <img :src="p.img || '/images/placeholder.svg'" :alt="p.name" class="h-full w-full object-contain p-6" loading="lazy" />
+                    </div>
+                    <div class="line-clamp-2 min-h-[40px] text-[14.5px] font-semibold leading-snug text-ink" x-text="p.name"></div>
+                    <div class="mt-1.5 text-[18px] font-extrabold text-sale" x-text="money(p.finalPrice)"></div>
+                </a>
+            </template>
+        </div>
+    </div>
+</section>
+
+@* Định nghĩa component + helper đẩy sản phẩm (PDP gọi window.htmRecentPush). Chỉ nạp 1 lần/trang. *@
+<script>
+    window.recentlyViewed = function (exclude) {
+        return {
+            items: [],
+            load() {
+                try { this.items = JSON.parse(localStorage.getItem('htm_recent') || '[]').filter(p => p.slug !== exclude).slice(0, 10); }
+                catch (e) { this.items = []; }
+            },
+            clear() { try { localStorage.removeItem('htm_recent'); } catch (e) { } this.items = []; },
+            money(n) { return Number(n).toLocaleString('vi-VN') + '₫'; }
+        };
+    };
+    window.htmRecentPush = function (p) {
+        try {
+            var arr = JSON.parse(localStorage.getItem('htm_recent') || '[]').filter(x => x.slug !== p.slug);
+            arr.unshift(p);
+            localStorage.setItem('htm_recent', JSON.stringify(arr.slice(0, 12)));
+        } catch (e) { }
+    };
+</script>

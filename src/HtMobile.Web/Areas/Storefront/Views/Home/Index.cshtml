@@ -5,6 +5,9 @@
 
     // Flash sale = các sản phẩm nổi bật đang có giảm giá (tối đa 6).
     var flash = Model.Featured.Where(p => p.DiscountPercent > 0).Take(6).ToList();
+    // "Sản phẩm nổi bật" loại các SP đã xuất hiện ở Flash Sale để tránh lặp (giảm "ồn" — P7 P2).
+    var flashIds = flash.Select(p => p.VariantId).ToHashSet();
+    var featured = Model.Featured.Where(p => !flashIds.Contains(p.VariantId)).Take(10).ToList();
     var banners = Model.Banners;
     string Vnd(decimal v) => v.ToString("#,##0") + "đ";
 }
@@ -184,9 +187,10 @@
     <section class="pt-5">
         <div class="mx-auto max-w-[1180px] px-4 sm:px-6">
             <div class="overflow-hidden rounded-2xl border border-line">
+                @* Đếm ngược tới hết ngày (mốc thật) thay vì vòng lặp tự reset gây hiểu nhầm *@
                 <div class="flex flex-nowrap items-center gap-2 px-3.5 py-3" style="background:linear-gradient(100deg,#FF424E,#FF7A1A);"
-                     x-data="{ h: 1, m: 59, s: 59, tick() { if (this.s>0){this.s--;} else {this.s=59; if(this.m>0){this.m--;} else {this.m=59; this.h=this.h>0?this.h-1:1;}} }, p(n){return String(n).padStart(2,'0')} }"
-                     x-init="setInterval(() => tick(), 1000)">
+                     x-data="{ h:0, m:0, s:0, calc(){ const now=new Date(); const end=new Date(now); end.setHours(23,59,59,999); let d=Math.max(0,Math.floor((end-now)/1000)); this.h=Math.floor(d/3600); this.m=Math.floor(d%3600/60); this.s=d%60; }, p(n){return String(n).padStart(2,'0')} }"
+                     x-init="calc(); setInterval(() => calc(), 1000)">
                     <div class="flex flex-none items-center gap-1.5 text-white"><i class="iks ik-bolt text-[19px]"></i><span class="whitespace-nowrap text-[16px] font-extrabold tracking-[-.3px]">FLASH SALE</span></div>
                     <div class="flex flex-none items-center gap-1">
                         <span class="flex h-7 w-7 items-center justify-center rounded-md bg-[#16161a] text-[12px] font-bold text-white" x-text="p(h)">01</span><span class="text-[12px] font-bold text-white">:</span>
@@ -198,7 +202,6 @@
                 <div class="grid gap-2.5 p-3 [grid-template-columns:repeat(2,1fr)] sm:[grid-template-columns:repeat(3,1fr)] lg:[grid-template-columns:repeat(6,1fr)]">
                     @foreach (var c in flash)
                     {
-                        var bar = Math.Clamp(c.DiscountPercent * 2, 25, 92);
                         <a href="/@c.VariantSlug" class="group flex cursor-pointer flex-col">
                             <div class="relative mb-1.5 flex aspect-square items-center justify-center rounded-lg bg-surface2">
                                 <span class="absolute left-1.5 top-1.5 rounded bg-[#FF424E] px-1.5 py-0.5 text-[10.5px] font-bold text-white">-@c.DiscountPercent%</span>
@@ -210,10 +213,10 @@
                             {
                                 <div class="text-[11px] text-ink2 line-through">@Vnd(c.CompareAtPrice!.Value)</div>
                             }
-                            <div class="relative mt-1.5 h-[14px] overflow-hidden rounded-full bg-[#FFE4E1]">
-                                <span class="absolute inset-y-0 left-0 rounded-full" style="width:@(bar)%;background:linear-gradient(90deg,#FF424E,#FF7A1A);"></span>
-                                <span class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white">Đang bán chạy</span>
-                            </div>
+                            @if (c.CompareAtPrice is > 0 && c.CompareAtPrice > c.FinalPrice)
+                            {
+                                <div class="mt-1.5 text-[11px] font-semibold text-[#FF424E]">Tiết kiệm @Vnd(c.CompareAtPrice!.Value - c.FinalPrice)</div>
+                            }
                         </a>
                     }
                 </div>
@@ -229,14 +232,14 @@
             <h2 class="m-0 flex items-center gap-2 text-[19px] font-bold text-ink"><i class="iks ik-mobile text-[18px] text-accent"></i>Sản phẩm nổi bật</h2>
             <a href="/iphone" class="flex items-center gap-1 border-0 bg-transparent text-[13.5px] font-semibold text-accent">Xem tất cả <i class="iks ik-chevron-right text-[11px]"></i></a>
         </div>
-        @if (Model.Featured.Count == 0)
+        @if (featured.Count == 0)
         {
             <p class="text-ink2">Chưa có dữ liệu. Chạy <code>scripts/seed.ps1</code> để nạp sản phẩm mẫu.</p>
         }
         else
         {
             <div class="grid gap-3 [grid-template-columns:repeat(2,1fr)] sm:[grid-template-columns:repeat(3,1fr)] lg:[grid-template-columns:repeat(5,1fr)]">
-                @foreach (var p in Model.Featured.Take(10))
+                @foreach (var p in featured)
                 {
                     <vc:product-card product="p"></vc:product-card>
                 }
@@ -244,6 +247,9 @@
         }
     </div>
 </section>
+
+@* ============ ĐÃ XEM GẦN ĐÂY (client-side, ẩn khi trống) ============ *@
+<partial name="_RecentlyViewed" />
 
 @* ============ PROMO SPLIT ============ *@
 <section class="pt-8">
