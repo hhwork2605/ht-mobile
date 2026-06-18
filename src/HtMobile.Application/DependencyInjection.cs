@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<IPricingService, PricingEngine>();
         services.AddScoped<AdminPromotionService>();
         services.AddScoped<CatalogService>();
+        services.AddScoped<ReviewService>();
         services.AddScoped<AdminProductService>();
         services.AddScoped<AdminCategoryService>();
         services.AddScoped<AdminInventoryService>();

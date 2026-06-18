@@ -223,13 +223,29 @@ public class CatalogService
             .Select(p => new PaymentOfferDto(p.Bank, p.Title, p.Description, p.EndsAt))
             .ToListAsync(ct);
 
-        // Đánh giá gộp theo model: review của bất kỳ biến thể con nào thuộc model này.
-        var reviewStats = await _db.Reviews
+        // Đánh giá gộp theo model: review của model hoặc bất kỳ biến thể con nào thuộc model này.
+        var reviewRows = await _db.Reviews
             .AsNoTracking()
             .Where(r => r.Product.ProductParentId == modelId || r.ProductId == modelId)
-            .GroupBy(_ => 1)
-            .Select(g => new { Count = g.Count(), Avg = (double?)g.Average(x => x.Rating) })
-            .FirstOrDefaultAsync(ct);
+            .OrderByDescending(r => r.Id)
+            .Select(r => new
+            {
+                r.Rating,
+                r.Content,
+                r.CreatedAt,
+                Author = r.CustomerId == null
+                    ? null
+                    : _db.Customers.Where(c => c.Id == r.CustomerId).Select(c => c.FullName ?? c.Email).FirstOrDefault()
+            })
+            .ToListAsync(ct);
+
+        var reviews = reviewRows
+            .Take(10)
+            .Select(r => new ReviewDto(string.IsNullOrWhiteSpace(r.Author) ? "Khách hàng" : r.Author!, r.Rating, r.Content, r.CreatedAt))
+            .ToList();
+        var ratingCounts = reviewRows.GroupBy(r => r.Rating).ToDictionary(g => g.Key, g => g.Count());
+        var reviewCount = reviewRows.Count;
+        double? avgRating = reviewCount == 0 ? null : reviewRows.Average(r => r.Rating);
 
         var price = await _pricing.GetEffectivePriceAsync(selectedVariantId, ct);
         var bundle = await _bundles.GetForProductAsync(modelId, ct);
@@ -260,9 +276,11 @@ public class CatalogService
             Offers = offers,
             PaymentOffers = paymentOffers,
             Bundle = bundle,
-            ReviewCount = reviewStats?.Count ?? 0,
-            AverageRating = reviewStats?.Avg,
-            Related = related
+            ReviewCount = reviewCount,
+            AverageRating = avgRating,
+            Related = related,
+            Reviews = reviews,
+            RatingCounts = ratingCounts
         };
     }
 

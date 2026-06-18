@@ -55,7 +55,16 @@ public record ProductDetailDto
 
     /// <summary>Sản phẩm liên quan (cùng danh mục, trừ chính nó) — khối cross-sell cuối PDP.</summary>
     public IReadOnlyList<ProductCardDto> Related { get; init; } = Array.Empty<ProductCardDto>();
+
+    /// <summary>Danh sách đánh giá hiển thị (mới nhất).</summary>
+    public IReadOnlyList<ReviewDto> Reviews { get; init; } = Array.Empty<ReviewDto>();
+
+    /// <summary>Số lượng đánh giá theo từng mức sao (1..5). Dùng vẽ thanh phân bố.</summary>
+    public IReadOnlyDictionary<int, int> RatingCounts { get; init; } = new Dictionary<int, int>();
 }
+
+/// <summary>1 đánh giá hiển thị trên PDP (tên người đánh giá ghép từ Customer).</summary>
+public record ReviewDto(string Author, int Rating, string? Content, DateTime CreatedAt);
 
 /// <summary>Một biến thể (Product con) để chọn — nhãn ghép từ thuộc tính; mỗi cái có slug/URL riêng.</summary>
 public record VariantOptionDto(

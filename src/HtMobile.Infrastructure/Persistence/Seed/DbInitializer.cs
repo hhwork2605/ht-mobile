@@ -4,6 +4,7 @@ using HtMobile.Domain.Entities.Catalog;
 using HtMobile.Domain.Entities.Cms;
 using HtMobile.Domain.Entities.Customers;
 using HtMobile.Domain.Entities.Pricing;
+using HtMobile.Domain.Entities.Reviews;
 using HtMobile.Domain.Entities.Sales;
 using HtMobile.Domain.Enums;
 using HtMobile.Infrastructure.Identity;
@@ -66,6 +67,7 @@ public class DbInitializer
         await SeedSampleCatalogAsync();
         await BackfillProductSpecsAsync();
         await SeedVouchersAsync();
+        await SeedReviewsAsync();
         await SeedBannersAsync();
         await SeedBundlesAsync();
         await SeedStockDemoAsync();
@@ -103,6 +105,26 @@ public class DbInitializer
             else
                 _logger.LogWarning("Tạo admin thất bại: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
         }
+    }
+
+    /// <summary>Đánh giá demo cho 1 model (anonymous) để PDP có sẵn danh sách + thanh phân bố. Idempotent.</summary>
+    private async Task SeedReviewsAsync()
+    {
+        if (await _db.Reviews.AnyAsync()) return;
+
+        var model = await _db.Products.FirstOrDefaultAsync(p => p.Slug == "dien-thoai-iphone-17-pro-max");
+        if (model is null) return;
+
+        var samples = new (int Rating, string Content)[]
+        {
+            (5, "Máy đẹp, đóng gói cẩn thận, giao nhanh trong ngày. Rất hài lòng!"),
+            (5, "Hàng chính hãng, kích hoạt bảo hành đầy đủ. Trả góp 0% duyệt nhanh."),
+            (4, "Sản phẩm tốt, pin trâu. Giao hơi trễ chút nhưng nhìn chung ổn."),
+            (5, "Camera quá xịn, màn hình mượt. Đáng tiền."),
+        };
+        foreach (var (rating, content) in samples)
+            _db.Reviews.Add(new Review { ProductId = model.Id, CustomerId = null, Rating = rating, Content = content });
+        await _db.SaveChangesAsync();
     }
 
     /// <summary>Voucher demo (có Code → chỉ áp khi khách nhập mã). Idempotent: thêm nếu chưa có (theo Code).</summary>
