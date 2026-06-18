@@ -8,6 +8,7 @@ using HtMobile.Application.Features.Inventory;
 using HtMobile.Application.Features.Orders;
 using HtMobile.Application.Features.Pricing;
 using HtMobile.Application.Features.Reports;
+using HtMobile.Application.Features.Seo;
 using HtMobile.Application.Features.StockNotifications;
 using HtMobile.Application.Features.TradeIn;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +32,7 @@ public static class DependencyInjection
         services.AddScoped<AdminOrderService>();
         services.AddScoped<DashboardService>();
         services.AddScoped<ReportsService>();
+        services.AddScoped<AdminSeoService>();
         services.AddScoped<BundleService>();
         services.AddScoped<TradeInService>();
         services.AddScoped<StockNotificationService>();

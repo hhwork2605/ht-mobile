@@ -14,6 +14,7 @@ import { UsersListComponent } from './pages/users/users-list.component';
 import { CategoriesListComponent } from './pages/categories/categories-list.component';
 import { CategoryFormComponent } from './pages/categories/category-form.component';
 import { InventoryComponent } from './pages/inventory/inventory.component';
+import { SeoComponent } from './pages/seo/seo.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -37,6 +38,7 @@ export const routes: Routes = [
       { path: 'promotions/new', component: PromotionFormComponent },
       { path: 'promotions/:id', component: PromotionFormComponent },
       { path: 'users', component: UsersListComponent },
+      { path: 'seo', component: SeoComponent },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     ],
   },

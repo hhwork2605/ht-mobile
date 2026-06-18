@@ -92,6 +92,7 @@ export class ShellComponent {
       { label: 'Khuyến mãi', icon: 'pi-megaphone', link: '/promotions' },
     ] },
     { title: 'Quản trị', items: [{ label: 'Người dùng & quyền', icon: 'pi-users', link: '/users' }] },
+    { title: 'Hệ thống', items: [{ label: 'SEO & Kỹ thuật', icon: 'pi-search', link: '/seo' }] },
   ];
 
   constructor(public auth: AuthService, private router: Router) {}
