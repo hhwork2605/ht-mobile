@@ -71,3 +71,26 @@
 - [ ] **Wishlist (yêu thích)** (✓) + **So sánh sản phẩm**.
 - [ ] **Hiển thị tồn kho** — số lượng còn / cảnh báo sắp hết (hiện chỉ "Còn hàng").
 - [ ] **Newsletter / đăng ký nhận tin**.
+
+## Phase 7 — UX TMĐT (rà soát chuyên gia UI/UX 2026-06-18)
+> Phát hiện khi đánh giá storefront theo chuẩn thương mại điện tử (chuyển đổi + tin cậy). Ưu tiên P0 → P2.
+> Một số mục trùng P2 ở trên — ghi chú để tránh làm lặp.
+
+### P0 — ma sát / tin cậy ảnh hưởng chuyển đổi
+- [ ] **Mini-cart toast/drawer khi "Thêm vào giỏ"** — hiện add → reload sang `/cart`, gãy luồng lướt. Cần toast "Đã thêm vào giỏ" + cập nhật badge qua htmx (không rời trang); cân nhắc mini-cart drawer. (Design gốc có toast.)
+- [ ] **Ảnh thật thay placeholder "HtMobile"** — banner/thẻ/gallery đang là ô xám trông như ảnh vỡ; hero text đè watermark. *(= P2 "Upload ảnh sản phẩm thật" — gộp; tối thiểu dùng skeleton/ảnh trung tính.)*
+- [ ] **Tin cậy gần nút Mua (PDP)** — đưa badge bảo hành chính hãng / đổi trả 30 ngày / thời gian giao dự kiến lên cạnh giá–nút mua (hiện trust grid ở xa phía dưới).
+
+### P1 — kỳ vọng chuẩn TMĐT
+- [ ] **Sticky "Thêm vào giỏ" trên mobile PDP** — thanh mua dính đáy khi cuộn (tăng chuyển đổi mobile).
+- [ ] **Lọc + sort cho trang Tìm kiếm** — `/search` hiện là lưới trơn; thêm sort + lọc giá như trang danh mục.
+- [ ] **Hero mạnh hơn** — banner chính có value-prop + CTA nổi bật + ảnh; bật slider nhiều banner (đang chỉ 1).
+- [ ] **Bước tiến trình + ghi chú ở Checkout** — chỉ dẫn Thông tin→Giao hàng→Thanh toán + ô "Ghi chú đơn hàng".
+- [ ] **Freeship threshold / cross-sell ở giỏ** — "Mua thêm X để freeship" hoặc "Có thể bạn thích" trong giỏ (hiện "Miễn phí" cứng).
+- [ ] **Icon phương thức thanh toán + cam kết bảo mật** ở footer/checkout (tăng tin cậy).
+
+### P2 — nâng cao
+- [ ] **Đã xem gần đây / gợi ý cá nhân hoá** (cross-sell, tăng quay lại).
+- [ ] **Bỏ/đổi dữ liệu trang trí gây hiểu nhầm** — thanh "Đang bán chạy" ở Flash Sale + rating tĩnh trên thẻ + đếm ngược Flash Sale tự reset: thay bằng dữ liệu thật (đã bán/đánh giá/mốc thật) hoặc ẩn.
+- [ ] **Gọn trang chủ khi chưa có ảnh** — nhiều khối cạnh tranh; cân nhắc gộp để giảm "ồn" (ổn khi đã có ảnh thật).
+> Trùng P2 đã có: Wishlist + So sánh (#14), Hiển thị tồn kho (#15), Newsletter (#16), Cổng thanh toán (#11), Phí/ETA giao hàng (#12).
