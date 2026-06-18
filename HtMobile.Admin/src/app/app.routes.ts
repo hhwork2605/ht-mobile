@@ -10,6 +10,8 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { PromotionsListComponent } from './pages/promotions/promotions-list.component';
 import { PromotionFormComponent } from './pages/promotions/promotion-form.component';
 import { UsersListComponent } from './pages/users/users-list.component';
+import { CategoriesListComponent } from './pages/categories/categories-list.component';
+import { CategoryFormComponent } from './pages/categories/category-form.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -22,6 +24,9 @@ export const routes: Routes = [
       { path: 'products', component: ProductsListComponent },
       { path: 'products/new', component: ProductFormComponent },
       { path: 'products/:id', component: ProductFormComponent },
+      { path: 'categories', component: CategoriesListComponent },
+      { path: 'categories/new', component: CategoryFormComponent },
+      { path: 'categories/:id', component: CategoryFormComponent },
       { path: 'orders', component: OrdersListComponent },
       { path: 'orders/:id', component: OrderDetailComponent },
       { path: 'promotions', component: PromotionsListComponent },

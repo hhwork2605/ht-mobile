@@ -75,17 +75,3 @@ public class ProductsController : ControllerBase
         return result == AdminProductResult.NotFound ? NotFound() : Ok(new { productId });
     }
 }
-
-[ApiController]
-[Route("api/categories")]
-[Authorize(AuthenticationSchemes = "Bearer", Roles = Roles.Admin)]
-public class CategoriesController : ControllerBase
-{
-    private readonly AdminProductService _products;
-
-    public CategoriesController(AdminProductService products) => _products = products;
-
-    [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<AdminCategoryOption>>> List(CancellationToken ct)
-        => Ok(await _products.GetCategoryOptionsAsync(ct));
-}
