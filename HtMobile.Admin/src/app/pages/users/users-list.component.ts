@@ -102,7 +102,7 @@ export class UsersListComponent implements OnInit {
   allRoles: string[] = [];
 
   createVisible = false;
-  cEmail = ''; cFullName = ''; cPassword = ''; cRoles: string[] = ['Customer'];
+  cEmail = ''; cFullName = ''; cPassword = ''; cRoles: string[] = ['Admin'];
 
   rolesVisible = false;
   editing: UserRow | null = null;
@@ -120,7 +120,7 @@ export class UsersListComponent implements OnInit {
     this.api.list().subscribe({ next: (r) => { this.rows.set(r); this.loading.set(false); }, error: () => this.loading.set(false) });
   }
 
-  openCreate(): void { this.cEmail = ''; this.cFullName = ''; this.cPassword = ''; this.cRoles = ['Customer']; this.createVisible = true; }
+  openCreate(): void { this.cEmail = ''; this.cFullName = ''; this.cPassword = ''; this.cRoles = ['Admin']; this.createVisible = true; }
 
   create(): void {
     this.saving.set(true);

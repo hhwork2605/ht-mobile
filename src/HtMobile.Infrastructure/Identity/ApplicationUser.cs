@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Identity;
 namespace HtMobile.Infrastructure.Identity;
 
 /// <summary>
-/// Người dùng/khách hàng. Gộp vai trò "Customer" của SPEC §7 (email/phone) vào Identity.
-/// Khóa chính <see cref="long"/> để FK đồng nhất với các entity domain.
+/// Tài khoản đăng nhập <b>Admin</b> (ASP.NET Identity, API JWT) — ADR 0005. Khách hàng storefront ở bảng
+/// <c>Customers</c> riêng, KHÔNG còn là <c>ApplicationUser</c>. Khóa chính <see cref="long"/>.
 /// </summary>
 public class ApplicationUser : IdentityUser<long>
 {

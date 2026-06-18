@@ -79,6 +79,7 @@ public class AdminProductService
                 Brand = x.Brand,
                 Tagline = x.Tagline,
                 Description = x.Description,
+                Specs = x.SpecsJson,
                 Variants = x.Children.OrderBy(v => v.Id).Select(v => new AdminVariantRow
                 {
                     Id = v.Id,
@@ -99,6 +100,8 @@ public class AdminProductService
 
     public async Task<(AdminProductResult Result, long Id)> CreateAsync(ProductInput input, VariantInput firstVariant, CancellationToken ct = default)
     {
+        if (!ProductSpecs.IsValid(input.Specs)) return (AdminProductResult.InvalidSpecs, 0);
+
         var slug = ResolveSlug(input.Slug, input.Name);
         if (await _db.Products.AnyAsync(p => p.Slug == slug, ct))
             return (AdminProductResult.SlugExists, 0);
@@ -116,6 +119,7 @@ public class AdminProductService
             Brand = Trim(input.Brand),
             Tagline = Trim(input.Tagline),
             Description = Trim(input.Description),
+            SpecsJson = Trim(input.Specs),
             Status = ProductStatus.Active
         };
         var child = await NewVariantAsync(firstVariant, parent, childSlug, ct);
@@ -127,6 +131,8 @@ public class AdminProductService
 
     public async Task<AdminProductResult> UpdateAsync(long id, ProductInput input, IReadOnlyList<VariantEdit> variants, CancellationToken ct = default)
     {
+        if (!ProductSpecs.IsValid(input.Specs)) return AdminProductResult.InvalidSpecs;
+
         var product = await _db.Products
             .Include(p => p.Children)
             .FirstOrDefaultAsync(p => p.Id == id && p.ProductParentId == null, ct);
@@ -142,6 +148,7 @@ public class AdminProductService
         product.Brand = Trim(input.Brand);
         product.Tagline = Trim(input.Tagline);
         product.Description = Trim(input.Description);
+        product.SpecsJson = Trim(input.Specs);
 
         var priceChanged = new List<long>();
         foreach (var edit in variants)

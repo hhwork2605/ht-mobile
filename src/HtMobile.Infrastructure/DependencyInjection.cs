@@ -65,6 +65,7 @@ public static class DependencyInjection
 
         services.AddScoped<ISearchService, PostgresSearchService>();
         services.AddScoped<IEmailSender, NullEmailSender>();
+        services.AddSingleton<IPasswordHasher, IdentityPasswordHasher>();
 
         services.AddScoped<DbInitializer>();
 

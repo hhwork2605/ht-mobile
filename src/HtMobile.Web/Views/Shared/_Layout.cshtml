@@ -76,21 +76,24 @@
 
     @await RenderSectionAsync("Head", required: false)
 
-    @* Theme tokens (luôn có ở cả dev & prod). Đổi giá trị ở đây hoặc app.css để đổi theme. *@
+    @* Theme tokens (apple — theo ShopDunk Storefront design). Đổi ở đây hoặc app.css để đổi theme. *@
     <style>
         :root {
-            --accent: #0066CC; --accent-press: #004e9e; --sale: #1d1d1f;
+            --accent: #0066CC; --accent-press: #004e9e; --sale: #FF424E;
             --ink: #1d1d1f; --ink2: #6e6e73;
             --bg: #ffffff; --bg2: #f5f5f7; --line: #e4e4e7;
             --header: rgba(255,255,255,.82); --header-ink: #1d1d1f; --header-border: #e4e4e7;
-            --card-radius: 18px;
+            --radius-card: 18px;
+            --success: #00B63E; --success-50: #E6F8EC;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Segoe UI", system-ui, Arial, sans-serif; }
         [x-cloak] { display: none !important; }
+        .no-scrollbar { scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 
-    @* Icon: Font Awesome Free (solid + brands) *@
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@fortawesome/fontawesome-free@6.5.2/css/all.min.css" />
+    @* Icon: KV Icon Kit (self-host) — solid .iks / regular .ikr / brands .ikb *@
+    <link rel="stylesheet" href="~/css/kv-icons.css" asp-append-version="true" />
 
     @* Dev: Tailwind Play CDN + map token thương hiệu vào config. Prod: CSS đã build (@theme inline trong app.css). *@
     <environment include="Development">
@@ -104,7 +107,9 @@
                         line: 'var(--line)', header: 'var(--header)', 'header-ink': 'var(--header-ink)',
                         'header-border': 'var(--header-border)'
                     },
-                    borderRadius: { card: 'var(--card-radius)' }
+                    borderRadius: { card: 'var(--radius-card)' },
+                    boxShadow: { overlay: '0 8px 24px rgba(0,0,0,.12)' },
+                    fontFamily: { sans: ['-apple-system','BlinkMacSystemFont','"SF Pro Display"','"SF Pro Text"','"Helvetica Neue"','"Segoe UI"','system-ui','Arial','sans-serif'] }
                 } }
             };
         </script>
@@ -113,16 +118,16 @@
         <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     </environment>
 </head>
-<body class="min-h-screen bg-surface text-ink antialiased">
+<body class="min-h-screen bg-surface text-ink antialiased font-sans pb-[64px] md:pb-0">
 
     <div class="bg-surface2 text-ink2 text-center text-[12.5px] py-[7px] px-3 border-b border-line">
         @L["TopBar.Promo"]
     </div>
 
-    <header class="sticky top-0 z-40 bg-header text-header-ink border-b border-header-border backdrop-blur-lg">
-        <div class="mx-auto flex max-w-[1180px] items-center gap-4 px-4 sm:px-6 h-[60px]">
-            <a href="/" class="flex items-center gap-2 text-xl font-bold tracking-tight text-header-ink">
-                <i class="fa-brands fa-apple text-[19px]"></i><span>HtMobile</span>
+    <header class="sticky top-0 z-50 bg-header text-header-ink border-b border-header-border [backdrop-filter:saturate(180%)_blur(18px)] [-webkit-backdrop-filter:saturate(180%)_blur(18px)]">
+        <div class="mx-auto flex max-w-[1180px] items-center gap-4 md:gap-6 px-4 sm:px-6 h-[60px]">
+            <a href="/" class="flex items-center gap-2 text-xl font-bold tracking-[-.4px] text-header-ink">
+                <i class="ikb ik-apple text-[19px]"></i><span>HtMobile</span>
             </a>
 
             <nav class="hidden flex-1 items-center gap-0.5 md:flex">
@@ -130,8 +135,8 @@
             </nav>
 
             <form action="/search" method="get" class="relative ml-auto hidden md:block" autocomplete="off">
-                <div class="flex items-center gap-2 rounded-full bg-black/5 px-3.5 py-2 w-[230px]">
-                    <i class="fa-solid fa-magnifying-glass text-sm text-header-ink opacity-60"></i>
+                <div class="flex items-center gap-2 rounded-full bg-[rgba(128,128,128,.14)] px-3.5 py-2 w-[230px]">
+                    <i class="ikr ik-magnifying-glass text-sm text-header-ink opacity-60"></i>
                     <input type="search" name="q" placeholder="@L["Search.Placeholder"]"
                            class="w-full border-0 bg-transparent text-[13.5px] text-header-ink outline-none"
                            hx-get="/search/suggest" hx-trigger="keyup changed delay:300ms"
@@ -140,20 +145,20 @@
                 <div id="search-suggest" class="absolute left-0 right-0 top-full z-50 mt-1"></div>
             </form>
 
-            <a href="/search" class="ml-auto flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5 md:hidden" aria-label="@L["Nav.Search"]">
-                <i class="fa-solid fa-magnifying-glass text-lg"></i>
+            <a href="/search" class="ml-auto flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-[rgba(128,128,128,.14)] md:hidden" aria-label="@L["Nav.Search"]">
+                <i class="ikr ik-magnifying-glass text-lg"></i>
             </a>
             <a href="@(CurrentUser.IsAuthenticated ? "/account" : "/login")"
-               class="flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5" aria-label="@L["Nav.Account"]">
-                <i class="fa-regular fa-circle-user text-lg"></i>
+               class="flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-[rgba(128,128,128,.14)]" aria-label="@L["Nav.Account"]">
+                <i class="ikr ik-circle-user text-lg"></i>
             </a>
-            <a href="/cart" class="relative flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-black/5" aria-label="@L["Nav.Cart"]">
-                <i class="fa-solid fa-cart-shopping text-lg"></i>
+            <a href="/cart" class="relative flex h-[38px] w-[38px] items-center justify-center rounded-full text-header-ink hover:bg-[rgba(128,128,128,.14)]" aria-label="@L["Nav.Cart"]">
+                <i class="ikr ik-cart-shopping text-lg"></i>
                 <vc:cart-badge></vc:cart-badge>
             </a>
 
             @* LangSwitcher VI|EN (P3-05) — giữ trang hiện tại qua returnUrl *@
-            <div class="flex items-center text-[12.5px] font-semibold">
+            <div class="hidden sm:flex items-center text-[12.5px] font-semibold">
                 <a href="/changelanguage?culture=vi&returnUrl=@langReturn" class="@(uiLang == "vi" ? "text-accent" : "text-ink2 hover:text-ink")">VI</a>
                 <span class="mx-1 text-ink2/40">|</span>
                 <a href="/changelanguage?culture=en&returnUrl=@langReturn" class="@(uiLang == "en" ? "text-accent" : "text-ink2 hover:text-ink")">EN</a>
@@ -170,7 +175,7 @@
             <div class="flex flex-wrap justify-between gap-10">
                 <div class="max-w-[280px]">
                     <div class="mb-2.5 flex items-center gap-2 text-lg font-bold text-ink">
-                        <i class="fa-brands fa-apple"></i>HtMobile
+                        <i class="ikb ik-apple"></i>HtMobile
                     </div>
                     <p class="m-0 text-[13px] leading-relaxed text-ink2">
                         @L["Footer.Tagline"]
@@ -208,21 +213,29 @@
             <div class="mt-[30px] flex flex-wrap items-center justify-between gap-3 border-t border-line pt-[18px]">
                 <span class="text-xs text-ink2">© 2026 HtMobile — Apple Reseller (demo scaffold).</span>
                 <div class="flex gap-3 text-[19px] text-ink2">
-                    <i class="fa-brands fa-facebook"></i><i class="fa-brands fa-youtube"></i>
-                    <i class="fa-brands fa-instagram"></i><i class="fa-brands fa-tiktok"></i>
+                    <i class="ikb ik-facebook"></i><i class="ikb ik-youtube"></i>
+                    <i class="ikb ik-instagram"></i><i class="ikb ik-tiktok"></i>
                 </div>
             </div>
         </div>
     </footer>
 
-    @* Nút nổi: hotline / lên đầu trang (SPEC §9) *@
-    <div class="fixed bottom-4 right-4 z-40 flex flex-col gap-2">
+    @* Nút nổi: hotline / lên đầu trang (SPEC §9). Đẩy lên trên thanh nav mobile. *@
+    <div class="fixed bottom-4 right-4 z-40 flex flex-col gap-2 md:bottom-4 [bottom:5.5rem] md:[bottom:1rem]">
         <a href="tel:18000000" class="rounded-full bg-accent px-4 py-2 text-sm font-medium text-white shadow-lg hover:bg-accent-press">
-            <i class="fa-solid fa-phone mr-1"></i>Hotline
+            <i class="iks ik-phone mr-1"></i>Hotline
         </a>
         <button onclick="window.scrollTo({top:0,behavior:'smooth'})"
                 class="rounded-full bg-ink px-4 py-2 text-sm font-medium text-white shadow-lg">↑</button>
     </div>
+
+    @* Thanh điều hướng dưới cùng cho mobile (ẩn trên desktop) *@
+    <nav class="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-line bg-surface pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden">
+        <a href="/" class="flex flex-col items-center gap-1 text-ink"><i class="iks ik-house text-[19px]"></i><span class="text-[10.5px] font-semibold">Trang chủ</span></a>
+        <a href="/iphone" class="flex flex-col items-center gap-1 text-ink2"><i class="iks ik-grid-2 text-[19px]"></i><span class="text-[10.5px] font-semibold">Danh mục</span></a>
+        <a href="/cart" class="relative flex flex-col items-center gap-1 text-ink2"><span class="relative flex"><i class="iks ik-cart-shopping text-[19px]"></i><vc:cart-badge></vc:cart-badge></span><span class="text-[10.5px] font-semibold">Giỏ hàng</span></a>
+        <a href="@(CurrentUser.IsAuthenticated ? "/account" : "/login")" class="flex flex-col items-center gap-1 text-ink2"><i class="iks ik-circle-user text-[19px]"></i><span class="text-[10.5px] font-semibold">Tài khoản</span></a>
+    </nav>
 
     <script src="https://unpkg.com/htmx.org@2.0.3"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>

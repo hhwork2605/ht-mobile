@@ -38,6 +38,7 @@ public class ProductsController : ControllerBase
             AdminProductResult.Ok => CreatedAtAction(nameof(Get), new { id }, new { id }),
             AdminProductResult.SlugExists => Conflict(new { field = "slug", message = "Slug đã tồn tại." }),
             AdminProductResult.SkuExists => Conflict(new { field = "sku", message = "SKU đã tồn tại." }),
+            AdminProductResult.InvalidSpecs => BadRequest(new { field = "specs", message = "Thông số kỹ thuật không phải JSON hợp lệ." }),
             _ => BadRequest()
         };
     }
@@ -51,6 +52,7 @@ public class ProductsController : ControllerBase
             AdminProductResult.Ok => NoContent(),
             AdminProductResult.NotFound => NotFound(),
             AdminProductResult.SlugExists => Conflict(new { field = "slug", message = "Slug đã tồn tại." }),
+            AdminProductResult.InvalidSpecs => BadRequest(new { field = "specs", message = "Thông số kỹ thuật không phải JSON hợp lệ." }),
             _ => BadRequest()
         };
     }

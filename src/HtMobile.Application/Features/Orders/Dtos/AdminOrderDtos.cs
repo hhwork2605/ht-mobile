@@ -44,6 +44,15 @@ public record AdminOrderDetailDto
     public string? PaymentMethod { get; init; }
     public string? ShipmentAddress { get; init; }
     public long? CustomerId { get; init; }
+
+    /// <summary>Thông tin khách (join bảng Customers); null nếu đơn của khách vãng lai.</summary>
+    public string? CustomerName { get; init; }
+    public string? CustomerEmail { get; init; }
+    public string? CustomerPhone { get; init; }
+
+    /// <summary>true nếu đơn gắn tài khoản Customer (không phải khách vãng lai).</summary>
+    public bool IsRegistered => CustomerId is not null;
+
     public IReadOnlyList<AdminOrderLine> Items { get; init; } = Array.Empty<AdminOrderLine>();
     public IReadOnlyList<OrderStatus> AllowedNext { get; init; } = Array.Empty<OrderStatus>();
 }

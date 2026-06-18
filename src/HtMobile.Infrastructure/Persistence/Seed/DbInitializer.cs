@@ -1,6 +1,8 @@
+using HtMobile.Application.Common.Interfaces;
 using HtMobile.Domain.Constants;
 using HtMobile.Domain.Entities.Catalog;
 using HtMobile.Domain.Entities.Cms;
+using HtMobile.Domain.Entities.Customers;
 using HtMobile.Domain.Entities.Pricing;
 using HtMobile.Domain.Entities.Sales;
 using HtMobile.Domain.Enums;
@@ -19,20 +21,26 @@ public class DbInitializer
     public const string AdminEmail = "admin@htmobile.local";
     public const string AdminPassword = "Admin@123456";
 
+    public const string CustomerEmail = "customer@htmobile.local";
+    public const string CustomerPassword = "Customer@123";
+
     private readonly AppDbContext _db;
     private readonly UserManager<ApplicationUser> _users;
     private readonly RoleManager<IdentityRole<long>> _roles;
+    private readonly IPasswordHasher _passwordHasher;
     private readonly ILogger<DbInitializer> _logger;
 
     public DbInitializer(
         AppDbContext db,
         UserManager<ApplicationUser> users,
         RoleManager<IdentityRole<long>> roles,
+        IPasswordHasher passwordHasher,
         ILogger<DbInitializer> logger)
     {
         _db = db;
         _users = users;
         _roles = roles;
+        _passwordHasher = passwordHasher;
         _logger = logger;
     }
 
@@ -53,8 +61,10 @@ public class DbInitializer
     public async Task SeedAsync()
     {
         await SeedRolesAndAdminAsync();
+        await SeedDemoCustomerAsync();
         await SeedCategoriesAsync();
         await SeedSampleCatalogAsync();
+        await BackfillProductSpecsAsync();
         await SeedBannersAsync();
         await SeedBundlesAsync();
         await SeedStockDemoAsync();
@@ -66,6 +76,16 @@ public class DbInitializer
         foreach (var role in Roles.All)
             if (!await _roles.RoleExistsAsync(role))
                 await _roles.CreateAsync(new IdentityRole<long>(role));
+
+        // Dọn role Identity "Customer" cũ (ADR 0005 — storefront dùng bảng Customers, không dùng role Identity).
+        // Xoá role kéo theo các ánh xạ AspNetUserRoles (cascade) — vốn đã vô nghĩa.
+        var legacyCustomerRole = await _roles.FindByNameAsync("Customer");
+        if (legacyCustomerRole is not null)
+        {
+            var result = await _roles.DeleteAsync(legacyCustomerRole);
+            if (!result.Succeeded)
+                _logger.LogWarning("Bỏ qua xoá role 'Customer' cũ: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
 
         if (await _users.FindByEmailAsync(AdminEmail) is null)
         {
@@ -82,6 +102,21 @@ public class DbInitializer
             else
                 _logger.LogWarning("Tạo admin thất bại: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
         }
+    }
+
+    /// <summary>Tài khoản Customer demo cho storefront (đăng nhập thử). Tách khỏi Identity (admin) — ADR 0004.</summary>
+    private async Task SeedDemoCustomerAsync()
+    {
+        if (await _db.Customers.AnyAsync(c => c.Email == CustomerEmail)) return;
+
+        _db.Customers.Add(new Customer
+        {
+            Email = CustomerEmail,
+            PasswordHash = _passwordHasher.Hash(CustomerPassword),
+            FullName = "Khách Demo",
+            Phone = "0900000000",
+        });
+        await _db.SaveChangesAsync();
     }
 
     private async Task SeedCategoriesAsync()
@@ -209,6 +244,30 @@ public class DbInitializer
         await _db.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Bổ sung thông số kỹ thuật cho các sản phẩm mẫu đã seed trước đây còn để rỗng
+    /// (<c>SpecsJson</c> null/<c>{}</c>/<c>[]</c>). Không phá dữ liệu — chỉ điền chỗ trống.
+    /// </summary>
+    private async Task BackfillProductSpecsAsync()
+    {
+        var slugs = SpecsBySlug.Keys.ToList();
+        var products = await _db.Products
+            .Where(p => p.ProductParentId == null && slugs.Contains(p.Slug))
+            .ToListAsync();
+
+        var changed = false;
+        foreach (var p in products)
+        {
+            var current = p.SpecsJson?.Trim();
+            var isEmpty = string.IsNullOrEmpty(current) || current is "{}" or "[]";
+            if (!isEmpty) continue;            // tôn trọng specs admin đã sửa
+            p.SpecsJson = SerializeSpecs(p.Slug);
+            changed = true;
+        }
+
+        if (changed) await _db.SaveChangesAsync();
+    }
+
     private async Task SeedBannersAsync()
     {
         if (await _db.Banners.AnyAsync()) return;
@@ -280,11 +339,79 @@ public class DbInitializer
     private AttributeEntity _storageAttr = null!;
     private AttributeEntity _colorAttr = null!;
 
+    /// <summary>
+    /// Thông số kỹ thuật mẫu theo slug (nguồn duy nhất) — dùng cho cả seed mới lẫn backfill.
+    /// Serialize theo contract <c>ProductSpecs</c> (mảng phẳng <c>[{label,value}]</c>).
+    /// </summary>
+    private static readonly Dictionary<string, (string Label, string Value)[]> SpecsBySlug = new()
+    {
+        ["dien-thoai-iphone-17-pro-max"] = new[]
+        {
+            ("Màn hình", "6.9\" Super Retina XDR, 120Hz ProMotion"),
+            ("Chip", "Apple A18 Pro"),
+            ("Camera sau", "48MP Fusion + Tele 5x + Ultra Wide"),
+            ("Camera trước", "12MP TrueDepth"),
+            ("Pin", "Đến 33 giờ phát video"),
+            ("Kết nối", "USB-C, 5G, Wi-Fi 7"),
+            ("Chất liệu", "Khung Titanium"),
+        },
+        ["dien-thoai-iphone-17"] = new[]
+        {
+            ("Màn hình", "6.1\" Super Retina XDR"),
+            ("Chip", "Apple A18"),
+            ("Camera sau", "48MP Fusion + Ultra Wide"),
+            ("Camera trước", "12MP TrueDepth"),
+            ("Pin", "Đến 22 giờ phát video"),
+            ("Kết nối", "USB-C, 5G, Wi-Fi 6E"),
+        },
+        ["may-tinh-bang-ipad-air-11-m3"] = new[]
+        {
+            ("Màn hình", "11\" Liquid Retina, 60Hz"),
+            ("Chip", "Apple M3"),
+            ("Camera sau", "12MP Wide"),
+            ("Camera trước", "12MP Ultra Wide (Center Stage)"),
+            ("Kết nối", "USB-C, Wi-Fi 6E, hỗ trợ Apple Pencil Pro"),
+            ("Pin", "Đến 10 giờ lướt web"),
+        },
+        ["macbook-air-m3-13"] = new[]
+        {
+            ("Màn hình", "13.6\" Liquid Retina, 500 nits"),
+            ("Chip", "Apple M3 (8 nhân CPU, 10 nhân GPU)"),
+            ("RAM", "16GB bộ nhớ hợp nhất"),
+            ("Pin", "Đến 18 giờ"),
+            ("Cổng", "2x Thunderbolt/USB 4, MagSafe 3, jack 3.5mm"),
+            ("Trọng lượng", "1.24 kg"),
+        },
+        ["apple-watch-series-10"] = new[]
+        {
+            ("Màn hình", "Always-On Retina LTPO3 OLED"),
+            ("Chip", "Apple S10 SiP"),
+            ("Sức khỏe", "ECG, SpO2, nhịp tim, nhiệt độ cổ tay"),
+            ("Chống nước", "WR50 (50m)"),
+            ("Pin", "Đến 18 giờ (36 giờ chế độ tiết kiệm)"),
+        },
+        ["airpods-pro-2"] = new[]
+        {
+            ("Chip", "Apple H2"),
+            ("Chống ồn", "Khử ồn chủ động (ANC) thế hệ mới"),
+            ("Âm thanh", "Adaptive Audio, Spatial Audio"),
+            ("Pin", "Đến 6 giờ (30 giờ với hộp sạc)"),
+            ("Chống nước", "IP54 (tai nghe & hộp sạc)"),
+            ("Sạc", "USB-C, MagSafe, Qi"),
+        },
+    };
+
+    private static string SerializeSpecs(string slug)
+        => SpecsBySlug.TryGetValue(slug, out var s) && s.Length > 0
+            ? System.Text.Json.JsonSerializer.Serialize(s.Select(x => new { label = x.Label, value = x.Value }))
+            : "[]";
+
     private void AddProductWithVariants(
         long categoryId, string name, string slug, string tagline, decimal basePrice, decimal compareAt,
         (string Storage, string Color)[] variants)
     {
         var now = DateTime.Now;
+        var specsJson = SerializeSpecs(slug);
 
         // Model cha (gom + ảnh gallery; không bán trực tiếp → giá 0, không SKU).
         var parent = new Product
@@ -296,7 +423,7 @@ public class DbInitializer
             Brand = "Apple",
             Description = $"{name} chính hãng Apple, nguyên seal 100%, đầy đủ phụ kiện. Bảo hành 12 tháng, " +
                           "hỗ trợ trả góp 0% và thu cũ đổi mới.",
-            SpecsJson = "{}",
+            SpecsJson = specsJson,
             Status = ProductStatus.Active
         };
         parent.Images.Add(new ProductImage { Url = "/images/placeholder.svg", SortOrder = 0 });

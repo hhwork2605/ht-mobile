@@ -1,158 +1,210 @@
+@using HtMobile.Web.Infrastructure
 @model HomePageDto
 @{
     ViewData["Title"] = "Trang chủ";
 
-    string CatIcon(string slug) => slug switch
-    {
-        "iphone" => "fa-mobile-screen-button",
-        "ipad" => "fa-tablet-screen-button",
-        "mac" => "fa-laptop",
-        "apple-watch" => "fa-clock",
-        "phu-kien" => "fa-headphones",
-        "am-thanh" => "fa-volume-high",
-        "camera" => "fa-camera",
-        "gia-dung" => "fa-blender",
-        "may-cu" => "fa-recycle",
-        _ => "fa-tag"
-    };
+    // Flash sale = các sản phẩm nổi bật đang có giảm giá (tối đa 6).
+    var flash = Model.Featured.Where(p => p.DiscountPercent > 0).Take(6).ToList();
+    var banners = Model.Banners;
+    string Vnd(decimal v) => v.ToString("#,##0") + "đ";
 }
 
-@* ============ BANNER SLIDER ============ *@
-@if (Model.Banners.Count > 0)
-{
-    <section class="bg-surface2">
-        <div class="relative mx-auto max-w-[1180px] px-4 sm:px-6 py-12"
-             x-data="{ i: 0, n: @Model.Banners.Count, timer: null,
-                       start() { if (this.n > 1) this.timer = setInterval(() => this.next(), 5000); },
-                       stop() { clearInterval(this.timer); },
-                       next() { this.i = (this.i + 1) % this.n; },
-                       prev() { this.i = (this.i - 1 + this.n) % this.n; } }"
-             x-init="start()" @@mouseenter="stop()" @@mouseleave="start()">
-            @for (var k = 0; k < Model.Banners.Count; k++)
-            {
-                var b = Model.Banners[k];
-                <div x-show="i === @k" x-transition.opacity.duration.500ms class="@(k == 0 ? "" : "hidden")">
-                    <div class="grid items-center gap-6 md:grid-cols-2">
-                        <div class="text-center md:text-left">
-                            @if (!string.IsNullOrWhiteSpace(b.Eyebrow))
-                            {
-                                <div class="text-sm font-semibold tracking-wide text-accent">@b.Eyebrow</div>
-                            }
-                            <h1 class="my-2 text-[40px] font-bold leading-[1.05] tracking-tight text-ink">@b.Title</h1>
-                            @if (!string.IsNullOrWhiteSpace(b.Subtitle))
-                            {
-                                <p class="mb-5 text-[19px] font-medium text-ink2">@b.Subtitle</p>
-                            }
-                            @if (!string.IsNullOrWhiteSpace(b.LinkUrl))
-                            {
-                                <a href="@b.LinkUrl" class="inline-block rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent-press">
-                                    @(string.IsNullOrWhiteSpace(b.CtaText) ? "Mua ngay" : b.CtaText) ›
-                                </a>
-                            }
-                        </div>
-                        <div class="flex items-center justify-center">
-                            <img src="@(string.IsNullOrWhiteSpace(b.ImageUrl) ? "/images/placeholder.svg" : b.ImageUrl)"
-                                 alt="@b.Title" class="h-[300px] w-full max-w-[460px] object-contain" />
-                        </div>
-                    </div>
+@* ============ HERO: rail danh mục (desktop) + banner ============ *@
+<section class="pt-4 pb-1">
+    <div class="mx-auto max-w-[1180px] px-4 sm:px-6">
+        @* --- Desktop: rail + banner --- *@
+        <div class="hidden items-start gap-4 md:grid md:[grid-template-columns:224px_1fr]">
+            <aside class="relative z-20 rounded-2xl border border-line bg-white">
+                <div class="flex items-center gap-2 rounded-t-2xl bg-ink px-4 py-3 text-[13px] font-bold text-white">
+                    <i class="iks ik-grid-2 text-[14px]"></i>Danh mục sản phẩm
                 </div>
-            }
-
-            @if (Model.Banners.Count > 1)
-            {
-                <button type="button" @@click="prev()" aria-label="Trước"
-                        class="absolute left-2 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-ink shadow hover:bg-white md:flex">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
-                <button type="button" @@click="next()" aria-label="Sau"
-                        class="absolute right-2 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-ink shadow hover:bg-white md:flex">
-                    <i class="fa-solid fa-chevron-right"></i>
-                </button>
-                <div class="mt-6 flex justify-center gap-2">
-                    @for (var k = 0; k < Model.Banners.Count; k++)
+                <div class="flex flex-col py-1">
+                    @foreach (var c in Model.Categories)
                     {
-                        <button type="button" @@click="i = @k" aria-label="Slide @(k + 1)"
-                                class="h-2 rounded-full transition-all"
-                                :class="i === @k ? 'w-6 bg-accent' : 'w-2 bg-ink2/30'"></button>
+                        <div class="group/cat static">
+                            <a href="/@c.Slug"
+                               class="group flex w-full items-center gap-3 border-0 px-4 py-2.5 text-left text-[13.5px] font-medium text-ink hover:bg-surface2 hover:text-accent group-hover/cat:bg-surface2 group-hover/cat:text-accent">
+                                <i class="iks @StorefrontIcons.Category(c.Slug) w-5 text-[16px] text-ink2 group-hover:text-accent group-hover/cat:text-accent"></i>
+                                <span class="flex-1">@c.Name</span>
+                                <i class="iks ik-chevron-right text-[11px] text-ink2 opacity-50"></i>
+                            </a>
+                            <div class="absolute left-full top-0 z-50 hidden min-h-full w-[420px] rounded-2xl border border-line bg-white p-5 shadow-overlay group-hover/cat:block">
+                                <div class="text-[11.5px] font-bold uppercase tracking-[.5px] text-accent">Ưu đãi @c.Name</div>
+                                <div class="mt-1.5 text-[15px] font-bold leading-snug text-ink">Trả góp 0% · Thu cũ đổi mới toàn bộ @c.Name</div>
+                                <p class="mt-2 text-[13px] leading-relaxed text-ink2">Khám phá đầy đủ sản phẩm @c.Name chính hãng, bảo hành 12 tháng, giao nhanh toàn quốc.</p>
+                                <a href="/@c.Slug" class="mt-3 inline-flex items-center gap-1 text-[13px] font-semibold text-accent">Xem tất cả <i class="iks ik-chevron-right text-[11px]"></i></a>
+                                <i class="iks @StorefrontIcons.Category(c.Slug) mt-3 block text-[40px] text-ink2 opacity-20"></i>
+                            </div>
+                        </div>
                     }
                 </div>
-            }
-        </div>
-    </section>
-}
+            </aside>
 
-@* ============ TILE DANH MỤC ============ *@
-@if (Model.Categories.Count > 0)
-{
-    <section class="mx-auto max-w-[1180px] px-4 sm:px-6 pt-10 pb-3.5">
-        <div class="flex flex-wrap justify-center gap-3.5">
-            @foreach (var c in Model.Categories)
-            {
-                <a href="/@c.Slug"
-                   class="flex min-w-[140px] max-w-[210px] flex-1 flex-col items-center gap-2.5 rounded-[18px] bg-surface2 px-4 py-[22px] transition hover:-translate-y-[3px]">
-                    <i class="fa-solid @CatIcon(c.Slug) text-[28px] text-ink"></i>
-                    <span class="text-sm font-semibold text-ink">@c.Name</span>
+            <div class="grid gap-3 [grid-template-columns:1fr_300px]">
+                @* Banner chính *@
+                @{ var hero = banners.Count > 0 ? banners[0] : null; }
+                <a href="@(hero?.LinkUrl ?? "/iphone")"
+                   class="relative flex h-[300px] flex-col justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#1d1d1f] to-[#3a3a3c] p-8 text-white">
+                    @if (hero != null && !string.IsNullOrWhiteSpace(hero.ImageUrl))
+                    {
+                        <img src="@hero.ImageUrl" alt="@hero.Title" class="absolute inset-0 h-full w-full object-cover" />
+                        <div class="absolute inset-0 bg-gradient-to-r from-black/55 to-transparent"></div>
+                    }
+                    <div class="relative max-w-[60%]">
+                        @if (!string.IsNullOrWhiteSpace(hero?.Eyebrow))
+                        {
+                            <div class="text-[13px] font-semibold tracking-wide text-white/80">@hero.Eyebrow</div>
+                        }
+                        <h1 class="mt-1 text-[30px] font-bold leading-[1.1] tracking-tight">@(hero?.Title ?? "Apple chính hãng — giá tốt mỗi ngày")</h1>
+                        @if (!string.IsNullOrWhiteSpace(hero?.Subtitle))
+                        {
+                            <p class="mt-2 text-[15px] text-white/80">@hero.Subtitle</p>
+                        }
+                        <span class="mt-4 inline-block rounded-full bg-white px-5 py-2.5 text-[13.5px] font-semibold text-ink">@(string.IsNullOrWhiteSpace(hero?.CtaText) ? "Mua ngay" : hero!.CtaText)</span>
+                    </div>
                 </a>
-            }
+                @* 2 banner phụ *@
+                <div class="flex flex-col gap-3">
+                    @{ var p1 = banners.Count > 1 ? banners[1] : null; var p2 = banners.Count > 2 ? banners[2] : null; }
+                    <a href="@(p1?.LinkUrl ?? "/phu-kien")" class="relative flex h-[144px] flex-col justify-center overflow-hidden rounded-2xl bg-surface2 p-5">
+                        @if (p1 != null && !string.IsNullOrWhiteSpace(p1.ImageUrl))
+                        { <img src="@p1.ImageUrl" alt="@p1.Title" class="absolute inset-0 h-full w-full object-cover" /> }
+                        <div class="relative">
+                            <div class="text-[15px] font-bold text-ink">@(p1?.Title ?? "Phụ kiện chính hãng")</div>
+                            <div class="mt-1 text-[12.5px] text-ink2">@(p1?.Subtitle ?? "AirPods · Sạc · Ốp lưng")</div>
+                        </div>
+                    </a>
+                    <a href="@(p2?.LinkUrl ?? "/mac")" class="relative flex h-[144px] flex-col justify-center overflow-hidden rounded-2xl bg-surface2 p-5">
+                        @if (p2 != null && !string.IsNullOrWhiteSpace(p2.ImageUrl))
+                        { <img src="@p2.ImageUrl" alt="@p2.Title" class="absolute inset-0 h-full w-full object-cover" /> }
+                        <div class="relative">
+                            <div class="text-[15px] font-bold text-ink">@(p2?.Title ?? "Mac cho công việc")</div>
+                            <div class="mt-1 text-[12.5px] text-ink2">@(p2?.Subtitle ?? "Trả góp 0% — duyệt nhanh")</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        @* --- Mobile: banner + cuộn danh mục --- *@
+        <div class="md:hidden">
+            @{ var mhero = banners.Count > 0 ? banners[0] : null; }
+            <a href="@(mhero?.LinkUrl ?? "/iphone")" class="relative flex h-[172px] flex-col justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#1d1d1f] to-[#3a3a3c] p-5 text-white">
+                @if (mhero != null && !string.IsNullOrWhiteSpace(mhero.ImageUrl))
+                { <img src="@mhero.ImageUrl" alt="@mhero.Title" class="absolute inset-0 h-full w-full object-cover" /><div class="absolute inset-0 bg-black/40"></div> }
+                <div class="relative">
+                    <h1 class="text-[20px] font-bold leading-tight">@(mhero?.Title ?? "Apple chính hãng")</h1>
+                    <span class="mt-2 inline-block rounded-full bg-white px-4 py-1.5 text-[12px] font-semibold text-ink">Mua ngay</span>
+                </div>
+            </a>
+            <div class="no-scrollbar mt-3.5 flex gap-2.5 overflow-x-auto pb-1">
+                @foreach (var c in Model.Categories)
+                {
+                    <a href="/@c.Slug" class="flex w-[74px] flex-none flex-col items-center gap-1.5 rounded-2xl bg-surface2 py-2.5">
+                        <i class="iks @StorefrontIcons.Category(c.Slug) text-[20px] text-ink"></i>
+                        <span class="px-1 text-center text-[10px] font-semibold leading-tight text-ink">@c.Name</span>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@* ============ FLASH SALE ============ *@
+@if (flash.Count > 0)
+{
+    <section class="pt-5">
+        <div class="mx-auto max-w-[1180px] px-4 sm:px-6">
+            <div class="overflow-hidden rounded-2xl border border-line">
+                <div class="flex flex-nowrap items-center gap-2 px-3.5 py-3" style="background:linear-gradient(100deg,#FF424E,#FF7A1A);"
+                     x-data="{ h: 1, m: 59, s: 59, tick() { if (this.s>0){this.s--;} else {this.s=59; if(this.m>0){this.m--;} else {this.m=59; this.h=this.h>0?this.h-1:1;}} }, p(n){return String(n).padStart(2,'0')} }"
+                     x-init="setInterval(() => tick(), 1000)">
+                    <div class="flex flex-none items-center gap-1.5 text-white"><i class="iks ik-bolt text-[19px]"></i><span class="whitespace-nowrap text-[16px] font-extrabold tracking-[-.3px]">FLASH SALE</span></div>
+                    <div class="flex flex-none items-center gap-1">
+                        <span class="flex h-7 w-7 items-center justify-center rounded-md bg-[#16161a] text-[12px] font-bold text-white" x-text="p(h)">01</span><span class="text-[12px] font-bold text-white">:</span>
+                        <span class="flex h-7 w-7 items-center justify-center rounded-md bg-[#16161a] text-[12px] font-bold text-white" x-text="p(m)">59</span><span class="text-[12px] font-bold text-white">:</span>
+                        <span class="flex h-7 w-7 items-center justify-center rounded-md bg-[#16161a] text-[12px] font-bold text-white" x-text="p(s)">59</span>
+                    </div>
+                    <a href="/iphone" class="ml-auto flex flex-none items-center gap-1 whitespace-nowrap border-0 bg-transparent text-[12.5px] font-semibold text-white">Xem tất cả <i class="iks ik-chevron-right text-[11px]"></i></a>
+                </div>
+                <div class="grid gap-2.5 p-3 [grid-template-columns:repeat(2,1fr)] sm:[grid-template-columns:repeat(3,1fr)] lg:[grid-template-columns:repeat(6,1fr)]">
+                    @foreach (var c in flash)
+                    {
+                        var bar = Math.Clamp(c.DiscountPercent * 2, 25, 92);
+                        <a href="/@c.VariantSlug" class="group flex cursor-pointer flex-col">
+                            <div class="relative mb-1.5 flex aspect-square items-center justify-center rounded-lg bg-surface2">
+                                <span class="absolute left-1.5 top-1.5 rounded bg-[#FF424E] px-1.5 py-0.5 text-[10.5px] font-bold text-white">-@c.DiscountPercent%</span>
+                                <img src="@(string.IsNullOrEmpty(c.ThumbnailUrl) ? "/images/placeholder.svg" : c.ThumbnailUrl)" alt="@c.Name" class="h-full w-full object-contain p-4" loading="lazy" />
+                            </div>
+                            <div class="line-clamp-2 min-h-[34px] text-[12.5px] font-medium leading-snug text-ink group-hover:text-accent">@c.Name</div>
+                            <div class="mt-0.5 text-[14.5px] font-extrabold text-[#FF424E]">@Vnd(c.FinalPrice)</div>
+                            @if (c.CompareAtPrice is > 0)
+                            {
+                                <div class="text-[11px] text-ink2 line-through">@Vnd(c.CompareAtPrice!.Value)</div>
+                            }
+                            <div class="relative mt-1.5 h-[14px] overflow-hidden rounded-full bg-[#FFE4E1]">
+                                <span class="absolute inset-y-0 left-0 rounded-full" style="width:@(bar)%;background:linear-gradient(90deg,#FF424E,#FF7A1A);"></span>
+                                <span class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white">Đang bán chạy</span>
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
         </div>
     </section>
 }
 
 @* ============ SẢN PHẨM NỔI BẬT ============ *@
-<section class="mx-auto max-w-[1180px] px-4 sm:px-6 pt-6 pb-12">
-    <div class="mb-[18px] flex items-baseline justify-between">
-        <h2 class="m-0 text-[28px] font-bold tracking-tight text-ink">Sản phẩm nổi bật</h2>
-        <a href="/iphone" class="text-[15px] text-accent hover:underline">Xem tất cả ›</a>
-    </div>
-    @if (Model.Featured.Count == 0)
-    {
-        <p class="text-ink2">Chưa có dữ liệu. Chạy <code>scripts/seed.ps1</code> để nạp sản phẩm mẫu.</p>
-    }
-    else
-    {
-        <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            @foreach (var p in Model.Featured)
-            {
-                <vc:product-card product="p"></vc:product-card>
-            }
+<section class="pt-7">
+    <div class="mx-auto max-w-[1180px] px-4 sm:px-6">
+        <div class="mb-3.5 flex items-center justify-between border-b border-line pb-2.5">
+            <h2 class="m-0 flex items-center gap-2 text-[19px] font-bold text-ink"><i class="iks ik-mobile text-[18px] text-accent"></i>Sản phẩm nổi bật</h2>
+            <a href="/iphone" class="flex items-center gap-1 border-0 bg-transparent text-[13.5px] font-semibold text-accent">Xem tất cả <i class="iks ik-chevron-right text-[11px]"></i></a>
         </div>
-    }
+        @if (Model.Featured.Count == 0)
+        {
+            <p class="text-ink2">Chưa có dữ liệu. Chạy <code>scripts/seed.ps1</code> để nạp sản phẩm mẫu.</p>
+        }
+        else
+        {
+            <div class="grid gap-3 [grid-template-columns:repeat(2,1fr)] sm:[grid-template-columns:repeat(3,1fr)] lg:[grid-template-columns:repeat(5,1fr)]">
+                @foreach (var p in Model.Featured.Take(10))
+                {
+                    <vc:product-card product="p"></vc:product-card>
+                }
+            </div>
+        }
+    </div>
 </section>
 
-@* ============ BENTO: TRẢ GÓP / THU CŨ ============ *@
-<section class="mx-auto max-w-[1180px] px-4 sm:px-6 pb-12">
-    <div class="grid gap-4 md:grid-cols-2">
-        <div class="flex min-h-[200px] flex-col gap-2 rounded-[22px] bg-surface2 p-[34px]">
-            <h3 class="m-0 text-2xl font-bold tracking-tight text-ink">Trả góp 0%</h3>
-            <p class="m-0 max-w-[300px] text-[15px] leading-normal text-ink2">Sở hữu sản phẩm Apple chính hãng với 0đ trả trước, duyệt nhanh trong 5 phút.</p>
-            <a href="/iphone" class="mt-auto self-start rounded-full bg-accent px-[22px] py-2.5 text-sm font-semibold text-white hover:bg-accent-press">Tìm hiểu</a>
-        </div>
-        <div class="flex min-h-[200px] flex-col gap-2 rounded-[22px] bg-surface2 p-[34px]">
-            <h3 class="m-0 text-2xl font-bold tracking-tight text-ink">Thu cũ đổi mới</h3>
-            <p class="m-0 max-w-[300px] text-[15px] leading-normal text-ink2">Lên đời dễ dàng — trợ giá đến 3 triệu khi mang máy cũ đến đổi.</p>
-            <a href="/thu-cu-doi-moi" class="mt-auto self-start rounded-full border-[1.5px] border-ink bg-white px-[22px] py-2.5 text-sm font-semibold text-ink hover:bg-surface2">Định giá máy</a>
+@* ============ PROMO SPLIT ============ *@
+<section class="pt-8">
+    <div class="mx-auto max-w-[1180px] px-4 sm:px-6">
+        <div class="grid gap-4 [grid-template-columns:1fr] md:[grid-template-columns:repeat(2,1fr)]">
+            <div class="flex min-h-[170px] flex-col gap-1.5 rounded-[20px] bg-surface2 p-7">
+                <i class="iks ik-credit-card text-[26px] text-accent"></i>
+                <h3 class="m-0 mt-2 text-[22px] font-bold tracking-[-.4px] text-ink">Trả góp 0%</h3>
+                <p class="m-0 max-w-[320px] text-[14px] leading-relaxed text-ink2">0đ trả trước, duyệt nhanh trong 5 phút. Sở hữu Apple chính hãng ngay hôm nay.</p>
+                <a href="/iphone" class="mt-auto self-start rounded-full bg-accent px-[22px] py-2.5 text-sm font-semibold text-white hover:bg-accent-press">Tìm hiểu</a>
+            </div>
+            <div class="flex min-h-[170px] flex-col gap-1.5 rounded-[20px] bg-surface2 p-7">
+                <i class="iks ik-arrows-rotate text-[26px] text-accent"></i>
+                <h3 class="m-0 mt-2 text-[22px] font-bold tracking-[-.4px] text-ink">Thu cũ đổi mới</h3>
+                <p class="m-0 max-w-[320px] text-[14px] leading-relaxed text-ink2">Lên đời dễ dàng — trợ giá đến 3 triệu khi mang máy cũ đến đổi.</p>
+                <a href="/thu-cu-doi-moi" class="mt-auto self-start rounded-full border-[1.5px] border-ink bg-white px-[22px] py-2.5 text-sm font-semibold text-ink">Định giá máy</a>
+            </div>
         </div>
     </div>
 </section>
 
 @* ============ TRUST BAR ============ *@
-<section class="bg-surface2 py-7">
-    <div class="mx-auto flex max-w-[1180px] flex-wrap justify-between gap-5 px-4 sm:px-6">
-        <div class="flex min-w-[200px] flex-1 items-center gap-3">
-            <i class="fa-solid fa-truck text-2xl text-accent"></i>
-            <div><div class="text-sm font-semibold text-ink">Giao nhanh 2 giờ</div><div class="text-[12.5px] text-ink2">Nội thành miễn phí</div></div>
-        </div>
-        <div class="flex min-w-[200px] flex-1 items-center gap-3">
-            <i class="fa-solid fa-shield-halved text-2xl text-accent"></i>
-            <div><div class="text-sm font-semibold text-ink">Chính hãng VN/A</div><div class="text-[12.5px] text-ink2">Bảo hành 12 tháng</div></div>
-        </div>
-        <div class="flex min-w-[200px] flex-1 items-center gap-3">
-            <i class="fa-solid fa-credit-card text-2xl text-accent"></i>
-            <div><div class="text-sm font-semibold text-ink">Trả góp 0%</div><div class="text-[12.5px] text-ink2">Duyệt trong 5 phút</div></div>
-        </div>
-        <div class="flex min-w-[200px] flex-1 items-center gap-3">
-            <i class="fa-solid fa-arrows-rotate text-2xl text-accent"></i>
-            <div><div class="text-sm font-semibold text-ink">Đổi trả 30 ngày</div><div class="text-[12.5px] text-ink2">1 đổi 1 nếu lỗi</div></div>
+<section class="mt-8 bg-surface2 py-7">
+    <div class="mx-auto max-w-[1180px] px-4 sm:px-6">
+        <div class="flex flex-wrap justify-between gap-5">
+            <div class="flex min-w-[200px] flex-1 items-center gap-3"><i class="iks ik-truck text-2xl text-accent"></i><div><div class="text-sm font-semibold text-ink">Giao nhanh 2 giờ</div><div class="text-[12.5px] text-ink2">Nội thành miễn phí</div></div></div>
+            <div class="flex min-w-[200px] flex-1 items-center gap-3"><i class="iks ik-shield-check text-2xl text-accent"></i><div><div class="text-sm font-semibold text-ink">Chính hãng VN/A</div><div class="text-[12.5px] text-ink2">Bảo hành 12 tháng</div></div></div>
+            <div class="flex min-w-[200px] flex-1 items-center gap-3"><i class="iks ik-credit-card text-2xl text-accent"></i><div><div class="text-sm font-semibold text-ink">Trả góp 0%</div><div class="text-[12.5px] text-ink2">Duyệt trong 5 phút</div></div></div>
+            <div class="flex min-w-[200px] flex-1 items-center gap-3"><i class="iks ik-arrows-rotate text-2xl text-accent"></i><div><div class="text-sm font-semibold text-ink">Đổi trả 30 ngày</div><div class="text-[12.5px] text-ink2">1 đổi 1 nếu lỗi</div></div></div>
         </div>
     </div>
 </section>

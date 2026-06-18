@@ -50,12 +50,15 @@ public class AdminProductEditDto
     public string? Brand { get; set; }
     public string? Tagline { get; set; }
     public string? Description { get; set; }
+
+    /// <summary>Thông số kỹ thuật dạng JSON thô (jsonb) để admin sửa. Xem <c>ProductSpecs</c> cho contract.</summary>
+    public string? Specs { get; set; }
     public IReadOnlyList<AdminVariantRow> Variants { get; set; } = new List<AdminVariantRow>();
     public IReadOnlyList<AdminCategoryOption> Categories { get; set; } = new List<AdminCategoryOption>();
 }
 
-/// <summary>Input field SP (tạo/sửa). Slug để trống → tự sinh từ Name.</summary>
-public record ProductInput(string Name, string? Slug, long CategoryId, string? Brand, string? Tagline, string? Description);
+/// <summary>Input field SP (tạo/sửa). Slug để trống → tự sinh từ Name. Specs = JSON thông số (xem <c>ProductSpecs</c>).</summary>
+public record ProductInput(string Name, string? Slug, long CategoryId, string? Brand, string? Tagline, string? Description, string? Specs = null);
 
 /// <summary>Input 1 biến thể mới.</summary>
 public record VariantInput(string Sku, string? Storage, string? Color, decimal BasePrice, decimal? CompareAtPrice, ProductStatus Status);
@@ -64,4 +67,4 @@ public record VariantInput(string Sku, string? Storage, string? Color, decimal B
 public record VariantEdit(long Id, decimal BasePrice, decimal? CompareAtPrice, ProductStatus Status);
 
 /// <summary>Kết quả thao tác ghi SP.</summary>
-public enum AdminProductResult { Ok, SlugExists, SkuExists, NotFound }
+public enum AdminProductResult { Ok, SlugExists, SkuExists, NotFound, InvalidSpecs }

@@ -3,6 +3,7 @@ using HtMobile.Application.Features.Bundles;
 using HtMobile.Application.Features.Cart;
 using HtMobile.Application.Features.Catalog;
 using HtMobile.Application.Features.Checkout;
+using HtMobile.Application.Features.Customers;
 using HtMobile.Application.Features.Dashboard;
 using HtMobile.Application.Features.Inventory;
 using HtMobile.Application.Features.Orders;
@@ -28,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<AdminInventoryService>();
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<CheckoutService>();
+        services.AddScoped<CustomerAccountService>();
         services.AddScoped<OrderHistoryService>();
         services.AddScoped<AdminOrderService>();
         services.AddScoped<DashboardService>();

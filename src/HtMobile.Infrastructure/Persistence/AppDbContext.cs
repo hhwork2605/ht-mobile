@@ -52,6 +52,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<long
     public DbSet<BundleItem> BundleItems => Set<BundleItem>();
 
     // Customers / Reviews
+    public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<Address> Addresses => Set<Address>();
     public DbSet<Review> Reviews => Set<Review>();
 

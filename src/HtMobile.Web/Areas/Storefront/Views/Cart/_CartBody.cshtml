@@ -4,7 +4,7 @@
     @if (Model.IsEmpty)
     {
         <div class="rounded-card border border-line py-16 text-center">
-            <i class="fa-solid fa-cart-shopping text-[46px] text-ink2 opacity-40"></i>
+            <i class="ikr ik-cart-shopping text-[46px] text-ink2 opacity-40"></i>
             <p class="mx-0 my-4 text-base text-ink2">Giỏ hàng của bạn đang trống.</p>
             <a href="/" class="inline-block rounded-xl bg-accent px-7 py-3 text-[15px] font-semibold text-white transition hover:bg-accent-press">Tiếp tục mua sắm</a>
         </div>
@@ -32,7 +32,7 @@
                         <div class="flex flex-col items-end gap-2.5">
                             <button hx-post="/cart/items/@it.Id/remove" hx-target="#cart-body" hx-swap="outerHTML"
                                     class="cursor-pointer border-0 bg-transparent text-ink2 hover:text-sale" aria-label="Xoá @it.ProductName">
-                                <i class="fa-regular fa-trash-can text-[15px]"></i>
+                                <i class="ikr ik-trash-can text-[15px]"></i>
                             </button>
                             <div class="flex items-center overflow-hidden rounded-[10px] border border-line">
                                 <button hx-post="/cart/items/@it.Id/dec" hx-target="#cart-body" hx-swap="outerHTML"
@@ -55,7 +55,7 @@
                 </div>
                 <div class="mb-1 flex justify-between text-sm text-ink2">
                     <span>Phí vận chuyển</span>
-                    <span class="font-semibold text-green-600">Miễn phí</span>
+                    <span class="font-semibold text-[color:var(--success)]">Miễn phí</span>
                 </div>
 
                 @* Mã giảm giá: UI có sẵn nhưng logic để Phase promotions (chưa xử lý). *@

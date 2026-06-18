@@ -38,13 +38,14 @@ POST /stock-notify               # body: variantId, contact (email/SĐT) → đ�
 > Merge giỏ guest→user: `ICartService.MergeAsync` (gọi sau khi đăng nhập — nối ở feature auth P2).
 > REST `/api/cart/*` (SPEC §8) để dành cho đối tác/app sau; storefront dùng route MVC trên.
 
-### Tài khoản / Auth (ASP.NET Identity — cookie, email + mật khẩu)
-`AccountController` (Storefront). Mọi POST có antiforgery. Đăng nhập/đăng ký thành công → gộp giỏ guest.
+### Tài khoản / Auth (tài khoản `Customer` — cookie `"Storefront"`, email + mật khẩu) *(ADR 0005)*
+`AccountController` (Storefront) + `CustomerAccountService`. **Không dùng Identity** (Identity chỉ cho Admin API).
+Mọi POST có antiforgery. Đăng nhập/đăng ký thành công → gộp giỏ guest. Đơn hàng gắn `Customer` qua `Orders.CustomerId`.
 ```
 GET  /register                       # form đăng ký (email, mật khẩu, họ tên)
-POST /register                       # tạo user + role Customer + đăng nhập + merge giỏ
+POST /register                       # tạo Customer + đăng nhập (cookie) + merge giỏ
 GET  /login?ReturnUrl=               # form đăng nhập (email, mật khẩu, nhớ đăng nhập)
-POST /login                          # PasswordSignIn + merge giỏ; ReturnUrl chỉ nhận URL nội bộ
+POST /login                          # kiểm tra Customer + merge giỏ; ReturnUrl chỉ nhận URL nội bộ
 POST /logout                         # SignOut
 GET  /forgot-password                # form nhập email
 POST /forgot-password                # sinh token + IEmailSender; luôn báo "đã gửi" (không lộ email tồn tại)
@@ -69,8 +70,13 @@ POST /checkout            # tạo Order(Pending)+OrderItem(snapshot giá)+Shipme
 > SEO bắt buộc mỗi trang (xem [conventions.md](conventions.md) §SEO): `_Layout` sinh `<title>`/`description`/canonical/OG/hreflang + JSON-LD `Organization`/`WebSite`; mỗi trang bổ sung JSON-LD qua section `Head` (Category → `ItemList`+`BreadcrumbList`; PDP → `Product`+`offers`(+`aggregateRating`)+`BreadcrumbList`). Helper: `Web/Infrastructure/Seo/JsonLd`.
 
 ### Admin — đã bỏ khỏi app MVC
-Khu quản trị sẽ là **webapp Angular riêng** dùng REST API (làm sau). App MVC này chỉ phục vụ storefront.
-Không còn route `/admin/*` trong `HtMobile.Web`.
+Khu quản trị là **webapp Angular riêng** (`HtMobile.Admin`) dùng REST API riêng (`HtMobile.Api`, JWT Bearer).
+App MVC này chỉ phục vụ storefront; không còn route `/admin/*` trong `HtMobile.Web`.
+
+Hợp đồng đáng chú ý của Admin API (`POST/PUT /api/products`): `ProductInput` gồm
+`Name, Slug?, CategoryId, Brand?, Tagline?, Description?, Specs?`. Trong đó **`Specs`** là JSON thông số kỹ thuật
+(ghi vào `Product.SpecsJson`) — theo contract `ProductSpecs` (xem [data-model.md](data-model.md) §Products);
+JSON sai → `400 { field: "specs" }`.
 
 ## Pricing
 ```

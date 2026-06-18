@@ -8,14 +8,14 @@
     @if (done)
     {
         <div class="rounded-card border border-line bg-surface2 p-4 text-sm text-ink">
-            <i class="fa-solid fa-bell mr-1.5 text-accent"></i>Đã đăng ký nhận thông báo khi có hàng. Cảm ơn bạn!
+            <i class="iks ik-bell mr-1.5 text-accent"></i>Đã đăng ký nhận thông báo khi có hàng. Cảm ơn bạn!
         </div>
     }
     else
     {
         <form hx-post="/stock-notify" hx-target="#stock-notify-@Model.VariantId" hx-swap="outerHTML"
               class="rounded-card border border-line p-4">
-            <p class="mb-2 text-sm font-semibold text-ink"><i class="fa-regular fa-bell mr-1.5 text-accent"></i>Tạm hết hàng — theo dõi để biết khi có hàng</p>
+            <p class="mb-2 text-sm font-semibold text-ink"><i class="ikr ik-bell mr-1.5 text-accent"></i>Tạm hết hàng — theo dõi để biết khi có hàng</p>
             <input type="hidden" name="variantId" value="@Model.VariantId" />
             <div class="flex flex-wrap gap-2">
                 <input name="contact" value="@Model.Contact" placeholder="Email hoặc số điện thoại"

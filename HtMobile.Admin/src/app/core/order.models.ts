@@ -37,6 +37,10 @@ export interface AdminOrderDetailDto {
   paymentMethod?: string | null;
   shipmentAddress?: string | null;
   customerId?: number | null;
+  customerName?: string | null;
+  customerEmail?: string | null;
+  customerPhone?: string | null;
+  isRegistered: boolean;
   items: AdminOrderLine[];
   allowedNext: OrderStatus[];
 }

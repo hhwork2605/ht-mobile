@@ -242,7 +242,7 @@ public class CatalogService
             Tagline = product.Tagline,
             Brand = product.Brand,
             Description = product.Description,
-            SpecsJson = product.SpecsJson,
+            Specs = ProductSpecs.Parse(product.SpecsJson),
             CategoryName = category?.Name ?? string.Empty,
             CategorySlug = category?.Slug ?? string.Empty,
             SelectedVariantId = selectedVariantId,

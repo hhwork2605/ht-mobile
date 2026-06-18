@@ -26,10 +26,10 @@
     <div class="mb-6 flex gap-6 border-b border-line" role="tablist">
         <button type="button" role="tab" @@click="tab = 'orders'"
                 :class="tab === 'orders' ? 'border-accent text-ink' : 'border-transparent text-ink2'"
-                class="flex items-center gap-2 border-b-2 pb-3 text-sm font-semibold"><i class="fa-solid fa-box-archive"></i> Đơn hàng</button>
+                class="flex items-center gap-2 border-b-2 pb-3 text-sm font-semibold"><i class="iks ik-box"></i> Đơn hàng</button>
         <button type="button" role="tab" @@click="tab = 'info'"
                 :class="tab === 'info' ? 'border-accent text-ink' : 'border-transparent text-ink2'"
-                class="flex items-center gap-2 border-b-2 pb-3 text-sm font-semibold"><i class="fa-regular fa-circle-user"></i> Thông tin</button>
+                class="flex items-center gap-2 border-b-2 pb-3 text-sm font-semibold"><i class="ikr ik-circle-user"></i> Thông tin</button>
     </div>
 
     @* ===== Tab Đơn hàng ===== *@
@@ -37,7 +37,7 @@
         @if (Model.Orders.Count == 0)
         {
             <div class="rounded-card py-14 text-center">
-                <i class="fa-solid fa-box-open text-[42px] text-ink2 opacity-40"></i>
+                <i class="iks ik-box-open text-[42px] text-ink2 opacity-40"></i>
                 <p class="mx-0 my-4 text-[15px] text-ink2">Bạn chưa có đơn hàng nào.</p>
                 <a href="/" class="inline-block rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white hover:bg-accent-press">Mua sắm ngay</a>
             </div>
@@ -54,7 +54,7 @@
                                 <span class="text-sm font-bold text-ink">#@o.Code</span>
                                 <span class="ml-2.5 text-[12.5px] text-ink2">@o.CreatedAt.ToString("dd/MM/yyyy")</span>
                             </div>
-                            <span class="rounded-full px-3 py-[5px] text-xs font-semibold @(st.IsCancelled ? "bg-red-50 text-red-600" : "bg-surface2 text-accent")">@st.Label</span>
+                            <span class="rounded-full px-3 py-[5px] text-xs font-semibold @(st.IsCancelled ? "bg-sale/10 text-sale" : "bg-surface2 text-accent")">@st.Label</span>
                         </div>
 
                         @if (!st.IsCancelled)
@@ -64,7 +64,7 @@
                                 {
                                     <div class="flex min-w-[110px] flex-1 items-center gap-1.5">
                                         <span class="flex h-6 w-6 flex-none items-center justify-center rounded-full text-[11px] @(i <= st.StepIndex ? "bg-accent text-white" : "bg-surface2 text-ink2")">
-                                            <i class="fa-solid fa-check"></i>
+                                            <i class="iks ik-check"></i>
                                         </span>
                                         <span class="whitespace-nowrap text-[11.5px] text-ink2">@OrderStatusInfo.Steps[i]</span>
                                     </div>

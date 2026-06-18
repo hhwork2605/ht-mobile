@@ -46,6 +46,7 @@ public interface IApplicationDbContext
     DbSet<BundleItem> BundleItems { get; }
 
     // Customers / Reviews
+    DbSet<Customer> Customers { get; }
     DbSet<Address> Addresses { get; }
     DbSet<Review> Reviews { get; }
 

@@ -16,7 +16,7 @@
 | Enum | Lưu **dạng số `int`** (giá trị enum), không lưu chuỗi. |
 | Audit | Entity kế thừa `BaseAuditableEntity` có `CreatedAt` (NOT NULL) + `UpdatedAt` (NULL), **gán tự động** bởi `AuditableEntityInterceptor` dùng **giờ server** (`IDateTime.Now`) khi `SaveChanges`. Entity chỉ kế thừa `BaseEntity` thì **không** có 2 cột này. |
 | Chuỗi không khai `HasMaxLength` | Map sang `text` (không giới hạn độ dài). |
-| Khách hàng | `Customer` của SPEC = **`ApplicationUser : IdentityUser<long>`** (bảng `AspNetUsers`). Các cột `CustomerId` là FK trỏ tới `AspNetUsers.Id`. |
+| Khách hàng | **`Customer`** (bảng `Customers`) — tài khoản storefront, **tách khỏi Identity** (ADR 0005). Cột `CustomerId` (Orders/Cart/Review/Address/TradeIn) = `Customers.Id`; **`Orders.CustomerId` có FK cứng** → `Customers`. ASP.NET Identity (`ApplicationUser`/`AspNetUsers`) nay **chỉ dùng cho đăng nhập Admin** (API JWT). |
 
 ### Lớp cơ sở
 
@@ -62,7 +62,7 @@ Quan hệ điều hướng: `Parent`, `Children`, `Products`.
 | `Tagline` | `string?` | `varchar(200)` | Khẩu hiệu ngắn cho ProductCard. |
 | `Description` | `string?` | `text` | Mô tả dài. |
 | `Brand` | `string?` | `varchar(100)` | Thương hiệu. |
-| `SpecsJson` | `string?` | **`jsonb`** | Thông số kỹ thuật JSON. |
+| `SpecsJson` | `string?` | **`jsonb`** | Thông số kỹ thuật JSON. **Contract** (xem `ProductSpecs`): mảng nhóm `[{ "group": "...", "items": [{ "label", "value" }] }]`; cũng chấp nhận mảng phẳng `[{ "label", "value" }]`, mảng cặp `[["k","v"]]`, hoặc object `{ "k": "v" }` (quy về 1 nhóm không tiêu đề). Parse phía Application → `IReadOnlyList<SpecGroupDto>` (PDP render); JSON sai/rỗng → không hiện mục thông số. Admin sửa qua field `Specs` (validate `ProductSpecs.IsValid`). |
 
 Quan hệ: `Category`, `Parent`/`Children` (self), `Attributes`, `Images`, `Videos`.
 
@@ -190,12 +190,12 @@ Quan hệ: `Items` (CartItem). Lưu ý: giỏ khách vãng lai có thể cache �
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
-| `CustomerId` | `long?` | | Khách đặt hàng (user đăng nhập); **`null` = khách vãng lai** (guest checkout, P2-02). Không đặt FK cứng. |
+| `CustomerId` | `long?` | **FK → `Customers.Id`**, `OnDelete: Restrict`, có index | Khách đặt hàng; **`null` = khách vãng lai** (guest checkout, P2-02). |
 | `Status` | `OrderStatus` (int) | mặc định `Pending` | `Pending`/`Confirmed`/`Processing`/`Shipped`/`Delivered`/`Cancelled`/`Refunded`. |
 | `Total` | `decimal(18,2)` | | Tổng tiền đơn. |
 | `PaymentMethod` | `string?` | `text` | Phương thức thanh toán đã chọn. |
 
-Quan hệ: `Items` (OrderItem), `Payments`, `Shipment` (0..1).
+Quan hệ: `Customer` (0..1), `Items` (OrderItem), `Payments`, `Shipment` (0..1).
 
 ### `OrderItems` — dòng đơn hàng *(không audit)*
 
@@ -247,11 +247,27 @@ Quan hệ: `Items` (BundleItem).
 
 ## 5. Customers — `Domain/Entities/Customers`
 
+### `Customers` ✅ Audit — tài khoản khách hàng storefront *(ADR 0005)*
+
+> Tài khoản đăng nhập phía cửa hàng, **tách khỏi ASP.NET Identity** (Identity nay chỉ cho Admin). Đăng nhập
+> email + mật khẩu băm qua `IPasswordHasher` (cookie scheme `"Storefront"` ở Web). Đơn hàng gắn qua `Orders.CustomerId`.
+
+| Cột | Kiểu | Ràng buộc | Ý nghĩa |
+|---|---|---|---|
+| `Email` | `string` | `varchar(256)`, NOT NULL, **UNIQUE** | Email đăng nhập (chuẩn hoá thường). |
+| `PasswordHash` | `string` | `varchar(256)`, NOT NULL | Mật khẩu đã băm (PBKDF2 PHC v3). |
+| `FullName` | `string?` | `varchar(200)` | Họ tên. |
+| `Phone` | `string?` | `varchar(30)` | SĐT. |
+| `ResetTokenHash` | `string?` | `varchar(128)` | Băm SHA-256 token đặt lại MK; `null` = không có yêu cầu. |
+| `ResetTokenExpiresAt` | `DateTime?` | | Hạn token reset (UTC). |
+
+Quan hệ: `Orders` (1-n).
+
 ### `Addresses` ✅ Audit — sổ địa chỉ nhận hàng
 
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
-| `CustomerId` | `long` | FK → `AspNetUsers.Id` | Khách sở hữu địa chỉ. |
+| `CustomerId` | `long` | = `Customers.Id` | Khách sở hữu địa chỉ. |
 | `Recipient` | `string` | `text`, NOT NULL | Tên người nhận. |
 | `Phone` | `string` | `text`, NOT NULL | SĐT người nhận. |
 | `AddressLine` | `string` | `text`, NOT NULL | Địa chỉ chi tiết. |
@@ -359,9 +375,11 @@ Chuỗi UI tĩnh dùng `.resx`; bảng này chỉ cho **nội dung DB** (VI/EN).
 
 ---
 
-## 10. Identity (khách hàng & phân quyền) — `Infrastructure/Identity`
+## 10. Identity (đăng nhập Admin) — `Infrastructure/Identity`
 
-Dùng ASP.NET Core Identity với khóa `long`. `Customer` của SPEC được gộp vào `ApplicationUser`.
+Dùng ASP.NET Core Identity với khóa `long`. **Từ ADR 0005, Identity chỉ phục vụ đăng nhập Admin** (API JWT):
+storefront dùng bảng `Customers` riêng. Role Identity còn lại **chỉ có `Admin`** (`Roles.All = { Admin }`); role
+`Customer` cũ đã **bỏ** — `DbInitializer` tự xoá role này khỏi DB khi khởi động nếu còn sót.
 
 ### `AspNetUsers` — `ApplicationUser : IdentityUser<long>`
 

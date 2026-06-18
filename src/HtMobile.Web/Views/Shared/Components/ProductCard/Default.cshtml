@@ -1,33 +1,50 @@
 @model ProductCardDto
+@{
+    var hasOld = Model.CompareAtPrice is > 0 && Model.CompareAtPrice > Model.FinalPrice;
+    // Trả góp 0% — ước lượng/tháng (làm tròn nghìn) như design.
+    var installPerMonth = Math.Round(Model.FinalPrice / 12 / 1000) * 1000;
+}
 
-<a href="/@Model.VariantSlug"
-   class="group flex h-full flex-col items-center gap-2 rounded-card border border-transparent bg-white p-[18px] pt-5 text-center transition duration-200 hover:-translate-y-1 hover:shadow-[0_14px_34px_rgba(0,0,0,.10)]">
-    <div class="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl bg-surface2">
-        @if (Model.IsNew)
-        {
-            <span class="absolute left-3 top-3 rounded-full bg-white px-2.5 py-1 text-[11.5px] font-semibold tracking-wide text-accent shadow-sm">Mới</span>
-        }
+<div class="group relative flex h-full flex-col rounded-card border border-line bg-white p-3 transition-[box-shadow,transform,border-color] duration-200 hover:-translate-y-1 hover:border-accent hover:shadow-[0_14px_34px_rgba(0,0,0,.10)]">
+    @* Link phủ toàn thẻ để mở PDP (stretched link) — nút thêm giỏ nằm trên, z cao hơn *@
+    <a href="/@Model.VariantSlug" class="absolute inset-0 z-0" aria-label="@Model.Name"></a>
+
+    <div class="relative mb-2.5 flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-surface2">
         @if (Model.DiscountPercent > 0)
         {
-            <span class="absolute right-3 top-3 rounded-full bg-sale px-2.5 py-1 text-[11.5px] font-semibold tracking-wide text-white">-@Model.DiscountPercent%</span>
+            <span class="absolute left-2.5 top-2.5 rounded-md bg-sale px-2 py-0.5 text-[11px] font-bold text-white">-@Model.DiscountPercent%</span>
+        }
+        @if (Model.IsNew)
+        {
+            <span class="absolute right-2.5 top-2.5 rounded-full border border-line bg-surface2 px-2 py-0.5 text-[10.5px] font-semibold text-accent">Mới</span>
         }
         <img src="@(string.IsNullOrEmpty(Model.ThumbnailUrl) ? "/images/placeholder.svg" : Model.ThumbnailUrl)"
              alt="@Model.Name" class="h-full w-full object-contain p-6" loading="lazy" />
     </div>
 
-    <div class="mt-1 text-base font-semibold leading-snug text-ink group-hover:text-accent">@Model.Name</div>
-    @if (!string.IsNullOrWhiteSpace(Model.Tagline))
-    {
-        <div class="text-[13px] leading-snug text-ink2">@Model.Tagline</div>
-    }
+    <div class="line-clamp-2 min-h-[40px] text-[14.5px] font-semibold leading-snug text-ink">@Model.Name</div>
 
-    <div class="mt-1.5 flex items-baseline justify-center gap-2">
-        <span class="text-[17px] font-semibold text-ink">@Model.FinalPrice.ToString("#,##0")đ</span>
-        @if (Model.CompareAtPrice is > 0 && Model.CompareAtPrice > Model.FinalPrice)
+    <div class="mt-1.5 flex items-baseline gap-2">
+        <span class="text-[18px] font-extrabold text-sale">@Model.FinalPrice.ToString("#,##0")đ</span>
+        @if (hasOld)
         {
-            <span class="text-[13px] text-ink2 line-through">@Model.CompareAtPrice.Value.ToString("#,##0")đ</span>
+            <span class="text-[12.5px] text-ink2 line-through">@Model.CompareAtPrice!.Value.ToString("#,##0")đ</span>
         }
     </div>
 
-    <span class="mt-2.5 rounded-full bg-accent px-[22px] py-[9px] text-sm font-semibold text-white transition group-hover:bg-accent-press">Mua</span>
-</a>
+    <div class="mt-2 self-start rounded-md bg-surface2 px-2 py-1 text-[11.5px] text-ink2">Trả góp 0% · @installPerMonth.ToString("#,##0")đ/tháng</div>
+
+    <div class="mt-auto flex items-center justify-between pt-2.5">
+        <span class="flex items-center gap-1 text-[12px] text-ink2"><i class="iks ik-shield-check text-[12px] text-accent"></i>Chính hãng</span>
+        <form method="post" action="/cart/items" class="relative z-10 flex">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="variantId" value="@Model.VariantId" />
+            <input type="hidden" name="quantity" value="1" />
+            <button type="submit"
+                    class="flex h-8 w-8 flex-none items-center justify-center rounded-full border-0 bg-accent text-white transition hover:bg-accent-press"
+                    aria-label="Thêm vào giỏ">
+                <i class="iks ik-cart-shopping text-[13px]"></i>
+            </button>
+        </form>
+    </div>
+</div>

@@ -12,7 +12,9 @@ public record ProductDetailDto
     public string? Tagline { get; init; }
     public string? Brand { get; init; }
     public string? Description { get; init; }
-    public string? SpecsJson { get; init; }
+
+    /// <summary>Thông số kỹ thuật đã parse từ <c>Product.SpecsJson</c> (jsonb) — nhóm + cặp nhãn/giá trị.</summary>
+    public IReadOnlyList<SpecGroupDto> Specs { get; init; } = Array.Empty<SpecGroupDto>();
 
     /// <summary>Tên + slug danh mục cha (cho breadcrumb + JSON-LD).</summary>
     public string CategoryName { get; init; } = string.Empty;
@@ -59,6 +61,12 @@ public record VariantOptionDto(
     string Label,
     string Sku,
     bool IsSelected);
+
+/// <summary>1 dòng thông số: nhãn + giá trị (vd "Màn hình" / "6.9\" Super Retina XDR 120Hz").</summary>
+public record SpecItemDto(string Label, string Value);
+
+/// <summary>1 nhóm thông số (vd "Tổng quan"); <see cref="Group"/> null = nhóm không tiêu đề.</summary>
+public record SpecGroupDto(string? Group, IReadOnlyList<SpecItemDto> Items);
 
 /// <summary>Khuyến mãi hiệu lực hiển thị ở khối "Ưu đãi".</summary>
 public record OfferDto(string Name, DateTime EndsAt);

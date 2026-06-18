@@ -22,6 +22,9 @@
         var m = System.Text.RegularExpressions.Regex.Match(url, @"(?:youtu\.be/|v=|embed/)([\w-]{11})");
         return m.Success ? $"https://www.youtube.com/embed/{m.Groups[1].Value}" : url;
     }
+
+    var monthlyFrom = InstallmentCalculator.MonthlyFrom(Model.Price.FinalPrice);
+    var plans = InstallmentCalculator.Plans(Model.Price.FinalPrice);
 }
 
 @section Head {
@@ -59,10 +62,10 @@
     }))</script>
 }
 
-<div class="mx-auto max-w-[1180px] px-4 sm:px-6 py-6">
+<div class="mx-auto max-w-[1180px] px-4 sm:px-6 py-[22px] pb-[50px]">
 
-    <nav aria-label="Breadcrumb" class="mb-4 text-[13px] text-ink2">
-        <ol class="flex flex-wrap items-center gap-1.5">
+    <nav aria-label="Breadcrumb" class="mb-[18px] text-[13px] text-ink2">
+        <ol class="flex flex-wrap items-center gap-2">
             <li><a href="/" class="hover:text-accent">Trang chủ</a></li>
             <li aria-hidden="true">/</li>
             <li><a href="/@Model.CategorySlug" class="hover:text-accent">@Model.CategoryName</a></li>
@@ -71,30 +74,34 @@
         </ol>
     </nav>
 
-    <div class="grid gap-8 lg:grid-cols-2">
+    <div class="flex flex-wrap items-start gap-x-[46px] gap-y-8">
         @* ===== Cột media: gallery + video ===== *@
-        <div x-data="{ active: 0 }">
-            <div class="aspect-square overflow-hidden rounded-card border border-line bg-white">
-                @for (var i = 0; i < images.Count; i++)
-                {
-                    <img src="@images[i]" alt="@Model.Name@(Model.SelectedVariantLabel is null ? "" : " " + Model.SelectedVariantLabel)"
-                         width="600" height="600" loading="@(i == 0 ? "eager" : "lazy")"
-                         x-show="active === @i" class="h-full w-full object-contain p-6" />
-                }
+        <div class="min-w-[280px] max-w-[520px] flex-1" x-data="{ active: 0 }">
+            <div class="flex items-center justify-center rounded-[20px] border border-line bg-white p-5">
+                <div class="aspect-square w-full">
+                    @for (var i = 0; i < images.Count; i++)
+                    {
+                        <img src="@images[i]" alt="@Model.Name@(Model.SelectedVariantLabel is null ? "" : " " + Model.SelectedVariantLabel)"
+                             width="600" height="600" loading="@(i == 0 ? "eager" : "lazy")"
+                             x-show="active === @i" class="h-full w-full object-contain" />
+                    }
+                </div>
             </div>
 
             @if (images.Count > 1)
             {
-                <div class="mt-3 flex gap-2 overflow-x-auto" role="tablist" aria-label="Ảnh sản phẩm">
-                    @for (var i = 0; i < images.Count; i++)
-                    {
-                        <button type="button" @@click="active = @i" aria-label="Ảnh @(i + 1)"
-                                :class="active === @i ? 'border-accent' : 'border-line'"
-                                class="h-16 w-16 shrink-0 overflow-hidden rounded-lg border bg-white">
-                            <img src="@images[i]" alt="@Model.Name thumbnail @(i + 1)" width="64" height="64"
-                                 loading="lazy" class="h-full w-full object-contain p-1" />
-                        </button>
-                    }
+                <div class="mt-3.5 flex items-center gap-2">
+                    <div class="no-scrollbar flex flex-1 gap-2.5 overflow-x-auto" role="tablist" aria-label="Ảnh sản phẩm">
+                        @for (var i = 0; i < images.Count; i++)
+                        {
+                            <button type="button" @@click="active = @i" aria-label="Ảnh @(i + 1)"
+                                    :class="active === @i ? 'border-accent border-[1.5px]' : 'border-line'"
+                                    class="h-[68px] w-[68px] flex-none overflow-hidden rounded-xl border bg-white">
+                                <img src="@images[i]" alt="@Model.Name thumbnail @(i + 1)" width="68" height="68"
+                                     loading="lazy" class="h-full w-full object-contain p-1.5" />
+                            </button>
+                        }
+                    </div>
                 </div>
             }
 
@@ -110,44 +117,52 @@
         </div>
 
         @* ===== Cột thông tin ===== *@
-        <div>
-            <h1 class="text-[26px] font-bold tracking-tight text-ink">@Model.Name</h1>
+        <div class="min-w-[280px] flex-1" x-data="{ qty: 1, showInstall: false }">
+            <h1 class="text-[29px] font-bold tracking-[-.5px] text-ink">@Model.Name</h1>
             @if (!string.IsNullOrWhiteSpace(Model.Tagline))
             {
                 <p class="mt-1 text-[15px] text-ink2">@Model.Tagline</p>
             }
 
-            @if (Model.ReviewCount > 0 && Model.AverageRating is not null)
-            {
-                <div class="mt-2 flex items-center gap-1.5 text-sm">
-                    <span class="text-amber-500">@(new string('★', (int)Math.Round(Model.AverageRating.Value)))</span>
-                    <span class="text-ink2">@Model.AverageRating.Value.ToString("0.0") · @Model.ReviewCount đánh giá</span>
-                </div>
-            }
-
-            <div class="mt-4">
-                <partial name="_PriceBlock" model="Model.Price" />
+            <div class="mt-3 mb-[18px] flex flex-wrap items-center gap-3 text-[13.5px] text-ink2">
+                @if (Model.ReviewCount > 0 && Model.AverageRating is not null)
+                {
+                    <span class="flex items-center gap-1"><i class="iks ik-star text-[14px] text-[#FFB400]"></i><b class="text-ink">@Model.AverageRating.Value.ToString("0.0")</b></span>
+                    <span>· @Model.ReviewCount đánh giá</span>
+                }
+                @if (Model.InStock)
+                {
+                    <span class="flex items-center gap-1 text-[color:var(--success)]"><i class="iks ik-circle-check"></i>Còn hàng</span>
+                }
+                else
+                {
+                    <span class="flex items-center gap-1 text-sale"><i class="iks ik-circle-xmark"></i>Tạm hết hàng</span>
+                }
             </div>
 
-            @{ var monthlyFrom = InstallmentCalculator.MonthlyFrom(Model.Price.FinalPrice); }
+            <partial name="_PriceBlock" model="Model.Price" />
+
             @if (monthlyFrom > 0)
             {
-                <p class="mt-1.5 text-[13px] text-ink2"><i class="fa-solid fa-circle-percent mr-1 text-accent"></i>Trả góp 0% chỉ từ <span class="font-semibold text-ink">@monthlyFrom.ToString("#,##0")₫</span>/tháng</p>
+                <div class="mt-2 mb-[22px] text-[13px] text-ink2">Hoặc trả góp 0% chỉ từ <span class="font-semibold text-ink">@monthlyFrom.ToString("#,##0")₫</span>/tháng</div>
             }
 
             @* VariantSelector: mỗi tổ hợp dung lượng×màu là 1 SKU có URL riêng *@
-            <div class="mt-5">
-                <p class="mb-2 text-sm font-semibold text-ink">Phiên bản</p>
-                <div class="flex flex-wrap gap-2">
-                    @foreach (var v in Model.Variants)
-                    {
-                        <a href="/@v.Slug" rel="@(v.IsSelected ? "canonical" : "nofollow")"
-                           class="rounded-lg border px-3.5 py-2 text-sm transition @(v.IsSelected ? "border-accent bg-accent/5 font-semibold text-accent" : "border-line text-ink hover:border-accent")">
-                            @v.Label
-                        </a>
-                    }
+            @if (Model.Variants.Count > 1)
+            {
+                <div class="mb-[22px]">
+                    <div class="mb-2.5 text-[13.5px] font-semibold text-ink">Phiên bản</div>
+                    <div class="flex flex-wrap gap-2.5">
+                        @foreach (var v in Model.Variants)
+                        {
+                            <a href="/@v.Slug" rel="@(v.IsSelected ? "canonical" : "nofollow")"
+                               class="rounded-xl border px-4 py-2.5 text-[14px] transition @(v.IsSelected ? "border-accent bg-accent/5 font-semibold text-accent" : "border-line text-ink hover:border-accent")">
+                                @v.Label
+                            </a>
+                        }
+                    </div>
                 </div>
-            </div>
+            }
 
             @* Hết hàng → form theo dõi hàng về (P3-04) thay khối mua *@
             @if (!Model.InStock)
@@ -158,27 +173,37 @@
             }
             else
             {
-            @* Hành động mua (SPEC §5) *@
-            <div class="mt-6" x-data="{ showInstall: false }">
-                <div class="grid gap-2.5 sm:grid-cols-2">
-                    <form method="post" action="/cart/items" class="contents">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="variantId" value="@Model.SelectedVariantId" />
-                        <button type="submit" class="rounded-full bg-accent px-4 py-3 font-semibold text-white transition hover:bg-accent-press">
-                            <i class="fa-solid fa-cart-shopping mr-1.5"></i>MUA NGAY
-                        </button>
-                    </form>
-                    <button type="button" @@click="showInstall = !showInstall" :aria-expanded="showInstall"
-                            class="rounded-full border-[1.5px] border-accent px-4 py-3 font-semibold text-accent transition hover:bg-accent/5">Trả góp 0%</button>
-                    <button class="rounded-full border border-line px-4 py-3 text-sm text-ink transition hover:bg-surface2">Trả góp qua thẻ</button>
-                    <button class="rounded-full border border-line px-4 py-3 text-sm text-ink transition hover:bg-surface2">Thu cũ đổi mới</button>
+                @* Số lượng *@
+                <div class="mb-[18px] flex items-center gap-3.5">
+                    <div class="flex items-center overflow-hidden rounded-xl border border-line">
+                        <button type="button" @@click="qty = Math.max(1, qty-1)" class="h-[42px] w-[42px] border-0 bg-white text-[20px] text-ink">−</button>
+                        <span class="w-11 text-center text-[15px] font-semibold text-ink" x-text="qty">1</span>
+                        <button type="button" @@click="qty = qty+1" class="h-[42px] w-[42px] border-0 bg-white text-[20px] text-ink">+</button>
+                    </div>
+                    <span class="text-[13px] text-ink2">Số lượng</span>
                 </div>
 
-                @{ var plans = InstallmentCalculator.Plans(Model.Price.FinalPrice); }
+                @* Hành động mua (SPEC §5) — cả 2 nút post tới /cart/items, "Mua ngay" sẽ chuyển sang giỏ *@
+                <div class="mb-6 flex flex-wrap gap-3">
+                    <form method="post" action="/cart/items" class="flex min-w-[150px] flex-1">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="variantId" value="@Model.SelectedVariantId" />
+                        <input type="hidden" name="quantity" :value="qty" />
+                        <button type="submit" class="w-full rounded-[14px] bg-accent px-4 py-[15px] text-[16px] font-bold text-white transition hover:bg-accent-press">Mua ngay</button>
+                    </form>
+                    <form method="post" action="/cart/items" class="flex min-w-[150px] flex-1">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="variantId" value="@Model.SelectedVariantId" />
+                        <input type="hidden" name="quantity" :value="qty" />
+                        <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-ink bg-white px-4 py-[15px] text-[16px] font-bold text-ink transition hover:bg-surface2"><i class="iks ik-cart-shopping"></i>Thêm vào giỏ</button>
+                    </form>
+                </div>
+
                 @if (plans.Count > 0)
                 {
-                    <div x-show="showInstall" x-cloak x-transition class="mt-3 rounded-card border border-line p-4">
-                        <h3 class="mb-2 text-sm font-bold text-ink">Trả góp 0% lãi suất</h3>
+                    <button type="button" @@click="showInstall = !showInstall" :aria-expanded="showInstall"
+                            class="mb-4 flex items-center gap-2 text-[13.5px] font-semibold text-accent"><i class="iks ik-circle-percent"></i>Xem các kỳ hạn trả góp 0%</button>
+                    <div x-show="showInstall" x-cloak x-transition class="mb-4 rounded-card border border-line p-4">
                         <div class="divide-y divide-line">
                             @foreach (var p in plans)
                             {
@@ -191,19 +216,18 @@
                         <p class="mt-2 text-[12px] text-ink2">Lãi suất 0%. Duyệt hồ sơ qua công ty tài chính/thẻ tín dụng (liên hệ tại cửa hàng).</p>
                     </div>
                 }
-            </div>
             }
 
             @* Khối ưu đãi (khuyến mãi hiệu lực) *@
             @if (Model.Offers.Count > 0)
             {
-                <section class="mt-6 rounded-card border border-line p-4">
-                    <h2 class="mb-2 flex items-center gap-2 text-sm font-bold text-ink"><i class="fa-solid fa-gift text-accent"></i> Ưu đãi</h2>
+                <section class="mt-2 rounded-card border border-line p-4">
+                    <h2 class="mb-2 flex items-center gap-2 text-sm font-bold text-ink"><i class="iks ik-gift text-accent"></i> Ưu đãi</h2>
                     <ul class="space-y-1.5 text-[13.5px] text-ink2">
                         @foreach (var o in Model.Offers)
                         {
                             <li class="flex items-start gap-2">
-                                <i class="fa-solid fa-check mt-0.5 text-green-600"></i>
+                                <i class="iks ik-check mt-0.5 text-[color:var(--success)]"></i>
                                 <span>@o.Name <span class="text-ink2/70">(đến @o.EndsAt.ToString("dd/MM/yyyy"))</span></span>
                             </li>
                         }
@@ -215,8 +239,8 @@
             @if (Model.PaymentOffers.Count > 0)
             {
                 <section class="mt-4 rounded-card border border-line p-4">
-                    <h2 class="mb-2 flex items-center gap-2 text-sm font-bold text-ink"><i class="fa-solid fa-credit-card text-accent"></i> Ưu đãi thanh toán</h2>
-                    <div class="flex gap-3 overflow-x-auto pb-1">
+                    <h2 class="mb-2 flex items-center gap-2 text-sm font-bold text-ink"><i class="iks ik-credit-card text-accent"></i> Ưu đãi thanh toán</h2>
+                    <div class="no-scrollbar flex gap-3 overflow-x-auto pb-1">
                         @foreach (var p in Model.PaymentOffers)
                         {
                             <div class="min-w-[200px] shrink-0 rounded-lg bg-surface2 p-3">
@@ -228,12 +252,12 @@
                 </section>
             }
 
-            <ul class="mt-6 grid gap-2 text-sm text-ink2 sm:grid-cols-2">
-                <li class="flex items-center gap-2"><i class="fa-solid fa-rotate text-accent"></i> Đổi 1-1 trong 30 ngày</li>
-                <li class="flex items-center gap-2"><i class="fa-solid fa-shield-halved text-accent"></i> Bảo hành 12 tháng chính hãng</li>
-                <li class="flex items-center gap-2"><i class="fa-solid fa-truck text-accent"></i> Giao hàng toàn quốc</li>
-                <li class="flex items-center gap-2"><i class="fa-solid fa-store text-accent"></i> Cửa hàng có sẵn sản phẩm</li>
-            </ul>
+            <div class="mt-6 grid grid-cols-1 gap-3 border-t border-line pt-[18px] sm:grid-cols-2">
+                <div class="flex items-center gap-2.5"><i class="iks ik-truck text-[18px] text-accent"></i><span class="text-[13px] text-ink">Giao nhanh 2 giờ nội thành</span></div>
+                <div class="flex items-center gap-2.5"><i class="iks ik-shield-check text-[18px] text-accent"></i><span class="text-[13px] text-ink">Chính hãng · BH 12 tháng</span></div>
+                <div class="flex items-center gap-2.5"><i class="iks ik-credit-card text-[18px] text-accent"></i><span class="text-[13px] text-ink">Trả góp 0% duyệt nhanh</span></div>
+                <div class="flex items-center gap-2.5"><i class="iks ik-arrows-rotate text-[18px] text-accent"></i><span class="text-[13px] text-ink">Đổi trả 30 ngày</span></div>
+            </div>
         </div>
     </div>
 
@@ -242,7 +266,7 @@
     {
         <section class="mt-10 rounded-card border border-line p-6"
                  x-data="@($"{{ main: {(long)Model.Price.FinalPrice}, items: [{string.Join(",", b.Accessories.Select(a => $"{{id:{a.VariantId},b:{(long)a.BundlePrice},s:{(long)a.Saving},on:true}}"))}], money(n){{return n.toLocaleString('vi-VN')+'₫'}}, get picked(){{return this.items.filter(i=>i.on)}}, get total(){{return this.main + this.picked.reduce((t,i)=>t+i.b,0)}}, get saving(){{return this.picked.reduce((t,i)=>t+i.s,0)}}, get count(){{return 1 + this.picked.length}} }}")">
-            <h2 class="mb-4 text-lg font-bold text-ink"><i class="fa-solid fa-gift mr-2 text-accent"></i>Mua kèm tiết kiệm hơn</h2>
+            <h2 class="mb-4 text-lg font-bold text-ink"><i class="iks ik-gift mr-2 text-accent"></i>Mua kèm tiết kiệm hơn</h2>
             <form method="post" action="/bundle/add" class="flex flex-col gap-3">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="mainVariantId" value="@Model.SelectedVariantId" />
@@ -278,7 +302,7 @@
                     <div>
                         <div class="text-sm text-ink2">Tổng <span x-text="count"></span> sản phẩm</div>
                         <div class="text-xl font-bold text-sale" x-text="money(total)"></div>
-                        <div class="text-[12.5px] text-green-600" x-show="saving > 0">Tiết kiệm <span x-text="money(saving)"></span></div>
+                        <div class="text-[12.5px] text-[color:var(--success)]" x-show="saving > 0">Tiết kiệm <span x-text="money(saving)"></span></div>
                     </div>
                     <button type="submit" class="rounded-full bg-accent px-6 py-3 font-semibold text-white transition hover:bg-accent-press">
                         Mua <span x-text="count"></span> sản phẩm
@@ -288,25 +312,63 @@
         </section>
     }
 
+    @* ===== Thông số kỹ thuật ===== *@
+    @if (Model.Specs.Count > 0)
+    {
+        <div class="mt-[46px]">
+            <h2 class="mb-3.5 flex items-center gap-2 border-b border-line pb-3 text-[20px] font-bold text-ink"><i class="iks ik-list-check text-[18px] text-accent"></i>Thông số kỹ thuật</h2>
+            <div class="overflow-hidden rounded-[14px] border border-line">
+                @{ var r = 0; }
+                @foreach (var g in Model.Specs)
+                {
+                    @if (!string.IsNullOrWhiteSpace(g.Group))
+                    {
+                        <div class="bg-ink/[.03] px-4 py-2.5 text-[12.5px] font-bold uppercase tracking-[.4px] text-ink">@g.Group</div>
+                        r = 0;
+                    }
+                    @foreach (var item in g.Items)
+                    {
+                        <div class="flex items-center justify-between gap-4 px-4 py-3 @(r % 2 == 1 ? "bg-surface2" : "bg-white")">
+                            <span class="text-[13.5px] text-ink2">@item.Label</span>
+                            <span class="text-right text-[13.5px] font-semibold text-ink">@item.Value</span>
+                        </div>
+                        r++;
+                    }
+                }
+            </div>
+        </div>
+    }
+
     @* ===== Mô tả ===== *@
     @if (!string.IsNullOrWhiteSpace(Model.Description))
     {
-        <section class="mt-10 rounded-card bg-surface2 p-6">
-            <h2 class="mb-3 text-lg font-bold text-ink">Mô tả sản phẩm</h2>
-            <div class="prose max-w-none text-sm text-ink2">@Html.Raw(Model.Description)</div>
-        </section>
+        <div class="mt-[46px]">
+            <h2 class="mb-3.5 flex items-center gap-2 border-b border-line pb-3 text-[20px] font-bold text-ink"><i class="iks ik-align-left text-[18px] text-accent"></i>Mô tả sản phẩm</h2>
+            <div class="prose max-w-none text-[14.5px] leading-[1.7] text-ink2">@Html.Raw(Model.Description)</div>
+        </div>
     }
 
     @* ===== Đánh giá ===== *@
-    <section class="mt-6 rounded-card border border-line p-6">
-        <h2 class="mb-3 text-lg font-bold text-ink">Đánh giá sản phẩm</h2>
-        @if (Model.ReviewCount == 0)
+    <div class="mt-[46px]">
+        <h2 class="mb-[18px] flex items-center gap-2 border-b border-line pb-3 text-[20px] font-bold text-ink"><i class="iks ik-star text-[18px] text-accent"></i>Đánh giá &amp; nhận xét</h2>
+        @if (Model.ReviewCount == 0 || Model.AverageRating is null)
         {
             <p class="text-sm text-ink2">Chưa có đánh giá. Hãy là người đầu tiên đánh giá sản phẩm này.</p>
         }
         else
         {
-            <p class="text-sm text-ink2">@Model.AverageRating?.ToString("0.0")/5 từ @Model.ReviewCount đánh giá.</p>
+            var avg = Model.AverageRating.Value;
+            var full = (int)Math.Round(avg);
+            <div class="flex flex-wrap items-start gap-10 rounded-2xl border border-line p-6">
+                <div class="min-w-[150px] flex-none text-center">
+                    <div class="text-[52px] font-bold leading-none text-ink">@avg.ToString("0.0")</div>
+                    <div class="my-1.5 text-[18px] tracking-[2px] text-[#FFB400]">@(new string('★', full))<span class="text-line">@(new string('★', 5 - full))</span></div>
+                    <div class="text-[13px] text-ink2">@Model.ReviewCount đánh giá</div>
+                </div>
+                <div class="min-w-[240px] flex-1 text-[13.5px] text-ink2">
+                    Đánh giá trung bình @avg.ToString("0.0")/5 từ khách hàng đã mua @Model.Name tại HtMobile.
+                </div>
+            </div>
         }
-    </section>
+    </div>
 </div>

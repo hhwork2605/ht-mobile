@@ -1,22 +1,23 @@
 using HtMobile.Application.Common.Interfaces;
+using HtMobile.Application.Features.Customers;
 using HtMobile.Application.Features.Orders;
-using HtMobile.Domain.Constants;
-using HtMobile.Infrastructure.Identity;
 using HtMobile.Web.Infrastructure;
 using HtMobile.Web.Models.Account;
 using HtMobile.Web.Models.Auth;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HtMobile.Web.Areas.Storefront.Controllers;
 
-/// <summary>Auth (Identity cookie): đăng ký / đăng nhập / đăng xuất / quên-đặt lại mật khẩu + landing tài khoản.</summary>
+/// <summary>
+/// Auth storefront bằng tài khoản <c>Customer</c> (cookie riêng, không qua ASP.NET Identity — ADR 0004):
+/// đăng ký / đăng nhập / đăng xuất / quên-đặt lại mật khẩu + landing tài khoản.
+/// </summary>
 [Area("Storefront")]
 public class AccountController : Controller
 {
-    private readonly UserManager<ApplicationUser> _users;
-    private readonly SignInManager<ApplicationUser> _signIn;
+    private readonly CustomerAccountService _accounts;
+    private readonly ICurrentUser _currentUser;
     private readonly ICartService _cart;
     private readonly CartContext _cartCtx;
     private readonly IEmailSender _email;
@@ -24,16 +25,16 @@ public class AccountController : Controller
     private readonly ILogger<AccountController> _logger;
 
     public AccountController(
-        UserManager<ApplicationUser> users,
-        SignInManager<ApplicationUser> signIn,
+        CustomerAccountService accounts,
+        ICurrentUser currentUser,
         ICartService cart,
         CartContext cartCtx,
         IEmailSender email,
         OrderHistoryService orders,
         ILogger<AccountController> logger)
     {
-        _users = users;
-        _signIn = signIn;
+        _accounts = accounts;
+        _currentUser = currentUser;
         _cart = cart;
         _cartCtx = cartCtx;
         _email = email;
@@ -51,16 +52,15 @@ public class AccountController : Controller
 
     [HttpPost("/login")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(LoginVm vm)
+    public async Task<IActionResult> Login(LoginVm vm, CancellationToken ct)
     {
         if (!ModelState.IsValid) return View(vm);
 
-        // Dùng overload theo userName: xử lý đồng nhất dù email tồn tại hay không (tránh lộ qua timing).
-        var result = await _signIn.PasswordSignInAsync(vm.Email, vm.Password, vm.RememberMe, lockoutOnFailure: false);
-        if (result.Succeeded)
+        var customer = await _accounts.ValidateCredentialsAsync(vm.Email, vm.Password, ct);
+        if (customer is not null)
         {
-            var user = await _users.FindByEmailAsync(vm.Email);
-            if (user is not null) await MergeGuestCartAsync(user.Id);
+            await StorefrontAuth.SignInAsync(HttpContext, customer, vm.RememberMe);
+            await MergeGuestCartAsync(customer.Id);
             return Redirect(UrlSafety.SafeLocalUrl(vm.ReturnUrl));
         }
 
@@ -78,22 +78,19 @@ public class AccountController : Controller
 
     [HttpPost("/register")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Register(RegisterVm vm)
+    public async Task<IActionResult> Register(RegisterVm vm, CancellationToken ct)
     {
         if (!ModelState.IsValid) return View(vm);
 
-        var user = new ApplicationUser { UserName = vm.Email, Email = vm.Email, FullName = vm.FullName };
-        var result = await _users.CreateAsync(user, vm.Password);
-        if (result.Succeeded)
+        var (result, customer) = await _accounts.RegisterAsync(vm.Email, vm.Password, vm.FullName, ct);
+        if (result == RegisterResult.Ok && customer is not null)
         {
-            await _users.AddToRoleAsync(user, Roles.Customer);
-            await _signIn.SignInAsync(user, isPersistent: false);
-            await MergeGuestCartAsync(user.Id);
+            await StorefrontAuth.SignInAsync(HttpContext, customer, isPersistent: false);
+            await MergeGuestCartAsync(customer.Id);
             return Redirect(UrlSafety.SafeLocalUrl(vm.ReturnUrl));
         }
 
-        foreach (var e in result.Errors)
-            ModelState.AddModelError(string.Empty, e.Description);
+        ModelState.AddModelError(nameof(RegisterVm.Email), "Email này đã được đăng ký.");
         return View(vm);
     }
 
@@ -101,7 +98,7 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
-        await _signIn.SignOutAsync();
+        await StorefrontAuth.SignOutAsync(HttpContext);
         return Redirect("/");
     }
 
@@ -110,18 +107,17 @@ public class AccountController : Controller
 
     [HttpPost("/forgot-password")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ForgotPassword(ForgotPasswordVm vm)
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordVm vm, CancellationToken ct)
     {
         if (!ModelState.IsValid) return View(vm);
 
-        var user = await _users.FindByEmailAsync(vm.Email);
-        if (user is not null)
+        var token = await _accounts.CreatePasswordResetTokenAsync(vm.Email, ct);
+        if (token is not null)
         {
-            var token = await _users.GeneratePasswordResetTokenAsync(user);
             var link = $"{Request.Scheme}://{Request.Host}/reset-password" +
                        $"?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(vm.Email)}";
             await _email.SendAsync(vm.Email, "Đặt lại mật khẩu HtMobile",
-                $"<p>Nhấn vào liên kết để đặt lại mật khẩu:</p><p><a href=\"{link}\">{link}</a></p>");
+                $"<p>Nhấn vào liên kết để đặt lại mật khẩu:</p><p><a href=\"{link}\">{link}</a></p>", ct);
             // Dev (NullEmailSender không gửi thật) — log link để test được.
             _logger.LogInformation("[Reset password] email={Email} link={Link}", vm.Email, link);
         }
@@ -141,19 +137,14 @@ public class AccountController : Controller
 
     [HttpPost("/reset-password")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ResetPassword(ResetPasswordVm vm)
+    public async Task<IActionResult> ResetPassword(ResetPasswordVm vm, CancellationToken ct)
     {
         if (!ModelState.IsValid) return View(vm);
 
-        var user = await _users.FindByEmailAsync(vm.Email);
-        if (user is not null)
+        if (await _accounts.ResetPasswordAsync(vm.Email, vm.Token, vm.Password, ct))
         {
-            var result = await _users.ResetPasswordAsync(user, vm.Token, vm.Password);
-            if (result.Succeeded)
-            {
-                ViewBag.Done = true;
-                return View(vm);
-            }
+            ViewBag.Done = true;
+            return View(vm);
         }
 
         // Mọi trường hợp khác (email lạ HOẶC token sai/hết hạn) → thông báo CHUNG, không lộ email tồn tại.
@@ -166,19 +157,20 @@ public class AccountController : Controller
     [HttpGet("/account")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
-        var user = await _users.GetUserAsync(User);
-        if (user is null) return Redirect("/login");
+        if (_currentUser.UserId is not long customerId) return Redirect("/login");
+        var customer = await _accounts.GetByIdAsync(customerId, ct);
+        if (customer is null) return Redirect("/login");
 
-        var orders = await _orders.GetMyOrdersAsync(user.Id, ct);
+        var orders = await _orders.GetMyOrdersAsync(customerId, ct);
         return View(new AccountVm
         {
-            FullName = user.FullName,
-            Email = user.Email ?? string.Empty,
+            FullName = customer.FullName,
+            Email = customer.Email,
             Orders = orders
         });
     }
 
-    private async Task MergeGuestCartAsync(long userId)
+    private async Task MergeGuestCartAsync(long customerId)
     {
         var guestId = _cartCtx.GuestSessionId;
         if (string.IsNullOrEmpty(guestId)) return;
@@ -186,12 +178,12 @@ public class AccountController : Controller
         // Best-effort: merge giỏ KHÔNG được làm hỏng đăng nhập đã thành công.
         try
         {
-            await _cart.MergeAsync(guestId, userId);
+            await _cart.MergeAsync(guestId, customerId);
             _cartCtx.ClearGuest();
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Merge giỏ guest→user {UserId} thất bại — bỏ qua.", userId);
+            _logger.LogWarning(ex, "Merge giỏ guest→customer {CustomerId} thất bại — bỏ qua.", customerId);
         }
     }
 }

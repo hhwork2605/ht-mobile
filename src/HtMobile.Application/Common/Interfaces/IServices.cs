@@ -18,3 +18,12 @@ public interface IDateTime
 {
     DateTime Now { get; }
 }
+
+/// <summary>Băm/kiểm tra mật khẩu (tách khỏi ASP.NET — hiện thực ở Infrastructure). Dùng cho tài khoản Customer storefront.</summary>
+public interface IPasswordHasher
+{
+    string Hash(string password);
+
+    /// <summary><c>true</c> nếu <paramref name="password"/> khớp <paramref name="hash"/>.</summary>
+    bool Verify(string hash, string password);
+}

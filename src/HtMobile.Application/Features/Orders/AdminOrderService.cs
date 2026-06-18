@@ -75,6 +75,9 @@ public class AdminOrderService
                 x.Total,
                 x.PaymentMethod,
                 x.CustomerId,
+                CustomerName = x.Customer != null ? x.Customer.FullName : null,
+                CustomerEmail = x.Customer != null ? x.Customer.Email : null,
+                CustomerPhone = x.Customer != null ? x.Customer.Phone : null,
                 Address = x.Shipment != null ? x.Shipment.Address : null,
                 Items = x.Items.Select(i => new
                 {
@@ -95,6 +98,9 @@ public class AdminOrderService
             Total = o.Total,
             PaymentMethod = o.PaymentMethod,
             CustomerId = o.CustomerId,
+            CustomerName = o.CustomerName,
+            CustomerEmail = o.CustomerEmail,
+            CustomerPhone = o.CustomerPhone,
             ShipmentAddress = o.Address,
             Items = o.Items.Select(i => new AdminOrderLine
             {

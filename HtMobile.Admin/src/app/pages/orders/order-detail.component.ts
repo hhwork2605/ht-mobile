@@ -35,7 +35,16 @@ import {
           <section class="card">
             <h2 class="h2">Thông tin</h2>
             <div class="info">
-              <div><div class="k">Khách hàng</div><div class="v">{{ o.customerId ? 'User #' + o.customerId : 'Khách vãng lai' }}</div></div>
+              <div>
+                <div class="k">Khách hàng</div>
+                @if (o.isRegistered) {
+                  <div class="v">{{ o.customerName || '(chưa đặt tên)' }} <span class="badge">Thành viên</span></div>
+                  @if (o.customerEmail) { <div class="sub"><i class="pi pi-envelope"></i> {{ o.customerEmail }}</div> }
+                  @if (o.customerPhone) { <div class="sub"><i class="pi pi-phone"></i> {{ o.customerPhone }}</div> }
+                } @else {
+                  <div class="v">Khách vãng lai</div>
+                }
+              </div>
               <div><div class="k">Thanh toán</div><div class="v">{{ o.paymentMethod }}</div></div>
               <div class="span2"><div class="k">Nhận hàng</div><div class="v">{{ o.shipmentAddress || '—' }}</div></div>
             </div>
@@ -82,6 +91,9 @@ import {
     .info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px; }
     .span2 { grid-column: 1 / -1; }
     .k { color: var(--ht-ink5); } .v { font-weight: 500; }
+    .sub { font-size: 12px; color: var(--ht-ink5); margin-top: 3px; display: flex; align-items: center; gap: 5px; }
+    .sub i { font-size: 11px; }
+    .badge { display: inline-block; font-size: 10.5px; font-weight: 600; color: #0070F4; background: #E5F1FE; border-radius: 6px; padding: 1px 7px; margin-left: 6px; vertical-align: middle; }
     .line { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--ht-line); font-size: 13px; }
     .strong { font-weight: 600; } .muted { color: var(--ht-ink5); } .sm { font-size: 13px; }
     .total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 12px; margin-top: 4px; font-weight: 700; }

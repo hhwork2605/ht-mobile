@@ -38,6 +38,7 @@ export interface AdminProductEditDto {
   brand?: string | null;
   tagline?: string | null;
   description?: string | null;
+  specs?: string | null;
   variants: AdminVariantRow[];
   categories: AdminCategoryOption[];
 }
@@ -49,6 +50,7 @@ export interface ProductInput {
   brand?: string | null;
   tagline?: string | null;
   description?: string | null;
+  specs?: string | null;
 }
 
 export interface VariantInput {

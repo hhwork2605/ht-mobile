@@ -25,6 +25,13 @@
 - Mobile-first, Tailwind utility. Component tái dùng = ViewComponent (SPEC §9).
 - Tương tác động: htmx trả **partial view**; state nhỏ dùng Alpine. Hạn chế JS rời rạc.
 - URL khách = slug (không lộ id). Resolve qua `ISlugResolver`.
+- **Design storefront = "ShopDunk Storefront"** (apple theme). Token màu/bo góc khai báo ở `:root` trong
+  `Views/Shared/_Layout.cshtml` (`--accent`, `--accent-press`, `--sale` = `#FF424E`, `--ink`/`--ink2`,
+  `--bg`/`--bg2`, `--line`, `--header*`, `--radius-card`, `--success`/`--success-50`) và map vào `tailwind.config`
+  (class `accent`, `sale`, `ink`, `surface`/`surface2`, `line`, `rounded-card`…). Dùng các class này thay vì màu Tailwind cứng (`text-red-600`…).
+- **Icon = KV Icon Kit (self-host)**, KHÔNG dùng Font Awesome. CSS ở `wwwroot/css/kv-icons.css`, font ở `wwwroot/fonts/`.
+  Markup: `<i class="iks ik-...">` (solid), `<i class="ikr ik-...">` (regular), `<i class="ikb ik-...">` (brands).
+  Map slug danh mục → glyph qua `HtMobile.Web.Infrastructure.StorefrontIcons.Category(slug)`.
 
 ## Admin — KHÔNG nằm trong app MVC này
 App MVC `HtMobile.Web` **chỉ phục vụ bán hàng (storefront)**. Khu quản trị (admin) sẽ là **một webapp Angular riêng**

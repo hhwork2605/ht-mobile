@@ -21,6 +21,27 @@ builder.Services.AddAntiforgery(o => o.HeaderName = "RequestVerificationToken");
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// Auth storefront = cookie riêng cho tài khoản Customer (tách khỏi Identity — ADR 0004).
+// AddInfrastructure đăng ký Identity (cho Admin API) và ĐẶT sẵn DefaultAuthenticate/Challenge/SignIn scheme
+// sang cookie Identity → phải ghi đè TƯỜNG MINH cả 3 sang "Storefront" cho app Web (storefront-only).
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = StorefrontAuth.Scheme;
+        options.DefaultAuthenticateScheme = StorefrontAuth.Scheme;
+        options.DefaultChallengeScheme = StorefrontAuth.Scheme;
+        options.DefaultSignInScheme = StorefrontAuth.Scheme;
+    })
+    .AddCookie(StorefrontAuth.Scheme, options =>
+    {
+        options.Cookie.Name = "htm_auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.LoginPath = "/login";
+        options.AccessDeniedPath = "/login";
+        options.ExpireTimeSpan = TimeSpan.FromDays(14);
+        options.SlidingExpiration = true;
+    });
+
 // Adapter mức Web cho interface khai báo ở Application
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddScoped<ISlugResolver, SlugResolver>();
@@ -37,11 +58,17 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-// Đa ngôn ngữ VI/EN (P3-05): culture theo cookie .AspNetCore.Culture, mặc định vi.
-app.UseRequestLocalization(new Microsoft.AspNetCore.Builder.RequestLocalizationOptions()
+// Đa ngôn ngữ VI/EN (P3-05): culture theo lựa chọn người dùng (query ?culture / cookie .AspNetCore.Culture),
+// mặc định vi. KHÔNG dùng AcceptLanguageHeaderRequestCultureProvider để tránh trình duyệt (Accept-Language: en)
+// tự ép sang EN khi khách chưa chọn — site là tiếng Việt trước.
+var localizationOptions = new Microsoft.AspNetCore.Builder.RequestLocalizationOptions()
     .SetDefaultCulture(LanguageOptions.Default)
     .AddSupportedCultures(LanguageOptions.Supported)
-    .AddSupportedUICultures(LanguageOptions.Supported));
+    .AddSupportedUICultures(LanguageOptions.Supported);
+localizationOptions.RequestCultureProviders = localizationOptions.RequestCultureProviders
+    .Where(p => p is not Microsoft.AspNetCore.Localization.AcceptLanguageHeaderRequestCultureProvider)
+    .ToList();
+app.UseRequestLocalization(localizationOptions);
 
 app.UseRouting();
 app.UseSession();

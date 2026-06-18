@@ -1,0 +1,490 @@
+/* ============================================================================
+   KV Icon Kit v1.4.15 — official KiotViet icon font, self-hosted.
+   Generated from kv-icon-kit/scss (source: uploads/kv-icon-kit/_variables.scss).
+   Usage:  <i class="iks ik-calendar-check"></i>   solid (700)
+           <i class="ikr ik-bell"></i>             regular (400)
+           <i class="ikb ik-facebook"></i>         brands (700)
+   ============================================================================ */
+
+@font-face {
+  font-family: 'KV Icon Kit';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('../fonts/regulars-400.woff2') format('woff2'),
+       url('../fonts/regulars-400.ttf') format('truetype'),
+       url('../fonts/regulars-400.otf') format('opentype');
+}
+@font-face {
+  font-family: 'KV Icon Kit';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url('../fonts/solids-700.woff2') format('woff2'),
+       url('../fonts/solids-700.ttf') format('truetype'),
+       url('../fonts/solids-700.otf') format('opentype');
+}
+@font-face {
+  font-family: 'KV Icon Kit Brands';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url('../fonts/brands-700.woff2') format('woff2'),
+       url('../fonts/brands-700.ttf') format('truetype'),
+       url('../fonts/brands-700.otf') format('opentype');
+}
+
+:root { --ik-size: 14px; }
+
+.iks, .ik-solid,
+.ikr, .ik-regular,
+.ikb, .ik-brands {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: var(--ik-display, inline-block);
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+}
+.iks, .ik-solid, .ikr, .ik-regular { font-family: 'KV Icon Kit'; }
+.ikb, .ik-brands { font-family: 'KV Icon Kit Brands'; }
+.iks, .ik-solid { font-weight: 700; }
+.ikr, .ik-regular { font-weight: 400; }
+.ikb, .ik-brands { font-weight: 700; }
+
+/* ---- Glyphs (solid / regular share codepoints) ------------------------- */
+.ik-address-card::before { content: "\e900"; }
+.ik-angle-down::before { content: "\e901"; }
+.ik-angle-left::before { content: "\e902"; }
+.ik-angle-right::before { content: "\e903"; }
+.ik-angle-up::before { content: "\e904"; }
+.ik-arrow-down::before { content: "\e905"; }
+.ik-arrow-down-left::before { content: "\e906"; }
+.ik-arrow-down-right::before { content: "\e907"; }
+.ik-arrow-down-to-line::before { content: "\e908"; }
+.ik-arrow-left::before { content: "\e909"; }
+.ik-arrow-right::before { content: "\e90a"; }
+.ik-arrow-right-arrow-left::before { content: "\e90b"; }
+.ik-arrows-repeat::before { content: "\e90c"; }
+.ik-arrows-rotate::before { content: "\e90d"; }
+.ik-arrow-turn-down::before { content: "\e90e"; }
+.ik-arrow-turn-down-left::before { content: "\e90f"; }
+.ik-arrow-turn-down-right::before { content: "\e910"; }
+.ik-arrow-turn-up::before { content: "\e911"; }
+.ik-arrow-trend-up::before { content: "\e912"; }
+.ik-arrow-up::before { content: "\e913"; }
+.ik-arrow-up-arrow-down::before { content: "\e914"; }
+.ik-arrow-up-from-line::before { content: "\e915"; }
+.ik-arrow-up-left::before { content: "\e916"; }
+.ik-arrow-up-right::before { content: "\e917"; }
+.ik-award::before { content: "\e918"; }
+.ik-backward-step::before { content: "\e919"; }
+.ik-bag-circle-signal::before { content: "\e91a"; }
+.ik-bag-shopping::before { content: "\e91b"; }
+.ik-bag-shopping-xmark::before { content: "\e91c"; }
+.ik-ban::before { content: "\e91d"; }
+.ik-bars::before { content: "\e91e"; }
+.ik-bars-filter::before { content: "\e91f"; }
+.ik-basket-shopping::before { content: "\e920"; }
+.ik-bed-front::before { content: "\e921"; }
+.ik-bell::before { content: "\e922"; }
+.ik-bell-concierge::before { content: "\e923"; }
+.ik-blanket::before { content: "\e924"; }
+.ik-bolt::before { content: "\e925"; }
+.ik-box::before { content: "\e926"; }
+.ik-box-arrow-right::before { content: "\e927"; }
+.ik-box-arrows-rotate::before { content: "\e928"; }
+.ik-box-barcode::before { content: "\e929"; }
+.ik-box-circle-dollar::before { content: "\e92a"; }
+.ik-box-circle-exclamation::before { content: "\e92b"; }
+.ik-box-circle-info::before { content: "\e92c"; }
+.ik-box-clock::before { content: "\e92d"; }
+.ik-box-check::before { content: "\e92e"; }
+.ik-boxes-stacked::before { content: "\e92f"; }
+.ik-box-open::before { content: "\e930"; }
+.ik-broom::before { content: "\e931"; }
+.ik-browser-circle-plus::before { content: "\e932"; }
+.ik-bullhorn::before { content: "\e933"; }
+.ik-burger-glass::before { content: "\e934"; }
+.ik-calendar-check::before { content: "\e936"; }
+.ik-cake-candles::before { content: "\e935"; }
+.ik-calendar-day::before { content: "\e937"; }
+.ik-calendar-lines::before { content: "\e938"; }
+.ik-calendar-pen::before { content: "\e939"; }
+.ik-calendar-star::before { content: "\e93a"; }
+.ik-camera::before { content: "\e93b"; }
+.ik-caret-down::before { content: "\e93c"; }
+.ik-caret-right::before { content: "\e93e"; }
+.ik-caret-left::before { content: "\e93d"; }
+.ik-caret-up::before { content: "\e93f"; }
+.ik-cart-flatbed-box-simple::before { content: "\e940"; }
+.ik-cart-flatbed-box-simple-xmark::before { content: "\e941"; }
+.ik-cart-flatbed-box-taped::before { content: "\e942"; }
+.ik-cart-shopping::before { content: "\e943"; }
+.ik-circle::before { content: "\e944"; }
+.ik-circle-check::before { content: "\e945"; }
+.ik-circle-dollar::before { content: "\e946"; }
+.ik-circle-dot::before { content: "\e947"; }
+.ik-circle-ellipsis::before { content: "\e948"; }
+.ik-circle-exclamation::before { content: "\e949"; }
+.ik-circle-info::before { content: "\e94a"; }
+.ik-circle-minus::before { content: "\e94b"; }
+.ik-circle-plus::before { content: "\e94c"; }
+.ik-circle-question::before { content: "\e94d"; }
+.ik-circle-user::before { content: "\e94e"; }
+.ik-circle-xmark::before { content: "\e94f"; }
+.ik-clipboard-check::before { content: "\e950"; }
+.ik-clipboard-line-up::before { content: "\e951"; }
+.ik-clock::before { content: "\e952"; }
+.ik-clock-rotate-left::before { content: "\e953"; }
+.ik-coins::before { content: "\e954"; }
+.ik-collapse::before { content: "\e955"; }
+.ik-comment::before { content: "\e956"; }
+.ik-comment-dots::before { content: "\e957"; }
+.ik-comment-sms::before { content: "\e958"; }
+.ik-copy::before { content: "\e959"; }
+.ik-coupon::before { content: "\e95a"; }
+.ik-credit-card::before { content: "\e95b"; }
+.ik-chart-area::before { content: "\e95c"; }
+.ik-chart-line-up::before { content: "\e95d"; }
+.ik-chart-pie-simple::before { content: "\e95e"; }
+.ik-chart-simple::before { content: "\e95f"; }
+.ik-check::before { content: "\e960"; }
+.ik-check-double::before { content: "\e961"; }
+.ik-chevron-down::before { content: "\e962"; }
+.ik-chevron-left::before { content: "\e963"; }
+.ik-chevron-right::before { content: "\e964"; }
+.ik-chevron-up::before { content: "\e965"; }
+.ik-children::before { content: "\e966"; }
+.ik-dollar-sign-arrow-right::before { content: "\e967"; }
+.ik-dollar-sign-plus::before { content: "\e968"; }
+.ik-double-shield-check::before { content: "\e969"; }
+.ik-down-to-bracket::before { content: "\e96a"; }
+.ik-ellipsis::before { content: "\e96b"; }
+.ik-envelope::before { content: "\e96c"; }
+.ik-envelope-open::before { content: "\e96d"; }
+.ik-expand::before { content: "\e96e"; }
+.ik-eye::before { content: "\e96f"; }
+.ik-eye-slash::before { content: "\e970"; }
+.ik-facebook-pos::before { content: "\e971"; }
+.ik-face-smile::before { content: "\e972"; }
+.ik-file-arrow-right-arrow-left::before { content: "\e973"; }
+.ik-file-arrows-rotate::before { content: "\e974"; }
+.ik-file-circle-e::before { content: "\e975"; }
+.ik-file-circle-plus::before { content: "\e976"; }
+.ik-file-csv::before { content: "\e977"; }
+.ik-file-chart-column::before { content: "\e978"; }
+.ik-file-chart-pie::before { content: "\e979"; }
+.ik-file-check::before { content: "\e97a"; }
+.ik-file-export::before { content: "\e97b"; }
+.ik-file-import::before { content: "\e97c"; }
+.ik-file-lines::before { content: "\e97d"; }
+.ik-file-pdf::before { content: "\e97e"; }
+.ik-file-pen::before { content: "\e97f"; }
+.ik-file-pen-line::before { content: "\e980"; }
+.ik-file-percent::before { content: "\e981"; }
+.ik-file-slash::before { content: "\e982"; }
+.ik-file-user::before { content: "\e983"; }
+.ik-file-xls::before { content: "\e984"; }
+.ik-file-xmark::before { content: "\e985"; }
+.ik-flip-image-left-right::before { content: "\e986"; }
+.ik-flip-image-top-bottom::before { content: "\e987"; }
+.ik-floppy-disk::before { content: "\e988"; }
+.ik-fork-knife::before { content: "\e989"; }
+.ik-forward-step::before { content: "\e98a"; }
+.ik-gamepad::before { content: "\e98b"; }
+.ik-gauge-low::before { content: "\e98c"; }
+.ik-gear::before { content: "\e98d"; }
+.ik-globe::before { content: "\e98e"; }
+.ik-grid-2::before { content: "\e98f"; }
+.ik-grip-dots-vertical::before { content: "\e990"; }
+.ik-gift::before { content: "\e991"; }
+.ik-gift-check::before { content: "\e992"; }
+.ik-image::before { content: "\e993"; }
+.ik-image-rotate-left::before { content: "\e994"; }
+.ik-image-rotate-right::before { content: "\e995"; }
+.ik-inbox::before { content: "\e996"; }
+.ik-inbox-in::before { content: "\e997"; }
+.ik-landmark::before { content: "\e998"; }
+.ik-laptop::before { content: "\e999"; }
+.ik-layer-group::before { content: "\e99a"; }
+.ik-lightbulb::before { content: "\e99b"; }
+.ik-line-columns::before { content: "\e99c"; }
+.ik-link-simple::before { content: "\e99d"; }
+.ik-link-simple-slash::before { content: "\e99e"; }
+.ik-list::before { content: "\e99f"; }
+.ik-list-check::before { content: "\e9a0"; }
+.ik-list-radio::before { content: "\e9a1"; }
+.ik-location-dot::before { content: "\e9a2"; }
+.ik-location-dot-slash::before { content: "\e9a3"; }
+.ik-lock-keyhole::before { content: "\e9a4"; }
+.ik-lock-keyhole-simple::before { content: "\e9a5"; }
+.ik-lock-keyhole-simple-open::before { content: "\e9a6"; }
+.ik-magnifying-glass::before { content: "\e9a7"; }
+.ik-memo-circle-dollar::before { content: "\e9a8"; }
+.ik-memo-circle-left-right::before { content: "\e9a9"; }
+.ik-memo-pad-dollar-pen::before { content: "\e9aa"; }
+.ik-memos::before { content: "\e9ab"; }
+.ik-message-dots::before { content: "\e9ac"; }
+.ik-message-lines::before { content: "\e9ad"; }
+.ik-message-question::before { content: "\e9ae"; }
+.ik-messages::before { content: "\e9af"; }
+.ik-message-smile::before { content: "\e9b0"; }
+.ik-minus::before { content: "\e9b1"; }
+.ik-mobile::before { content: "\e9b2"; }
+.ik-mobile-arrow-right::before { content: "\e9b3"; }
+.ik-mobile-screen::before { content: "\e9b4"; }
+.ik-money-check-dollar::before { content: "\e9b5"; }
+.ik-money-transfer::before { content: "\e9b6"; }
+.ik-money-wave::before { content: "\e9b7"; }
+.ik-moon::before { content: "\e9b8"; }
+.ik-nfc::before { content: "\e9b9"; }
+.ik-palette::before { content: "\e9ba"; }
+.ik-paperclip::before { content: "\e9bb"; }
+.ik-paper-plane::before { content: "\e9bc"; }
+.ik-pen-line::before { content: "\e9bd"; }
+.ik-pen-to-square::before { content: "\e9be"; }
+.ik-person-hold-box::before { content: "\e9bf"; }
+.ik-person-walking::before { content: "\e9c0"; }
+.ik-plus::before { content: "\e9c1"; }
+.ik-power-off::before { content: "\e9c2"; }
+.ik-print::before { content: "\e9c3"; }
+.ik-product-attribute::before { content: "\e9c4"; }
+.ik-product-unit::before { content: "\e9c5"; }
+.ik-phone::before { content: "\e9c6"; }
+.ik-phone-arrow-right::before { content: "\e9c7"; }
+.ik-reply::before { content: "\e9c8"; }
+.ik-right-from-bracket::before { content: "\e9c9"; }
+.ik-rotate-right::before { content: "\e9ca"; }
+.ik-sack-dollar::before { content: "\e9cb"; }
+.ik-scan::before { content: "\e9cc"; }
+.ik-screen-users::before { content: "\e9cd"; }
+.ik-self-delivery::before { content: "\e9ce"; }
+.ik-selling::before { content: "\e9cf"; }
+.ik-share::before { content: "\e9d0"; }
+.ik-shield-check::before { content: "\e9d1"; }
+.ik-signal-stream::before { content: "\e9d2"; }
+.ik-sliders::before { content: "\e9d3"; }
+.ik-sort::before { content: "\e9d4"; }
+.ik-square::before { content: "\e9d5"; }
+.ik-square-arrow-left::before { content: "\e9d6"; }
+.ik-square-check::before { content: "\e9d7"; }
+.ik-square-dashed::before { content: "\e9d8"; }
+.ik-square-dollar::before { content: "\e9d9"; }
+.ik-key-card::before { content: "\e9da"; }
+.ik-star::before { content: "\e9db"; }
+.ik-star-circle::before { content: "\e9dc"; }
+.ik-store::before { content: "\e9dd"; }
+.ik-store-location-dot::before { content: "\e9de"; }
+.ik-store-user::before { content: "\e9df"; }
+.ik-sun-bright::before { content: "\e9e0"; }
+.ik-tag::before { content: "\e9e1"; }
+.ik-tags::before { content: "\e9e2"; }
+.ik-thumbs-up::before { content: "\e9e3"; }
+.ik-thumbtack::before { content: "\e9e4"; }
+.ik-trash-can::before { content: "\e9e5"; }
+.ik-trash-can-undo::before { content: "\e9e6"; }
+.ik-triangle-exclamation::before { content: "\e9e7"; }
+.ik-truck::before { content: "\e9e8"; }
+.ik-truck-arrow-left::before { content: "\e9e9"; }
+.ik-up::before { content: "\e9ea"; }
+.ik-up-from-bracket::before { content: "\e9eb"; }
+.ik-upload::before { content: "\e9ec"; }
+.ik-user::before { content: "\e9ed"; }
+.ik-user-box::before { content: "\e9ee"; }
+.ik-user-group::before { content: "\e9ef"; }
+.ik-user-headset::before { content: "\e9f0"; }
+.ik-user-location-dot::before { content: "\e9f1"; }
+.ik-users::before { content: "\e9f2"; }
+.ik-user-tie::before { content: "\e9f3"; }
+.ik-user-triangle-exclamation::before { content: "\e9f4"; }
+.ik-user-xmark::before { content: "\e9f5"; }
+.ik-video-plus::before { content: "\e9f6"; }
+.ik-voucher::before { content: "\e9f7"; }
+.ik-wallet::before { content: "\e9f8"; }
+.ik-warehouse::before { content: "\e9f9"; }
+.ik-wifi-slash::before { content: "\e9fa"; }
+.ik-wrench::before { content: "\e9fb"; }
+.ik-xmark::before { content: "\e9fc"; }
+.ik-arrow-rotate-dollar::before { content: "\e9fd"; }
+.ik-arrow-up-right-from-square::before { content: "\e9fe"; }
+.ik-badge-dollar::before { content: "\e9ff"; }
+.ik-barcode::before { content: "\ea00"; }
+.ik-bolt-slash::before { content: "\ea01"; }
+.ik-building::before { content: "\ea02"; }
+.ik-car::before { content: "\ea03"; }
+.ik-card-lines::before { content: "\ea04"; }
+.ik-circle-connect::before { content: "\ea05"; }
+.ik-circle-percent::before { content: "\ea06"; }
+.ik-coins-circle-dollar::before { content: "\ea07"; }
+.ik-checkbox-indeterminated::before { content: "\ea08"; }
+.ik-checkbox-selected::before { content: "\ea09"; }
+.ik-checkbox-unselected::before { content: "\ea0a"; }
+.ik-desktop::before { content: "\ea0b"; }
+.ik-e-wallet::before { content: "\ea0c"; }
+.ik-favorite::before { content: "\ea0d"; }
+.ik-file-circle-arrow-right::before { content: "\ea0e"; }
+.ik-file-circle-check::before { content: "\ea0f"; }
+.ik-file-circle-xmark::before { content: "\ea10"; }
+.ik-file-flip::before { content: "\ea11"; }
+.ik-house::before { content: "\ea12"; }
+.ik-location-line::before { content: "\ea13"; }
+.ik-money-bills-simple::before { content: "\ea14"; }
+.ik-money-waves::before { content: "\ea15"; }
+.ik-octagon-info::before { content: "\ea16"; }
+.ik-print-circle-check::before { content: "\ea17"; }
+.ik-print-circle-exclamation::before { content: "\ea18"; }
+.ik-qrcode::before { content: "\ea19"; }
+.ik-radio-selected::before { content: "\ea1a"; }
+.ik-radio-unselected::before { content: "\ea1b"; }
+.ik-sliders-simple::before { content: "\ea1c"; }
+.ik-sparkles::before { content: "\ea1d"; }
+.ik-thumbs-down::before { content: "\ea1e"; }
+.ik-trash::before { content: "\ea1f"; }
+.ik-angle-small-down::before { content: "\ea20"; }
+.ik-angle-small-up::before { content: "\ea21"; }
+.ik-angle-small-left::before { content: "\ea22"; }
+.ik-angle-small-right::before { content: "\ea23"; }
+.ik-arrows-turn-center::before { content: "\ea24"; }
+.ik-credit-card-circle-dollar::before { content: "\ea25"; }
+.ik-envelope-dot::before { content: "\ea26"; }
+.ik-grid-3::before { content: "\ea27"; }
+.ik-pause::before { content: "\ea28"; }
+.ik-play::before { content: "\ea29"; }
+.ik-rotate-left::before { content: "\ea2a"; }
+.ik-volume::before { content: "\ea2b"; }
+.ik-volume-xmark::before { content: "\ea2c"; }
+.ik-webhook::before { content: "\ea2d"; }
+.ik-wifi::before { content: "\ea2e"; }
+.ik-address-book::before { content: "\ea2f"; }
+.ik-circle-up-right::before { content: "\ea30"; }
+.ik-dining-table::before { content: "\ea31"; }
+.ik-file-vat::before { content: "\ea32"; }
+.ik-laptop-mobile::before { content: "\ea33"; }
+.ik-loading::before { content: "\ea34"; }
+.ik-mobile-signal-out::before { content: "\ea35"; }
+.ik-spa::before { content: "\ea36"; }
+.ik-magnifying-glass-minus::before { content: "\ea37"; }
+.ik-magnifying-glass-plus::before { content: "\ea38"; }
+.ik-boxes::before { content: "\ea39"; }
+.ik-briefcase-medical::before { content: "\ea3a"; }
+.ik-weight-scale::before { content: "\ea3b"; }
+.ik-child-simple::before { content: "\ea3c"; }
+.ik-file-simple-arrow-right::before { content: "\ea3d"; }
+.ik-object-intersect::before { content: "\ea3e"; }
+.ik-person-dress-simple::before { content: "\ea3f"; }
+.ik-person-simple::before { content: "\ea40"; }
+.ik-arrow-down-wide-short::before { content: "\ea41"; }
+.ik-arrow-up-short-wide::before { content: "\ea42"; }
+.ik-file-arrow-up-right::before { content: "\ea43"; }
+.ik-function::before { content: "\ea44"; }
+.ik-key::before { content: "\ea45"; }
+.ik-heart::before { content: "\ea46"; }
+.ik-keyboard::before { content: "\ea47"; }
+.ik-file-horizontal-lines::before { content: "\ea48"; }
+.ik-file-horizontal-dollar::before { content: "\ea49"; }
+.ik-digital-signature::before { content: "\ea4a"; }
+.ik-award-check::before { content: "\ea4b"; }
+.ik-lock::before { content: "\ea4c"; }
+.ik-lock-open::before { content: "\ea4d"; }
+.ik-face-id::before { content: "\ea4e"; }
+.ik-phone-sparkle::before { content: "\ea4f"; }
+.ik-picture-in-picture::before { content: "\ea50"; }
+.ik-circle-play-half-dashed::before { content: "\ea51"; }
+.ik-user-magnifying-glass::before { content: "\ea52"; }
+.ik-eye-dropper::before { content: "\ea53"; }
+.ik-barcode-read::before { content: "\ea54"; }
+.ik-phone-plus::before { content: "\ea55"; }
+.ik-headset-sparkle::before { content: "\ea56"; }
+.ik-microphone-sparkle::before { content: "\ea57"; }
+.ik-wand-magic-sparkles::before { content: "\ea58"; }
+.ik-image-sparkle::before { content: "\ea59"; }
+.ik-paragraph-sparkle::before { content: "\ea5a"; }
+.ik-square-chart-sparkle::before { content: "\ea5b"; }
+.ik-sidebar::before { content: "\ea5c"; }
+.ik-comment-check::before { content: "\ea5d"; }
+.ik-ellipsis-vertical::before { content: "\ea5e"; }
+.ik-folder::before { content: "\ea5f"; }
+.ik-brackets-curly::before { content: "\ea60"; }
+.ik-file-calculator::before { content: "\ea61"; }
+.ik-gear-arrow-up-right::before { content: "\ea62"; }
+.ik-file-wrench::before { content: "\ea63"; }
+.ik-fingerprint::before { content: "\ea64"; }
+.ik-file-arrow-curved-right::before { content: "\ea65"; }
+.ik-box-archive::before { content: "\ea66"; }
+.ik-box-archive-arrow-down::before { content: "\ea67"; }
+.ik-box-arrow-curved-right::before { content: "\ea68"; }
+.ik-folder-arrow-right::before { content: "\ea69"; }
+.ik-bold::before { content: "\ea6a"; }
+.ik-italic::before { content: "\ea6b"; }
+.ik-underline::before { content: "\ea6c"; }
+.ik-align-left::before { content: "\ea6d"; }
+.ik-align-center::before { content: "\ea6e"; }
+.ik-align-right::before { content: "\ea6f"; }
+.ik-list-ol::before { content: "\ea70"; }
+.ik-list-ul::before { content: "\ea71"; }
+.ik-indent::before { content: "\ea72"; }
+.ik-outdent::before { content: "\ea73"; }
+.ik-link-simple-broken::before { content: "\ea74"; }
+.ik-shirt::before { content: "\ea75"; }
+.ik-washing-machine::before { content: "\ea76"; }
+.ik-shovel::before { content: "\ea77"; }
+.ik-house-medical::before { content: "\ea78"; }
+.ik-baby-carriage::before { content: "\ea79"; }
+.ik-book::before { content: "\ea7a"; }
+.ik-beauty-cream::before { content: "\ea7b"; }
+.ik-corn::before { content: "\ea7c"; }
+.ik-motorcycle::before { content: "\ea7d"; }
+.ik-sofa::before { content: "\ea7e"; }
+.ik-utensils::before { content: "\ea7f"; }
+.ik-cup-togo::before { content: "\ea80"; }
+.ik-microphone-stand::before { content: "\ea81"; }
+.ik-martini-glass::before { content: "\ea82"; }
+.ik-burger-soda::before { content: "\ea83"; }
+.ik-hotel::before { content: "\ea84"; }
+.ik-motel::before { content: "\ea85"; }
+.ik-homestay::before { content: "\ea86"; }
+.ik-villa::before { content: "\ea87"; }
+.ik-dumbbell::before { content: "\ea88"; }
+.ik-stethoscope::before { content: "\ea89"; }
+.ik-hand-holding-lotus::before { content: "\ea8a"; }
+.ik-scissors::before { content: "\ea8b"; }
+.ik-nail-polish::before { content: "\ea8c"; }
+
+/* ---- Brand glyphs (use with .ikb) --------------------------------------- */
+.ik-apple::before { content: "\e900"; }
+.ik-facebook::before { content: "\e901"; }
+.ik-facebook-messenger::before { content: "\e902"; }
+.ik-google::before { content: "\e903"; }
+.ik-grab::before { content: "\e904"; }
+.ik-instagram::before { content: "\e905"; }
+.ik-kiotviet::before { content: "\e906"; }
+.ik-kiotviet-connect::before { content: "\e907"; }
+.ik-kiotviet-finance::before { content: "\e908"; }
+.ik-kiotviet-software::before { content: "\e909"; }
+.ik-lazada::before { content: "\e90a"; }
+.ik-sendo::before { content: "\e90b"; }
+.ik-shopee::before { content: "\e90c"; }
+.ik-tiki::before { content: "\e90d"; }
+.ik-tiktok::before { content: "\e90e"; }
+.ik-zalo::before { content: "\e90f"; }
+.ik-agoda::before { content: "\e910"; }
+.ik-airbnb::before { content: "\e911"; }
+.ik-booking::before { content: "\e912"; }
+.ik-tiktok-simple::before { content: "\e913"; }
+.ik-keivi::before { content: "\e914"; }
+.ik-twitter::before { content: "\e915"; }
+.ik-x-twitter::before { content: "\e916"; }
+.ik-youtube::before { content: "\e917"; }
+.ik-freshchat::before { content: "\e918"; }
+.ik-instagram-solid::before { content: "\e919"; }
+.ik-open-ai::before { content: "\e91a"; }
+.ik-deepseek::before { content: "\e91b"; }
+.ik-claude::before { content: "\e91c"; }
+.ik-gemini::before { content: "\e91d"; }
+.ik-meta::before { content: "\e91e"; }
+.ik-traveloka::before { content: "\e91f"; }
+.ik-expedia::before { content: "\e920"; }
+.ik-tourist-village::before { content: "\e921"; }
+.ik-dayladau::before { content: "\e922"; }

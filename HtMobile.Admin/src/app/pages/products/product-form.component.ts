@@ -47,6 +47,12 @@ import {
           <div class="f"><label>Thương hiệu</label><input pInputText [(ngModel)]="product.brand" class="w-full" /></div>
           <div class="f"><label>Tagline</label><input pInputText [(ngModel)]="product.tagline" class="w-full" /></div>
           <div class="f span2"><label>Mô tả</label><textarea pTextarea [(ngModel)]="product.description" rows="3" class="w-full"></textarea></div>
+          <div class="f span2">
+            <label>Thông số kỹ thuật (JSON)</label>
+            <textarea pTextarea [(ngModel)]="product.specs" rows="6" class="w-full mono"
+                      placeholder='[{{ "{" }}"label":"Màn hình","value":"6.9&quot;"{{ "}" }}]'></textarea>
+            <small class="hint2">Mảng <code>[{{ "{" }}"label","value"{{ "}" }}]</code> hoặc nhóm <code>[{{ "{" }}"group","items":[…]{{ "}" }}]</code>. Để trống nếu chưa có.</small>
+          </div>
         </div>
       </section>
 
@@ -116,6 +122,9 @@ import {
     .addbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--ht-line); }
     .addbar .sm { width: 140px; }
     .actions { display: flex; gap: 10px; }
+    .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; }
+    .hint2 { font-size: 11.5px; color: var(--ht-ink4); margin-top: 5px; }
+    .hint2 code { background: var(--ht-line); border-radius: 4px; padding: 1px 5px; }
   `],
 })
 export class ProductFormComponent implements OnInit {
@@ -125,7 +134,7 @@ export class ProductFormComponent implements OnInit {
   categories: AdminCategoryOption[] = [];
   variants = signal<AdminVariantRow[]>([]);
 
-  product: ProductInput = { name: '', slug: '', categoryId: 0, brand: 'Apple', tagline: '', description: '' };
+  product: ProductInput = { name: '', slug: '', categoryId: 0, brand: 'Apple', tagline: '', description: '', specs: '' };
   variant: VariantInput = { sku: '', storage: '', color: '', basePrice: 0, compareAtPrice: null, status: ProductStatus.Active };
   newVar: VariantInput = { sku: '', storage: '', color: '', basePrice: 0, compareAtPrice: null, status: ProductStatus.Active };
 
@@ -153,7 +162,7 @@ export class ProductFormComponent implements OnInit {
 
   load(): void {
     this.api.get(this.id).subscribe((dto) => {
-      this.product = { name: dto.name, slug: dto.slug, categoryId: dto.categoryId, brand: dto.brand, tagline: dto.tagline, description: dto.description };
+      this.product = { name: dto.name, slug: dto.slug, categoryId: dto.categoryId, brand: dto.brand, tagline: dto.tagline, description: dto.description, specs: dto.specs };
       this.categories = dto.categories;
       this.variants.set(dto.variants);
     });

@@ -49,7 +49,7 @@
         @* Ước tính live (Alpine) — server tính lại khi gửi *@
         <div x-show="total > 0" x-cloak x-transition class="rounded-card border border-line bg-surface2 p-4">
             <div class="flex justify-between text-sm text-ink2"><span>Giá thu ước tính</span><span class="font-semibold text-ink" x-text="money(tradeIn)"></span></div>
-            <div class="mt-1 flex justify-between text-sm text-ink2"><span>Trợ giá lên đời</span><span class="font-semibold text-green-600" x-text="money(subsidy)"></span></div>
+            <div class="mt-1 flex justify-between text-sm text-ink2"><span>Trợ giá lên đời</span><span class="font-semibold text-[color:var(--success)]" x-text="money(subsidy)"></span></div>
             <div class="mt-2 flex items-baseline justify-between border-t border-line pt-2"><span class="text-[15px] font-bold text-ink">Tổng nhận</span><span class="text-xl font-bold text-sale" x-text="money(total)"></span></div>
         </div>
 

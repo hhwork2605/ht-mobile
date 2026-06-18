@@ -23,7 +23,7 @@
 
     <form action="/search" method="get" class="mb-8" autocomplete="off">
         <div class="flex max-w-xl items-center gap-2 rounded-full border border-line bg-white px-4 py-2.5">
-            <i class="fa-solid fa-magnifying-glass text-ink2"></i>
+            <i class="ikr ik-magnifying-glass text-ink2"></i>
             <input type="search" name="q" value="@Model.Query" placeholder="Tìm iPhone, iPad, Mac..."
                    class="w-full border-0 bg-transparent text-[15px] text-ink outline-none" aria-label="Từ khóa tìm kiếm" />
             <button type="submit" class="rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-white hover:bg-accent-press">Tìm</button>
@@ -37,7 +37,7 @@
     else if (Model.Products.Count == 0)
     {
         <div class="rounded-card bg-surface2 p-10 text-center">
-            <i class="fa-solid fa-magnifying-glass mb-3 text-3xl text-ink2/50"></i>
+            <i class="ikr ik-magnifying-glass mb-3 text-3xl text-ink2/50"></i>
             <p class="text-ink">Không tìm thấy sản phẩm nào khớp với “<span class="font-semibold">@Model.Query</span>”.</p>
             <p class="mt-1 text-sm text-ink2">Thử từ khóa khác hoặc xem các danh mục trên thanh menu.</p>
         </div>
