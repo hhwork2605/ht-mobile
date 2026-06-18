@@ -7,6 +7,7 @@ import { ProductFormComponent } from './pages/products/product-form.component';
 import { OrdersListComponent } from './pages/orders/orders-list.component';
 import { OrderDetailComponent } from './pages/orders/order-detail.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { ReportsComponent } from './pages/reports/reports.component';
 import { PromotionsListComponent } from './pages/promotions/promotions-list.component';
 import { PromotionFormComponent } from './pages/promotions/promotion-form.component';
 import { UsersListComponent } from './pages/users/users-list.component';
@@ -22,6 +23,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'dashboard', component: DashboardComponent },
+      { path: 'reports', component: ReportsComponent },
       { path: 'products', component: ProductsListComponent },
       { path: 'products/new', component: ProductFormComponent },
       { path: 'products/:id', component: ProductFormComponent },

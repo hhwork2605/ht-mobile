@@ -80,7 +80,10 @@ interface NavGroup { title: string; items: NavItem[]; }
 })
 export class ShellComponent {
   groups: NavGroup[] = [
-    { title: 'Tổng quan', items: [{ label: 'Bảng điều khiển', icon: 'pi-th-large', link: '/dashboard' }] },
+    { title: 'Tổng quan', items: [
+      { label: 'Bảng điều khiển', icon: 'pi-th-large', link: '/dashboard' },
+      { label: 'Báo cáo', icon: 'pi-chart-line', link: '/reports' },
+    ] },
     { title: 'Bán hàng', items: [
       { label: 'Sản phẩm', icon: 'pi-box', link: '/products' },
       { label: 'Danh mục', icon: 'pi-sitemap', link: '/categories' },
