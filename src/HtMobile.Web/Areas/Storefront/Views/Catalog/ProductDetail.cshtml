@@ -23,8 +23,15 @@
         return m.Success ? $"https://www.youtube.com/embed/{m.Groups[1].Value}" : url;
     }
 
-    var monthlyFrom = InstallmentCalculator.MonthlyFrom(Model.Price.FinalPrice);
-    var plans = InstallmentCalculator.Plans(Model.Price.FinalPrice);
+    // Nhúng giá tất cả biến thể + lựa chọn ban đầu để đổi giá client-side khi chọn (không reload).
+    var jsonOpts = new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web)
+    {
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+    var variantsJson = System.Text.Json.JsonSerializer.Serialize(Model.VariantPrices, jsonOpts);
+    var selAttrs = Model.VariantPrices.FirstOrDefault(v => v.Id == Model.SelectedVariantId)?.Attrs
+                   ?? new Dictionary<string, string>();
+    var selJson = System.Text.Json.JsonSerializer.Serialize(selAttrs, jsonOpts);
 }
 
 @section Head {
@@ -117,7 +124,9 @@
         </div>
 
         @* ===== Cột thông tin ===== *@
-        <div class="min-w-[280px] flex-1" x-data="{ qty: 1, showInstall: false }">
+        <script type="application/json" id="pdp-variants-data">@Html.Raw(variantsJson)</script>
+        <script type="application/json" id="pdp-sel-data">@Html.Raw(selJson)</script>
+        <div class="min-w-[280px] flex-1" x-data="pdpBuyBox()">
             <h1 class="text-[29px] font-bold tracking-[-.5px] text-ink">@Model.Name</h1>
             @if (!string.IsNullOrWhiteSpace(Model.Tagline))
             {
@@ -130,22 +139,18 @@
                     <span class="flex items-center gap-1"><i class="iks ik-star text-[14px] text-[#FFB400]"></i><b class="text-ink">@Model.AverageRating.Value.ToString("0.0")</b></span>
                     <span>· @Model.ReviewCount đánh giá</span>
                 }
-                @if (Model.InStock)
-                {
-                    <span class="flex items-center gap-1 text-[color:var(--success)]"><i class="iks ik-circle-check"></i>Còn hàng</span>
-                }
-                else
-                {
-                    <span class="flex items-center gap-1 text-sale"><i class="iks ik-circle-xmark"></i>Tạm hết hàng</span>
-                }
+                <span class="flex items-center gap-1 text-[color:var(--success)]" x-show="current.inStock"><i class="iks ik-circle-check"></i>Còn hàng</span>
+                <span class="flex items-center gap-1 text-sale" x-show="!current.inStock"><i class="iks ik-circle-xmark"></i>Tạm hết hàng</span>
             </div>
 
-            <partial name="_PriceBlock" model="Model.Price" />
+            @* Giá đổi tức thì theo biến thể (client-side) *@
+            <div class="flex flex-wrap items-baseline gap-2.5">
+                <span class="text-[30px] font-extrabold text-sale" x-text="money(current.finalPrice)"></span>
+                <span class="text-[16px] text-ink2 line-through" x-show="current.compareAtPrice && current.compareAtPrice > current.finalPrice" x-text="money(current.compareAtPrice)"></span>
+                <span class="rounded-md bg-sale px-2 py-0.5 text-[13px] font-bold text-white" x-show="current.discountPercent > 0" x-text="'-' + current.discountPercent + '%'"></span>
+            </div>
 
-            @if (monthlyFrom > 0)
-            {
-                <div class="mt-2 mb-[22px] text-[13px] text-ink2">Hoặc trả góp 0% chỉ từ <span class="font-semibold text-ink">@monthlyFrom.ToString("#,##0")₫</span>/tháng</div>
-            }
+            <div class="mt-2 mb-[22px] text-[13px] text-ink2" x-show="current.finalPrice > 0">Hoặc trả góp 0% chỉ từ <span class="font-semibold text-ink" x-text="money(monthly())"></span>/tháng</div>
 
             @* VariantSelector: tách theo từng trục thuộc tính (Dung lượng / Màu…); mỗi lựa chọn là 1 SKU có URL riêng *@
             @{
@@ -173,25 +178,29 @@
                 foreach (var axis in Model.VariantAxes)
                 {
                     var isColor = axis.Name.ToLowerInvariant().Contains("màu");
-                    var selectedVal = axis.Options.FirstOrDefault(o => o.IsSelected)?.Value;
+                    var axisJs = axis.Name.Replace("'", "\\'");
                     <div class="mb-[22px]">
-                        <div class="mb-2.5 text-[13.5px] font-semibold text-ink">@axis.Name@(selectedVal is null ? "" : ":") <span class="font-normal text-ink2">@selectedVal</span></div>
+                        <div class="mb-2.5 text-[13.5px] font-semibold text-ink">@axis.Name: <span class="font-normal text-ink2" x-text="sel['@axisJs']"></span></div>
                         <div class="flex flex-wrap gap-2.5">
                             @foreach (var opt in axis.Options)
                             {
-                                var cls = opt.IsSelected ? "border-accent bg-accent/5 font-semibold text-accent" : "border-line text-ink hover:border-accent";
-                                var dim = opt.Available || opt.IsSelected ? "" : "opacity-40";
+                                var valJs = opt.Value.Replace("'", "\\'");
+                                var selExpr = $"sel['{axisJs}'] === '{valJs}'";
                                 if (isColor)
                                 {
                                     <a href="@(opt.Slug is null ? "#" : "/" + opt.Slug)" title="@opt.Value"
-                                       class="flex items-center gap-2 rounded-xl border px-3 py-2 text-[13.5px] transition @cls @dim">
+                                       @@click.prevent="pick('@axisJs', '@valJs')"
+                                       class="flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-[13.5px] transition"
+                                       :class="@selExpr ? 'border-accent bg-accent/5 font-semibold text-accent' : 'border-line text-ink hover:border-accent'">
                                         <span class="h-4 w-4 rounded-full border border-black/10" style="background:@ColorHex(opt.Value)"></span>@opt.Value
                                     </a>
                                 }
                                 else
                                 {
                                     <a href="@(opt.Slug is null ? "#" : "/" + opt.Slug)"
-                                       class="rounded-xl border px-4 py-2.5 text-[14px] transition @cls @dim">@opt.Value</a>
+                                       @@click.prevent="pick('@axisJs', '@valJs')"
+                                       class="cursor-pointer rounded-xl border px-4 py-2.5 text-[14px] transition"
+                                       :class="@selExpr ? 'border-accent bg-accent/5 font-semibold text-accent' : 'border-line text-ink hover:border-accent'">@opt.Value</a>
                                 }
                             }
                         </div>
@@ -199,15 +208,8 @@
                 }
             }
 
-            @* Hết hàng → form theo dõi hàng về (P3-04) thay khối mua *@
-            @if (!Model.InStock)
-            {
-                <div class="mt-6">
-                    <partial name="_StockNotify" model="new StockNotifyVm { VariantId = Model.SelectedVariantId }" />
-                </div>
-            }
-            else
-            {
+            @* ===== Khối mua (còn hàng) — variantId đổi theo biến thể đang chọn ===== *@
+            <div x-show="current.inStock">
                 @* Số lượng *@
                 <div class="mb-[18px] flex items-center gap-3.5">
                     <div class="flex items-center overflow-hidden rounded-xl border border-line">
@@ -222,37 +224,45 @@
                 <div class="mb-6 flex flex-wrap gap-3">
                     <form method="post" action="/cart/items" class="flex min-w-[150px] flex-1">
                         @Html.AntiForgeryToken()
-                        <input type="hidden" name="variantId" value="@Model.SelectedVariantId" />
+                        <input type="hidden" name="variantId" :value="current.id" />
                         <input type="hidden" name="quantity" :value="qty" />
                         <input type="hidden" name="buyNow" value="true" />
                         <button type="submit" class="w-full rounded-[14px] bg-accent px-4 py-[15px] text-[16px] font-bold text-white transition hover:bg-accent-press">Mua ngay</button>
                     </form>
                     <form method="post" action="/cart/items" class="flex min-w-[150px] flex-1">
                         @Html.AntiForgeryToken()
-                        <input type="hidden" name="variantId" value="@Model.SelectedVariantId" />
+                        <input type="hidden" name="variantId" :value="current.id" />
                         <input type="hidden" name="quantity" :value="qty" />
                         <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-ink bg-white px-4 py-[15px] text-[16px] font-bold text-ink transition hover:bg-surface2"><i class="iks ik-cart-shopping"></i>Thêm vào giỏ</button>
                     </form>
                 </div>
 
-                @if (plans.Count > 0)
-                {
-                    <button type="button" @@click="showInstall = !showInstall" :aria-expanded="showInstall"
-                            class="mb-4 flex items-center gap-2 text-[13.5px] font-semibold text-accent"><i class="iks ik-circle-percent"></i>Xem các kỳ hạn trả góp 0%</button>
-                    <div x-show="showInstall" x-cloak x-transition class="mb-4 rounded-card border border-line p-4">
-                        <div class="divide-y divide-line">
-                            @foreach (var p in plans)
-                            {
-                                <div class="flex items-center justify-between py-2 text-sm">
-                                    <span class="text-ink2">@p.Months tháng</span>
-                                    <span class="font-semibold text-ink">@p.MonthlyAmount.ToString("#,##0")₫<span class="text-[12px] font-normal text-ink2">/tháng</span></span>
-                                </div>
-                            }
-                        </div>
-                        <p class="mt-2 text-[12px] text-ink2">Lãi suất 0%. Duyệt hồ sơ qua công ty tài chính/thẻ tín dụng (liên hệ tại cửa hàng).</p>
+                <button type="button" @@click="showInstall = !showInstall" :aria-expanded="showInstall"
+                        class="mb-4 flex items-center gap-2 text-[13.5px] font-semibold text-accent"><i class="iks ik-circle-percent"></i>Xem các kỳ hạn trả góp 0%</button>
+                <div x-show="showInstall" x-cloak x-transition class="mb-4 rounded-card border border-line p-4">
+                    <div class="divide-y divide-line">
+                        <template x-for="p in plans" :key="p.m">
+                            <div class="flex items-center justify-between py-2 text-sm">
+                                <span class="text-ink2" x-text="p.m + ' tháng'"></span>
+                                <span class="font-semibold text-ink"><span x-text="money(p.a)"></span><span class="text-[12px] font-normal text-ink2">/tháng</span></span>
+                            </div>
+                        </template>
                     </div>
-                }
-            }
+                    <p class="mt-2 text-[12px] text-ink2">Lãi suất 0%. Duyệt hồ sơ qua công ty tài chính/thẻ tín dụng (liên hệ tại cửa hàng).</p>
+                </div>
+            </div>
+
+            @* ===== Hết hàng → theo dõi hàng về (variantId theo biến thể đang chọn) ===== *@
+            <div x-show="!current.inStock" x-cloak class="mt-2 rounded-card border border-line p-4">
+                <p class="mb-2 text-sm font-semibold text-ink"><i class="ikr ik-bell mr-1.5 text-accent"></i>Tạm hết hàng — theo dõi để biết khi có hàng</p>
+                <form hx-post="/stock-notify" hx-target="#sn-result" hx-swap="innerHTML" class="flex flex-wrap gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="variantId" :value="current.id" />
+                    <input name="contact" placeholder="Email hoặc số điện thoại" class="min-w-[180px] flex-1 rounded-xl border border-line px-3.5 py-2.5 text-[14px] text-ink outline-none focus:border-accent" />
+                    <button type="submit" class="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-press">Đăng ký</button>
+                </form>
+                <div id="sn-result"></div>
+            </div>
 
             @* Khối ưu đãi (khuyến mãi hiệu lực) *@
             @if (Model.Offers.Count > 0)
@@ -488,3 +498,42 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        // Bộ chọn biến thể: đổi giá/khuyến mãi/nút mua/URL tức thì client-side (không reload).
+        function pdpBuyBox() {
+            return {
+                variants: JSON.parse(document.getElementById('pdp-variants-data').textContent),
+                sel: JSON.parse(document.getElementById('pdp-sel-data').textContent),
+                selectedId: @Model.SelectedVariantId,
+                qty: 1,
+                showInstall: false,
+                get current() {
+                    return this.variants.find(v => Object.keys(this.sel).every(k => v.attrs[k] === this.sel[k]))
+                        || this.variants.find(v => v.id === this.selectedId)
+                        || this.variants[0]
+                        || { id: 0, finalPrice: 0, compareAtPrice: null, discountPercent: 0, inStock: false, attrs: {} };
+                },
+                get plans() {
+                    const p = this.current.finalPrice;
+                    return p > 0 ? [6, 9, 12].map(m => ({ m: m, a: Math.ceil(p / m) })) : [];
+                },
+                monthly() {
+                    const p = this.current.finalPrice;
+                    return p > 0 ? Math.ceil(p / 12) : 0;
+                },
+                pick(axis, value) {
+                    const cand = this.variants.find(v => v.attrs[axis] === value && Object.keys(this.sel).every(k => k === axis || v.attrs[k] === this.sel[k]))
+                        || this.variants.find(v => v.attrs[axis] === value);
+                    if (cand) {
+                        this.sel = Object.assign({}, cand.attrs);
+                        this.qty = 1;
+                        if (cand.slug) history.replaceState(null, '', '/' + cand.slug);
+                    }
+                },
+                money(n) { return (n === null || n === undefined || n === '') ? '' : Number(n).toLocaleString('vi-VN') + '₫'; }
+            };
+        }
+    </script>
+}

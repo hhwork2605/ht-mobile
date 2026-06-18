@@ -209,6 +209,17 @@ public class CatalogService
             .ToList();
         var variantAxes = VariantAxisBuilder.Build(variantInfos, selectedVariantId);
 
+        // Giá từng biến thể (nhúng client để đổi giá tức thì khi chọn). Giá hiệu lực cache ở Redis nên rẻ.
+        var variantPrices = new List<VariantPriceDto>(variantRows.Count);
+        foreach (var v in variantRows)
+        {
+            var vp = await _pricing.GetEffectivePriceAsync(v.Id, ct);
+            variantPrices.Add(new VariantPriceDto(
+                v.Id, v.Slug, v.Sku ?? string.Empty, v.Status == Domain.Enums.ProductStatus.Active,
+                vp.FinalPrice, vp.CompareAtPrice, vp.DiscountPercent,
+                v.Attrs.ToDictionary(a => a.Name, a => a.Value)));
+        }
+
         var selected = variantRows.FirstOrDefault(v => v.Id == selectedVariantId);
         var canonicalSlug = variantRows.FirstOrDefault()?.Slug ?? product.Slug;
 
@@ -288,6 +299,7 @@ public class CatalogService
             Price = price,
             Variants = variants,
             VariantAxes = variantAxes,
+            VariantPrices = variantPrices,
             Images = images,
             YoutubeUrls = videos,
             Offers = offers,

@@ -38,6 +38,9 @@ public record ProductDetailDto
 
     /// <summary>Bộ chọn biến thể tách theo từng trục thuộc tính (vd "Dung lượng", "Màu") — thay nút gộp.</summary>
     public IReadOnlyList<VariantAxisDto> VariantAxes { get; init; } = Array.Empty<VariantAxisDto>();
+
+    /// <summary>Giá tất cả biến thể (nhúng client) — đổi giá tức thì khi chọn biến thể, không reload trang.</summary>
+    public IReadOnlyList<VariantPriceDto> VariantPrices { get; init; } = Array.Empty<VariantPriceDto>();
     public IReadOnlyList<string> Images { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> YoutubeUrls { get; init; } = Array.Empty<string>();
 
@@ -82,6 +85,12 @@ public record VariantAxisOptionDto(string Value, string? Slug, bool IsSelected, 
 
 /// <summary>1 trục chọn biến thể (vd "Dung lượng" / "Màu") gồm các lựa chọn.</summary>
 public record VariantAxisDto(string Name, IReadOnlyList<VariantAxisOptionDto> Options);
+
+/// <summary>Giá + thuộc tính từng biến thể (nhúng client để đổi giá tức thì khi chọn, không reload).</summary>
+public record VariantPriceDto(
+    long Id, string Slug, string Sku, bool InStock,
+    decimal FinalPrice, decimal? CompareAtPrice, int DiscountPercent,
+    IReadOnlyDictionary<string, string> Attrs);
 
 /// <summary>1 dòng thông số: nhãn + giá trị (vd "Màn hình" / "6.9\" Super Retina XDR 120Hz").</summary>
 public record SpecItemDto(string Label, string Value);
