@@ -25,10 +25,11 @@ public class CartController : Controller
 
     [HttpPost("/cart/items")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Add([FromForm] long variantId, [FromForm] int quantity = 1, CancellationToken ct = default)
+    public async Task<IActionResult> Add([FromForm] long variantId, [FromForm] int quantity = 1, [FromForm] bool buyNow = false, CancellationToken ct = default)
     {
         await _cart.AddItemAsync(_ctx.GetOwner(createGuestIfMissing: true), variantId, quantity, ct: ct);
-        return RedirectToAction(nameof(Index));
+        // "Mua ngay" → tới thẳng thanh toán; "Thêm vào giỏ" → về trang giỏ.
+        return buyNow ? Redirect("/checkout") : RedirectToAction(nameof(Index));
     }
 
     [HttpPost("/cart/items/{id:long}/inc")]

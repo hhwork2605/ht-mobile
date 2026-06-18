@@ -52,7 +52,7 @@
 
 ### P0 — ảnh hưởng trực tiếp chuyển đổi / khó dùng ngay
 - [ ] **Search tiếng Việt theo danh mục + từ đồng nghĩa** (✓) — "tai nghe" → 0 kết quả dù có AirPods; hiện chỉ khớp tiền tố tên. Cần khớp tên danh mục + bộ synonym (tai nghe→AirPods, điện thoại→iPhone, laptop→Mac…) + nhiều từ khoá. (`ISearchService`/Postgres FTS)
-- [ ] **Luồng "Mua ngay" → thẳng thanh toán** (✓) — hiện cả "Mua ngay" và "Thêm vào giỏ" đều POST `/cart/items` rồi về `/cart`. "Mua ngay" cần add rồi redirect `/checkout`.
+- [x] **Luồng "Mua ngay" → thẳng thanh toán** (✓, 2026-06-18) — `CartController.Add` nhận cờ `buyNow` → add rồi redirect `/checkout`; PDP "Mua ngay" gắn `buyNow=true`, "Thêm vào giỏ" giữ về `/cart`.
 - [ ] **Mã giảm giá ở giỏ/checkout** (✓) — ô coupon đang disable ("Sắp có"); wire khuyến mãi/voucher vào `CartService`/`CheckoutService` (đã có pricing engine + Promotion).
 - [ ] **Tra cứu đơn cho khách vãng lai (COD)** (✓) — không có trang tra cứu; guest đặt COD xong không xem được đơn. Cần trang `/tra-cuu-don` (mã đơn + SĐT).
 
