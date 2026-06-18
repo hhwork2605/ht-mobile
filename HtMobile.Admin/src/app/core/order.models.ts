@@ -33,6 +33,9 @@ export interface AdminOrderDetailDto {
   code: string;
   status: OrderStatus;
   createdAt: string;
+  subtotal: number;
+  discountAmount: number;
+  couponCode?: string | null;
   total: number;
   paymentMethod?: string | null;
   shipmentAddress?: string | null;

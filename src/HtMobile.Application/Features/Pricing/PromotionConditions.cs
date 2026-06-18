@@ -23,6 +23,17 @@ public static class PromotionConditions
         public long[]? CategoryIds { get; set; }
         public long[]? ProductIds { get; set; }
         public long[]? VariantIds { get; set; }
+
+        /// <summary>Ngưỡng đơn tối thiểu (đồng) để áp voucher; null = không yêu cầu.</summary>
+        public decimal? MinOrder { get; set; }
+    }
+
+    /// <summary>Đọc ngưỡng đơn tối thiểu từ ConditionsJson (dùng cho voucher). null nếu không có / JSON hỏng.</summary>
+    public static decimal? GetMinOrder(string? conditionsJson)
+    {
+        if (string.IsNullOrWhiteSpace(conditionsJson)) return null;
+        try { return JsonSerializer.Deserialize<Conditions>(conditionsJson, Opts)?.MinOrder; }
+        catch (JsonException) { return null; }
     }
 
     public static bool Matches(string? conditionsJson, PricingContext ctx)

@@ -5,6 +5,7 @@ export enum PromotionType {
 export interface AdminPromotionRow {
   id: number;
   name: string;
+  code?: string | null;
   type: PromotionType;
   value: number;
   startsAt: string;
@@ -15,6 +16,7 @@ export interface AdminPromotionRow {
 export interface AdminPromotionDetail {
   id: number;
   name: string;
+  code?: string | null;
   type: PromotionType;
   value: number;
   startsAt: string;
@@ -24,6 +26,7 @@ export interface AdminPromotionDetail {
 
 export interface PromotionInput {
   name: string;
+  code?: string | null;
   type: PromotionType;
   value: number;
   startsAt: string;

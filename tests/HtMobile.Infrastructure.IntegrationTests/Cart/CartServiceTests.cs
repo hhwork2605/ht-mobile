@@ -37,7 +37,7 @@ public class CartServiceTests
         return db;
     }
 
-    private static CartService Service(AppDbContext db) => new(db, new StubPricing());
+    private static CartService Service(AppDbContext db) => new(db, new StubPricing(), new HtMobile.Infrastructure.Common.SystemDateTime());
 
     private static readonly CartOwner Guest = new(null, "sess-guest");
     private static readonly CartOwner User = new(42, null);

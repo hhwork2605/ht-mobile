@@ -27,13 +27,14 @@ import { AdminPromotionRow, promotionTypeLabel, promotionValueText } from '../..
       <p-table [value]="rows()" [loading]="loading()" styleClass="p-datatable-sm" [tableStyle]="{ 'min-width': '60rem' }">
         <ng-template pTemplate="header">
           <tr>
-            <th>Tên</th><th>Loại</th><th class="ta-r">Giá trị</th>
+            <th>Tên</th><th>Mã</th><th>Loại</th><th class="ta-r">Giá trị</th>
             <th>Bắt đầu</th><th>Kết thúc</th><th class="ta-c">Trạng thái</th><th></th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-p>
           <tr>
             <td class="strong">{{ p.name }}</td>
+            <td>@if (p.code) { <span class="code">{{ p.code }}</span> } @else { <span class="muted">— tự động</span> }</td>
             <td><p-tag [value]="typeLabel(p.type)" severity="secondary" /></td>
             <td class="ta-r strong">{{ valueText(p) }}</td>
             <td class="muted">{{ p.startsAt | date:'dd/MM/yy HH:mm' }}</td>
@@ -45,7 +46,7 @@ import { AdminPromotionRow, promotionTypeLabel, promotionValueText } from '../..
             </td>
           </tr>
         </ng-template>
-        <ng-template pTemplate="emptymessage"><tr><td colspan="7" class="empty">Chưa có khuyến mãi nào.</td></tr></ng-template>
+        <ng-template pTemplate="emptymessage"><tr><td colspan="8" class="empty">Chưa có khuyến mãi nào.</td></tr></ng-template>
       </p-table>
     </div>
   `,
@@ -54,6 +55,7 @@ import { AdminPromotionRow, promotionTypeLabel, promotionValueText } from '../..
     .h1 { font-size: 20px; font-weight: 700; margin: 0; }
     .card { background: #fff; border: 1px solid var(--ht-line); border-radius: 14px; overflow: hidden; }
     .strong { font-weight: 600; } .muted { color: var(--ht-ink5); }
+    .code { font-family: ui-monospace, monospace; font-weight: 700; color: var(--ht-brand); background: var(--ht-line); border-radius: 6px; padding: 1px 7px; font-size: 12.5px; }
     .ta-c { text-align: center; } .ta-r { text-align: right; } .nowrap { white-space: nowrap; }
     .empty { text-align: center; padding: 28px; color: var(--ht-ink4); }
   `],

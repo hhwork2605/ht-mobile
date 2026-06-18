@@ -33,7 +33,7 @@ public class CheckoutServiceTests
         });
         db.SaveChanges();
 
-        var cart = new CartService(db, new StubPricing());
+        var cart = new CartService(db, new StubPricing(), new HtMobile.Infrastructure.Common.SystemDateTime());
         return (db, new CheckoutService(db, cart), cart);
     }
 

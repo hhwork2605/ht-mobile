@@ -37,7 +37,8 @@ public class CheckoutService
             .Select(i => new OrderLineInput(i.VariantId, i.UnitPrice, i.Quantity))   // CartLineDto.VariantId = Id Product con
             .ToList();
 
-        var order = OrderFactory.Create(lines, owner.CustomerId, shippingAddress, CodPaymentMethod);
+        // cart.Discount/CouponCode đã được revalidate trong GetCartAsync (hạn + ngưỡng đơn) tại thời điểm đặt.
+        var order = OrderFactory.Create(lines, owner.CustomerId, shippingAddress, CodPaymentMethod, cart.Discount, cart.CouponCode);
         if (order is null) return null;
 
         // Atomic: tạo đơn + xoá giỏ trong CÙNG 1 SaveChanges (tránh đơn tạo mà giỏ chưa xoá → đặt lại).

@@ -29,6 +29,11 @@ import { PROMOTION_TYPE_OPTIONS, PromotionType } from '../../core/promotion.mode
           <label>Tên chương trình *</label>
           <input pInputText [(ngModel)]="name" class="w-full" placeholder="VD: Ưu đãi khai trương -10%" />
         </div>
+        <div class="f span2">
+          <label>Mã giảm giá (voucher) — để trống = KM tự động</label>
+          <input pInputText [(ngModel)]="code" class="w-full mono" placeholder="VD: GIAM5" />
+          <small class="hint">Có mã → khách phải NHẬP mã ở giỏ/checkout mới được giảm. Để trống → tự áp theo điều kiện. Ngưỡng đơn tối thiểu: thêm <code>{{ '{' }}"minOrder":10000000{{ '}' }}</code> vào Điều kiện.</small>
+        </div>
         <div class="f">
           <label>Loại *</label>
           <p-select [options]="typeOptions" [(ngModel)]="type" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body" />
@@ -78,6 +83,7 @@ export class PromotionFormComponent implements OnInit {
   typeOptions = PROMOTION_TYPE_OPTIONS;
 
   name = '';
+  code = '';
   type: PromotionType = PromotionType.Percentage;
   value = 0;
   startsAt: Date = new Date();
@@ -98,7 +104,7 @@ export class PromotionFormComponent implements OnInit {
 
   load(): void {
     this.api.get(this.id).subscribe((p) => {
-      this.name = p.name; this.type = p.type; this.value = p.value;
+      this.name = p.name; this.code = p.code ?? ''; this.type = p.type; this.value = p.value;
       this.startsAt = new Date(p.startsAt); this.endsAt = new Date(p.endsAt);
       this.conditionsJson = p.conditionsJson ?? '';
     });
@@ -109,7 +115,7 @@ export class PromotionFormComponent implements OnInit {
     if (this.endsAt < this.startsAt) { this.toast.add({ severity: 'warn', summary: 'Ngày kết thúc phải sau ngày bắt đầu' }); return; }
     this.saving.set(true);
     const input = {
-      name: this.name, type: this.type, value: this.value,
+      name: this.name, code: this.code.trim() || null, type: this.type, value: this.value,
       startsAt: this.startsAt.toISOString(), endsAt: this.endsAt.toISOString(),
       conditionsJson: this.conditionsJson.trim() || null,
     };

@@ -1,5 +1,6 @@
 using HtMobile.Application.Common.Interfaces;
 using HtMobile.Application.Features.Cart.Dtos;
+using HtMobile.Application.Features.Pricing;
 using HtMobile.Domain.Entities.Sales;
 using HtMobile.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -20,11 +21,13 @@ public class CartService : ICartService
 {
     private readonly IApplicationDbContext _db;
     private readonly IPricingService _pricing;
+    private readonly IDateTime _clock;
 
-    public CartService(IApplicationDbContext db, IPricingService pricing)
+    public CartService(IApplicationDbContext db, IPricingService pricing, IDateTime clock)
     {
         _db = db;
         _pricing = pricing;
+        _clock = clock;
     }
 
     /// <summary>Đọc giỏ + tính tóm tắt. Không tạo giỏ nếu chưa có (trả giỏ rỗng).</summary>
@@ -64,14 +67,58 @@ public class CartService : ICartService
         }
 
         var totals = CartMath.Summarize(amounts);
+        var (couponCode, discount) = await EvaluateCouponAsync(cart.CouponCode, totals.Subtotal, ct);
         return new CartDto
         {
             Items = lines,
             Count = totals.Count,
             Subtotal = totals.Subtotal,
             ShippingFee = totals.ShippingFee,
-            Total = totals.Total
+            CouponCode = couponCode,
+            Discount = discount,
+            Total = totals.Total - discount
         };
+    }
+
+    /// <summary>Tra voucher theo mã đã lưu + đánh giá với subtotal hiện tại. Trả (mã hiển thị, số tiền giảm).
+    /// Mã không còn hợp lệ (hết hạn / dưới ngưỡng) → (null, 0) — vẫn giữ mã trên entity để tự áp lại khi đủ điều kiện.</summary>
+    private async Task<(string? Code, decimal Discount)> EvaluateCouponAsync(string? storedCode, decimal subtotal, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(storedCode)) return (null, 0m);
+        var promo = await _db.Promotions.AsNoTracking().FirstOrDefaultAsync(p => p.Code == storedCode, ct);
+        var r = CouponCalculator.Evaluate(promo, subtotal, _clock.Now);
+        return r.IsApplied ? (storedCode, r.Discount) : (null, 0m);
+    }
+
+    public async Task<ApplyCouponResult> ApplyCouponAsync(CartOwner owner, string code, CancellationToken ct = default)
+    {
+        var normalized = (code ?? string.Empty).Trim().ToUpperInvariant();
+        var cart = await FindCartAsync(owner, track: true, ct);
+        if (cart is null || cart.Items.Count == 0)
+            return new ApplyCouponResult(CouponOutcome.NotFound, await GetCartAsync(owner, ct));
+
+        // Subtotal hiện tại để xét ngưỡng đơn tối thiểu.
+        var summary = await GetCartAsync(owner, ct);
+        var promo = string.IsNullOrEmpty(normalized)
+            ? null
+            : await _db.Promotions.AsNoTracking().FirstOrDefaultAsync(p => p.Code == normalized, ct);
+        var result = CouponCalculator.Evaluate(promo, summary.Subtotal, _clock.Now);
+
+        if (result.Outcome == CouponOutcome.Ok)
+        {
+            cart.CouponCode = normalized;
+            await _db.SaveChangesAsync(ct);
+        }
+
+        return new ApplyCouponResult(result.Outcome, await GetCartAsync(owner, ct));
+    }
+
+    public async Task RemoveCouponAsync(CartOwner owner, CancellationToken ct = default)
+    {
+        var cart = await FindCartAsync(owner, track: true, ct);
+        if (cart?.CouponCode is null) return;
+        cart.CouponCode = null;
+        await _db.SaveChangesAsync(ct);
     }
 
     /// <summary>Thêm 1 biến thể vào giỏ (gộp nếu đã có). Trả về tổng số lượng giỏ sau khi thêm.</summary>

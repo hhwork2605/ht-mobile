@@ -23,4 +23,10 @@ public interface ICartService
 
     /// <summary>Gộp giỏ khách vãng lai vào giỏ user khi đăng nhập.</summary>
     Task MergeAsync(string sessionId, long customerId, CancellationToken ct = default);
+
+    /// <summary>Áp mã giảm giá vào giỏ (validate code + hạn + đơn tối thiểu). Trả kết quả + giỏ sau khi áp.</summary>
+    Task<ApplyCouponResult> ApplyCouponAsync(CartOwner owner, string code, CancellationToken ct = default);
+
+    /// <summary>Gỡ mã giảm giá khỏi giỏ.</summary>
+    Task RemoveCouponAsync(CartOwner owner, CancellationToken ct = default);
 }

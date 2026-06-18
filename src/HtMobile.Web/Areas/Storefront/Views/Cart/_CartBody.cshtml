@@ -57,14 +57,46 @@
                     <span>Phí vận chuyển</span>
                     <span class="font-semibold text-[color:var(--success)]">Miễn phí</span>
                 </div>
+                @if (Model.Discount > 0)
+                {
+                    <div class="mt-1 flex justify-between text-sm text-ink2">
+                        <span>Giảm giá @(string.IsNullOrEmpty(Model.CouponCode) ? "" : $"({Model.CouponCode})")</span>
+                        <span class="font-semibold text-[color:var(--success)]">−@Model.Discount.ToString("#,##0")₫</span>
+                    </div>
+                }
 
-                @* Mã giảm giá: UI có sẵn nhưng logic để Phase promotions (chưa xử lý). *@
-                <div class="my-3.5 flex gap-2">
-                    <input placeholder="Mã giảm giá" disabled
-                           class="flex-1 rounded-[10px] border border-line px-3 py-2.5 text-[13.5px] text-ink outline-none disabled:bg-surface2 disabled:text-ink2" />
-                    <button type="button" disabled title="Sắp có"
-                            class="cursor-not-allowed rounded-[10px] bg-surface2 px-4 text-[13.5px] font-semibold text-ink2">Áp dụng</button>
-                </div>
+                @* ===== Mã giảm giá (htmx) ===== *@
+                @{
+                    var couponOutcome = ViewData["CouponOutcome"] as HtMobile.Application.Features.Pricing.CouponOutcome?;
+                    string? couponMsg = couponOutcome switch
+                    {
+                        HtMobile.Application.Features.Pricing.CouponOutcome.NotFound => "Mã giảm giá không tồn tại.",
+                        HtMobile.Application.Features.Pricing.CouponOutcome.Inactive => "Mã đã hết hạn hoặc chưa hiệu lực.",
+                        HtMobile.Application.Features.Pricing.CouponOutcome.BelowMinOrder => "Đơn hàng chưa đạt giá trị tối thiểu để áp mã.",
+                        HtMobile.Application.Features.Pricing.CouponOutcome.NotApplicable => "Mã này không áp dụng giảm tiền.",
+                        _ => null
+                    };
+                }
+                @if (!string.IsNullOrEmpty(Model.CouponCode) && Model.Discount > 0)
+                {
+                    <div class="my-3.5 flex items-center justify-between gap-2 rounded-[10px] border border-[color:var(--success)]/40 bg-[color:var(--success)]/5 px-3 py-2.5">
+                        <span class="flex items-center gap-1.5 text-[13.5px] font-semibold text-ink"><i class="iks ik-tag text-[color:var(--success)]"></i>@Model.CouponCode</span>
+                        <button type="button" hx-post="/cart/coupon/remove" hx-target="#cart-body" hx-swap="outerHTML"
+                                class="text-[12.5px] font-semibold text-ink2 hover:text-sale">Gỡ</button>
+                    </div>
+                }
+                else
+                {
+                    <form hx-post="/cart/coupon" hx-target="#cart-body" hx-swap="outerHTML" class="my-3.5 flex gap-2">
+                        <input name="code" value="@(ViewData["CouponInput"] as string)" placeholder="Mã giảm giá" autocomplete="off"
+                               class="flex-1 rounded-[10px] border border-line px-3 py-2.5 text-[13.5px] text-ink outline-none focus:border-accent" />
+                        <button type="submit" class="rounded-[10px] bg-surface2 px-4 text-[13.5px] font-semibold text-ink hover:bg-line">Áp dụng</button>
+                    </form>
+                    @if (couponMsg is not null)
+                    {
+                        <p class="-mt-2 mb-1 text-[12.5px] text-sale">@couponMsg</p>
+                    }
+                }
 
                 <div class="mt-1.5 flex items-baseline justify-between border-t border-line pt-3.5">
                     <span class="text-[15px] font-bold text-ink">Tổng cộng</span>

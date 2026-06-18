@@ -51,9 +51,10 @@ public class PricingEngine : IPricingService
 
         var ctx = new PricingContext(productId, product.ProductParentId, product.CategoryId);
 
+        // KM có Code = voucher (chỉ áp khi khách nhập mã ở giỏ) → KHÔNG auto-apply vào giá sản phẩm.
         var active = await _db.Promotions
             .AsNoTracking()
-            .Where(p => p.StartsAt <= now && p.EndsAt >= now)
+            .Where(p => p.Code == null && p.StartsAt <= now && p.EndsAt >= now)
             .ToListAsync(ct);
 
         // Lọc theo ConditionsJson (in-memory; danh sách KM đang chạy nhỏ).

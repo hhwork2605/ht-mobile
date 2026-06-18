@@ -15,7 +15,9 @@ public static class OrderFactory
         IReadOnlyList<OrderLineInput> lines,
         long? customerId,
         string shippingAddress,
-        string paymentMethod)
+        string paymentMethod,
+        decimal discount = 0m,
+        string? couponCode = null)
     {
         if (lines is null || lines.Count == 0) return null;
 
@@ -26,7 +28,7 @@ public static class OrderFactory
             PaymentMethod = paymentMethod
         };
 
-        decimal total = 0m;
+        decimal subtotal = 0m;
         foreach (var l in lines)
         {
             order.Items.Add(new OrderItem
@@ -35,9 +37,16 @@ public static class OrderFactory
                 Quantity = l.Quantity,
                 UnitPrice = l.UnitPrice
             });
-            total += l.UnitPrice * l.Quantity;
+            subtotal += l.UnitPrice * l.Quantity;
         }
 
+        // Chặn giảm giá trong [0, subtotal] để tổng không bao giờ âm.
+        var safeDiscount = Math.Clamp(discount, 0m, subtotal);
+        var total = subtotal - safeDiscount;
+
+        order.Subtotal = subtotal;
+        order.DiscountAmount = safeDiscount;
+        order.CouponCode = safeDiscount > 0 ? couponCode : null;
         order.Total = total;
         order.Shipment = new Shipment
         {

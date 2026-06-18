@@ -65,6 +65,7 @@ public class DbInitializer
         await SeedCategoriesAsync();
         await SeedSampleCatalogAsync();
         await BackfillProductSpecsAsync();
+        await SeedVouchersAsync();
         await SeedBannersAsync();
         await SeedBundlesAsync();
         await SeedStockDemoAsync();
@@ -102,6 +103,26 @@ public class DbInitializer
             else
                 _logger.LogWarning("Tạo admin thất bại: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
         }
+    }
+
+    /// <summary>Voucher demo (có Code → chỉ áp khi khách nhập mã). Idempotent: thêm nếu chưa có (theo Code).</summary>
+    private async Task SeedVouchersAsync()
+    {
+        var now = DateTime.Now;
+        if (!await _db.Promotions.AnyAsync(p => p.Code == "GIAM5"))
+            _db.Promotions.Add(new Promotion
+            {
+                Name = "Giảm 5% toàn đơn", Code = "GIAM5", Type = PromotionType.Percentage, Value = 5,
+                StartsAt = now.AddDays(-1), EndsAt = now.AddMonths(3)
+            });
+        if (!await _db.Promotions.AnyAsync(p => p.Code == "GIAM500K"))
+            _db.Promotions.Add(new Promotion
+            {
+                Name = "Giảm 500K cho đơn từ 10 triệu", Code = "GIAM500K", Type = PromotionType.FixedAmount, Value = 500_000,
+                ConditionsJson = "{\"minOrder\":10000000}",
+                StartsAt = now.AddDays(-1), EndsAt = now.AddMonths(3)
+            });
+        await _db.SaveChangesAsync();
     }
 
     /// <summary>Tài khoản Customer demo cho storefront (đăng nhập thử). Tách khỏi Identity (admin) — ADR 0004.</summary>
@@ -148,7 +169,7 @@ public class DbInitializer
         var watch = await _db.Categories.FirstAsync(c => c.Slug == "apple-watch");
         var phukien = await _db.Categories.FirstAsync(c => c.Slug == "phu-kien");
 
-        // Khuyến mãi 10% áp cho mọi sản phẩm (scaffold)
+        // Khuyến mãi 10% áp cho mọi sản phẩm (scaffold, auto-apply — Code null)
         _db.Promotions.Add(new Promotion
         {
             Name = "Ưu đãi khai trương -10%",

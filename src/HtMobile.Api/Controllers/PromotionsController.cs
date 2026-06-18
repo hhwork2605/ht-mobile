@@ -30,15 +30,27 @@ public class PromotionsController : ControllerBase
     public async Task<IActionResult> Create([FromBody] PromotionInput input, CancellationToken ct)
     {
         if (input.EndsAt < input.StartsAt) return BadRequest(new { message = "Ngày kết thúc phải sau ngày bắt đầu." });
-        var id = await _promos.CreateAsync(input, ct);
-        return CreatedAtAction(nameof(Get), new { id }, new { id });
+        var (result, id) = await _promos.CreateAsync(input, ct);
+        return result switch
+        {
+            PromotionWriteResult.Ok => CreatedAtAction(nameof(Get), new { id }, new { id }),
+            PromotionWriteResult.CodeExists => Conflict(new { field = "code", message = "Mã giảm giá đã tồn tại." }),
+            _ => BadRequest()
+        };
     }
 
     [HttpPut("{id:long}")]
     public async Task<IActionResult> Update(long id, [FromBody] PromotionInput input, CancellationToken ct)
     {
         if (input.EndsAt < input.StartsAt) return BadRequest(new { message = "Ngày kết thúc phải sau ngày bắt đầu." });
-        return await _promos.UpdateAsync(id, input, ct) ? NoContent() : NotFound();
+        var result = await _promos.UpdateAsync(id, input, ct);
+        return result switch
+        {
+            PromotionWriteResult.Ok => NoContent(),
+            PromotionWriteResult.NotFound => NotFound(),
+            PromotionWriteResult.CodeExists => Conflict(new { field = "code", message = "Mã giảm giá đã tồn tại." }),
+            _ => BadRequest()
+        };
     }
 
     [HttpDelete("{id:long}")]

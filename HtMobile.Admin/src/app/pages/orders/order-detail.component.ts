@@ -58,6 +58,10 @@ import {
                 <span class="strong">{{ vnd(it.lineTotal) }}</span>
               </div>
             }
+            <div class="subline"><span>Tạm tính</span><span>{{ vnd(o.subtotal) }}</span></div>
+            @if (o.discountAmount > 0) {
+              <div class="subline disc"><span>Giảm giá @if (o.couponCode) { ({{ o.couponCode }}) }</span><span>−{{ vnd(o.discountAmount) }}</span></div>
+            }
             <div class="total"><span>Tổng tiền</span><span class="grand">{{ vnd(o.total) }}</span></div>
           </section>
         </div>
@@ -96,7 +100,9 @@ import {
     .badge { display: inline-block; font-size: 10.5px; font-weight: 600; color: #0070F4; background: #E5F1FE; border-radius: 6px; padding: 1px 7px; margin-left: 6px; vertical-align: middle; }
     .line { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--ht-line); font-size: 13px; }
     .strong { font-weight: 600; } .muted { color: var(--ht-ink5); } .sm { font-size: 13px; }
-    .total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 12px; margin-top: 4px; font-weight: 700; }
+    .subline { display: flex; justify-content: space-between; font-size: 13px; color: var(--ht-ink5); padding-top: 8px; }
+    .subline.disc { color: var(--ht-success, #00B63E); }
+    .total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 12px; margin-top: 4px; border-top: 1px solid var(--ht-line); font-weight: 700; }
     .grand { font-size: 20px; }
     .w-full { width: 100%; } .mb-3 { margin-bottom: 14px; }
   `],

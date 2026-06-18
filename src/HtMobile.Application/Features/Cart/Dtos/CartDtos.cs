@@ -1,4 +1,12 @@
+using HtMobile.Application.Features.Pricing;
+
 namespace HtMobile.Application.Features.Cart.Dtos;
+
+/// <summary>Kết quả áp mã giảm giá + giỏ sau khi áp (để render lại).</summary>
+public record ApplyCouponResult(CouponOutcome Outcome, CartDto Cart)
+{
+    public bool Success => Outcome == CouponOutcome.Ok;
+}
 
 /// <summary>Một dòng trong giỏ (đã có giá hiệu lực + thông tin hiển thị).</summary>
 public record CartLineDto
@@ -22,6 +30,14 @@ public record CartDto
     public int Count { get; init; }
     public decimal Subtotal { get; init; }
     public decimal ShippingFee { get; init; }
+
+    /// <summary>Mã giảm giá đang áp (null = không có / không còn hợp lệ).</summary>
+    public string? CouponCode { get; init; }
+
+    /// <summary>Số tiền giảm từ mã (0 nếu không áp được).</summary>
+    public decimal Discount { get; init; }
+
+    /// <summary>Tổng phải trả = Subtotal + ShippingFee − Discount.</summary>
     public decimal Total { get; init; }
     public bool IsEmpty => Items.Count == 0;
 }

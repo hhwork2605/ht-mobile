@@ -12,6 +12,17 @@ public class Order : BaseAuditableEntity
     /// <summary>Khách hàng đặt đơn (null nếu guest).</summary>
     public Customer? Customer { get; set; }
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
+
+    /// <summary>Tổng tiền hàng (trước giảm giá mã).</summary>
+    public decimal Subtotal { get; set; }
+
+    /// <summary>Số tiền giảm từ mã giảm giá (0 nếu không có).</summary>
+    public decimal DiscountAmount { get; set; }
+
+    /// <summary>Mã giảm giá đã áp (null nếu không có).</summary>
+    public string? CouponCode { get; set; }
+
+    /// <summary>Tổng phải trả = Subtotal − DiscountAmount (+ phí ship).</summary>
     public decimal Total { get; set; }
     public string? PaymentMethod { get; set; }
 

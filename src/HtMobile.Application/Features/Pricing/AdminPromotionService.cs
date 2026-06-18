@@ -27,6 +27,7 @@ public class AdminPromotionService
             {
                 Id = p.Id,
                 Name = p.Name,
+                Code = p.Code,
                 Type = p.Type,
                 Value = p.Value,
                 StartsAt = p.StartsAt,
@@ -42,16 +43,21 @@ public class AdminPromotionService
             .Where(p => p.Id == id)
             .Select(p => new AdminPromotionDetail
             {
-                Id = p.Id, Name = p.Name, Type = p.Type, Value = p.Value,
+                Id = p.Id, Name = p.Name, Code = p.Code, Type = p.Type, Value = p.Value,
                 StartsAt = p.StartsAt, EndsAt = p.EndsAt, ConditionsJson = p.ConditionsJson,
             })
             .FirstOrDefaultAsync(ct);
 
-    public async Task<long> CreateAsync(PromotionInput input, CancellationToken ct = default)
+    public async Task<(PromotionWriteResult Result, long Id)> CreateAsync(PromotionInput input, CancellationToken ct = default)
     {
+        var code = NormalizeCode(input.Code);
+        if (code is not null && await _db.Promotions.AnyAsync(p => p.Code == code, ct))
+            return (PromotionWriteResult.CodeExists, 0);
+
         var promo = new Promotion
         {
             Name = input.Name.Trim(),
+            Code = code,
             Type = input.Type,
             Value = input.Value,
             StartsAt = input.StartsAt,
@@ -60,22 +66,34 @@ public class AdminPromotionService
         };
         _db.Promotions.Add(promo);
         await _db.SaveChangesAsync(ct);
-        return promo.Id;
+        return (PromotionWriteResult.Ok, promo.Id);
     }
 
-    public async Task<bool> UpdateAsync(long id, PromotionInput input, CancellationToken ct = default)
+    public async Task<PromotionWriteResult> UpdateAsync(long id, PromotionInput input, CancellationToken ct = default)
     {
         var promo = await _db.Promotions.FirstOrDefaultAsync(p => p.Id == id, ct);
-        if (promo is null) return false;
+        if (promo is null) return PromotionWriteResult.NotFound;
+
+        var code = NormalizeCode(input.Code);
+        if (code is not null && await _db.Promotions.AnyAsync(p => p.Code == code && p.Id != id, ct))
+            return PromotionWriteResult.CodeExists;
 
         promo.Name = input.Name.Trim();
+        promo.Code = code;
         promo.Type = input.Type;
         promo.Value = input.Value;
         promo.StartsAt = input.StartsAt;
         promo.EndsAt = input.EndsAt;
         promo.ConditionsJson = string.IsNullOrWhiteSpace(input.ConditionsJson) ? null : input.ConditionsJson;
         await _db.SaveChangesAsync(ct);
-        return true;
+        return PromotionWriteResult.Ok;
+    }
+
+    /// <summary>Chuẩn hoá mã voucher: trim + UPPER; rỗng → null (KM tự động).</summary>
+    private static string? NormalizeCode(string? code)
+    {
+        var c = code?.Trim().ToUpperInvariant();
+        return string.IsNullOrEmpty(c) ? null : c;
     }
 
     public async Task<bool> DeleteAsync(long id, CancellationToken ct = default)

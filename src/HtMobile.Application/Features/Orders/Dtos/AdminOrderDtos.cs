@@ -40,6 +40,9 @@ public record AdminOrderDetailDto
     public string Code => $"SD{Id:D6}";
     public OrderStatus Status { get; init; }
     public DateTime CreatedAt { get; init; }
+    public decimal Subtotal { get; init; }
+    public decimal DiscountAmount { get; init; }
+    public string? CouponCode { get; init; }
     public decimal Total { get; init; }
     public string? PaymentMethod { get; init; }
     public string? ShipmentAddress { get; init; }
