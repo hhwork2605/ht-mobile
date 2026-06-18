@@ -45,3 +45,29 @@
   - [x] Đơn hàng (P5-01) — layout admin + danh sách/lọc + chi tiết + đổi trạng thái (validate luồng)
 - [ ] Báo cáo doanh thu / đơn hàng
 - [ ] SEO nâng cao (structured data) + tối ưu hiệu năng + kiểm thử bảo mật
+
+## Phase 6 — Storefront UX & hoàn thiện bán hàng  → `phase-6-storefront-ux/`
+> Backlog từ đợt **rà soát như người dùng thật** (2026-06-18) trên storefront đã redesign. Ưu tiên P0 → P2.
+> `(✓)` = đã kiểm chứng trực tiếp trong phiên rà soát.
+
+### P0 — ảnh hưởng trực tiếp chuyển đổi / khó dùng ngay
+- [ ] **Search tiếng Việt theo danh mục + từ đồng nghĩa** (✓) — "tai nghe" → 0 kết quả dù có AirPods; hiện chỉ khớp tiền tố tên. Cần khớp tên danh mục + bộ synonym (tai nghe→AirPods, điện thoại→iPhone, laptop→Mac…) + nhiều từ khoá. (`ISearchService`/Postgres FTS)
+- [ ] **Luồng "Mua ngay" → thẳng thanh toán** (✓) — hiện cả "Mua ngay" và "Thêm vào giỏ" đều POST `/cart/items` rồi về `/cart`. "Mua ngay" cần add rồi redirect `/checkout`.
+- [ ] **Mã giảm giá ở giỏ/checkout** (✓) — ô coupon đang disable ("Sắp có"); wire khuyến mãi/voucher vào `CartService`/`CheckoutService` (đã có pricing engine + Promotion).
+- [ ] **Tra cứu đơn cho khách vãng lai (COD)** (✓) — không có trang tra cứu; guest đặt COD xong không xem được đơn. Cần trang `/tra-cuu-don` (mã đơn + SĐT).
+
+### P1 — thiếu so với kỳ vọng & so với design
+- [ ] **PDP: "Sản phẩm liên quan"** (✓) — design có, bản hiện tại bỏ; thêm khối 4 SP cùng danh mục (cross-sell).
+- [ ] **Đánh giá sản phẩm: đọc + viết** (✓) — PDP chỉ có điểm tổng; thêm danh sách review + form "Viết đánh giá" (bảng `Review` đã có sẵn trong DB).
+- [ ] **Trang nội dung + footer hết link chết** (✓) — 8 mục footer (Tra cứu đơn, Bảo hành, Trả góp 0%, Thu cũ đổi mới, Hệ thống cửa hàng, Tuyển dụng, Tin tức, Liên hệ) đang là text chết → cần trang CMS/chính sách + nối link.
+- [ ] **Chọn biến thể trực quan** — tách **màu (swatch)** và **dung lượng** riêng thay vì 1 nút gộp ("256GB · Titan Tự Nhiên"); theo đúng design PDP.
+- [ ] **Menu danh mục cho mobile** — header mobile chỉ có bottom-nav 4 mục; thêm drawer/hamburger + danh mục con.
+
+### P2 — hoàn thiện trải nghiệm
+- [ ] **Upload ảnh sản phẩm thật** (✓) — hiện toàn placeholder.
+- [ ] **Cổng thanh toán thật** — ngoài COD: chuyển khoản/thẻ/trả góp (trùng mục HOÃN ở Phase 3 — gộp khi làm).
+- [ ] **Phí & thời gian giao hàng theo địa chỉ** — hiện cứng "Miễn phí"; thêm chọn tỉnh/quận + tính phí/ETA.
+- [ ] **Tài khoản đầy đủ** — sổ địa chỉ, đổi mật khẩu, huỷ/mua lại đơn.
+- [ ] **Wishlist (yêu thích)** (✓) + **So sánh sản phẩm**.
+- [ ] **Hiển thị tồn kho** — số lượng còn / cảnh báo sắp hết (hiện chỉ "Còn hàng").
+- [ ] **Newsletter / đăng ký nhận tin**.
