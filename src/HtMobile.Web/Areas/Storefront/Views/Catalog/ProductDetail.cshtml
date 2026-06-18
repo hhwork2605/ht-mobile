@@ -264,6 +264,14 @@
                 <div id="sn-result"></div>
             </div>
 
+            @* ===== Tin cậy gần nút mua (P7 P0): BH chính hãng · đổi trả · giao dự kiến ===== *@
+            <div class="mt-2 grid gap-2.5 rounded-[14px] border border-line bg-surface2/60 p-3.5 sm:grid-cols-3"
+                 x-data="{ eta(){ const f=d=>String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0'); const a=new Date(), b=new Date(); b.setDate(b.getDate()+1); return f(a)+' – '+f(b); } }">
+                <div class="flex items-center gap-2.5"><i class="iks ik-shield-check text-[20px] text-accent"></i><div><div class="text-[13px] font-semibold text-ink">Chính hãng VN/A</div><div class="text-[11.5px] text-ink2">Bảo hành 12 tháng</div></div></div>
+                <div class="flex items-center gap-2.5"><i class="iks ik-arrows-rotate text-[20px] text-accent"></i><div><div class="text-[13px] font-semibold text-ink">Đổi trả 30 ngày</div><div class="text-[11.5px] text-ink2">1 đổi 1 nếu lỗi</div></div></div>
+                <div class="flex items-center gap-2.5"><i class="iks ik-truck text-[20px] text-accent"></i><div><div class="text-[13px] font-semibold text-ink">Giao dự kiến</div><div class="text-[11.5px] text-ink2"><span x-text="eta()"></span> · nội thành 2h</div></div></div>
+            </div>
+
             @* Khối ưu đãi (khuyến mãi hiệu lực) *@
             @if (Model.Offers.Count > 0)
             {
@@ -297,13 +305,6 @@
                     </div>
                 </section>
             }
-
-            <div class="mt-6 grid grid-cols-1 gap-3 border-t border-line pt-[18px] sm:grid-cols-2">
-                <div class="flex items-center gap-2.5"><i class="iks ik-truck text-[18px] text-accent"></i><span class="text-[13px] text-ink">Giao nhanh 2 giờ nội thành</span></div>
-                <div class="flex items-center gap-2.5"><i class="iks ik-shield-check text-[18px] text-accent"></i><span class="text-[13px] text-ink">Chính hãng · BH 12 tháng</span></div>
-                <div class="flex items-center gap-2.5"><i class="iks ik-credit-card text-[18px] text-accent"></i><span class="text-[13px] text-ink">Trả góp 0% duyệt nhanh</span></div>
-                <div class="flex items-center gap-2.5"><i class="iks ik-arrows-rotate text-[18px] text-accent"></i><span class="text-[13px] text-ink">Đổi trả 30 ngày</span></div>
-            </div>
 
             @* ===== Thanh mua dính đáy (mobile) — tăng chuyển đổi khi cuộn (P7 #1) ===== *@
             <div x-show="current.inStock" x-cloak

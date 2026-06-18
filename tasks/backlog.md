@@ -79,7 +79,7 @@
 ### P0 — ma sát / tin cậy ảnh hưởng chuyển đổi
 - [x] **Mini-cart toast khi "Thêm vào giỏ"** (✓, 2026-06-18) — "Thêm vào giỏ" (card + PDP) dùng `hx-post` (không reload); `CartController.Add` trả OOB badge (header + bottom-nav) cho htmx; layout nghe `htmx:afterRequest` (path `/cart/items`) → bắn `cart-added` → Alpine hiện toast "Đã thêm vào giỏ hàng" (tự ẩn 2.6s, có "Xem giỏ"). "Mua ngay" giữ điều hướng /checkout. *(Mini-cart drawer để sau nếu cần.)*
 - [ ] **Ảnh thật thay placeholder "HtMobile"** — banner/thẻ/gallery đang là ô xám trông như ảnh vỡ; hero text đè watermark. *(= P2 "Upload ảnh sản phẩm thật" — gộp; tối thiểu dùng skeleton/ảnh trung tính.)*
-- [ ] **Tin cậy gần nút Mua (PDP)** — đưa badge bảo hành chính hãng / đổi trả 30 ngày / thời gian giao dự kiến lên cạnh giá–nút mua (hiện trust grid ở xa phía dưới).
+- [x] **Tin cậy gần nút Mua (PDP)** (✓, 2026-06-18) — khối trust 3 cột (Chính hãng VN/A·BH 12 tháng · Đổi trả 30 ngày · Giao dự kiến + ETA hôm nay–mai tính client-side) ngay dưới nút Mua/Thêm giỏ; gỡ trust grid trùng ở cuối cột thông tin.
 
 ### P1 — kỳ vọng chuẩn TMĐT
 - [x] **Sticky "Thêm vào giỏ" trên mobile PDP** (✓, 2026-06-18) — thanh mua dính đáy (`bottom-[64px]`, md:hidden, trên bottom-nav) trong scope `pdpBuyBox()`: tên + giá (`current.finalPrice`) + nút Thêm (hx-post, không reload) + Mua ngay; chỉ hiện khi còn hàng; thêm `pb-[96px] md:pb-[50px]` tránh che nội dung.
