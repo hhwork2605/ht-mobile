@@ -40,7 +40,7 @@
 > Thư mục `phase-4-services-cms/` để trống. Nếu cần lại sau này thì mở lại từ SPEC §4.
 
 ## Phase 5 — Hoàn thiện  → `phase-5-admin-polish/`
-- [ ] Admin: danh mục/SP/biến thể/tồn kho theo cửa hàng
+- [x] Admin: danh mục/SP/biến thể/tồn kho theo cửa hàng (✓, 2026-06-19) — CRUD đầy đủ ở `HtMobile.Api` (`Categories`/`Products`/`Stores` + `AdminCategory/Product/InventoryService`) + Angular (`categories`/`products`/`inventory`). **+ Quản lý ảnh sản phẩm**: `IFileStorage`→`LocalFileStorage` (wwwroot/uploads, static files), `AdminProductImageService` + endpoint upload/list/delete/reorder, gallery trong product-form (thumbnail = ảnh đầu, ▲▼ sắp xếp, validate JPEG/PNG/WebP/GIF ≤5MB). Xem [ADR 0006](../docs/decisions/0006-luu-tru-file-anh.md).
 - [~] Admin: khuyến mãi/campaign + đơn hàng + người dùng & phân quyền + CMS
   - [x] Đơn hàng (P5-01) — layout admin + danh sách/lọc + chi tiết + đổi trạng thái (validate luồng)
 - [ ] Báo cáo doanh thu / đơn hàng
@@ -64,7 +64,7 @@
 - [x] **Menu danh mục cho mobile** (✓, 2026-06-18) — thêm hamburger (ik-bars) + **drawer trượt** (Alpine, overlay, ESC/click đóng) chứa đầy đủ danh mục (`vc:menu`) + link nhanh (tra cứu đơn, thu cũ, trả góp, tài khoản).
 
 ### P2 — hoàn thiện trải nghiệm
-- [ ] **Upload ảnh sản phẩm thật** (✓) — hiện toàn placeholder.
+- [~] **Upload ảnh sản phẩm thật** — ✅ (2026-06-19) **công cụ upload đã có** (Admin product-form: gallery + sắp xếp + xoá; xem Phase 5). ⬜ Còn: nạp ảnh thật cho từng SP (nội dung) — storefront vẫn hiện placeholder tới khi có ảnh.
 - [ ] **Cổng thanh toán thật** — ngoài COD: chuyển khoản/thẻ/trả góp (trùng mục HOÃN ở Phase 3 — gộp khi làm).
 - [ ] **Phí & thời gian giao hàng theo địa chỉ** — hiện cứng "Miễn phí"; thêm chọn tỉnh/quận + tính phí/ETA.
 - [~] **Tài khoản đầy đủ** — ✅ (2026-06-18) **Sổ địa chỉ** (CRUD + mặc định, `AddressService`; tự điền checkout) + **Đổi mật khẩu** (`CustomerAccountService.ChangePasswordAsync`). ⬜ Còn: huỷ đơn, mua lại đơn (chưa làm đợt này).
@@ -78,7 +78,7 @@
 
 ### P0 — ma sát / tin cậy ảnh hưởng chuyển đổi
 - [x] **Mini-cart toast khi "Thêm vào giỏ"** (✓, 2026-06-18) — "Thêm vào giỏ" (card + PDP) dùng `hx-post` (không reload); `CartController.Add` trả OOB badge (header + bottom-nav) cho htmx; layout nghe `htmx:afterRequest` (path `/cart/items`) → bắn `cart-added` → Alpine hiện toast "Đã thêm vào giỏ hàng" (tự ẩn 2.6s, có "Xem giỏ"). "Mua ngay" giữ điều hướng /checkout. *(Mini-cart drawer để sau nếu cần.)*
-- [ ] **Ảnh thật thay placeholder "HtMobile"** — banner/thẻ/gallery đang là ô xám trông như ảnh vỡ; hero text đè watermark. *(= P2 "Upload ảnh sản phẩm thật" — gộp; tối thiểu dùng skeleton/ảnh trung tính.)*
+- [~] **Ảnh thật thay placeholder "HtMobile"** — ✅ (2026-06-19) công cụ upload ảnh SP đã có (Phase 5 / [ADR 0006](../docs/decisions/0006-luu-tru-file-anh.md)). ⬜ Còn: nạp ảnh thật (nội dung) + banner. *(= P2 "Upload ảnh sản phẩm thật".)*
 - [x] **Tin cậy gần nút Mua (PDP)** (✓, 2026-06-18) — khối trust 3 cột (Chính hãng VN/A·BH 12 tháng · Đổi trả 30 ngày · Giao dự kiến + ETA hôm nay–mai tính client-side) ngay dưới nút Mua/Thêm giỏ; gỡ trust grid trùng ở cuối cột thông tin.
 
 ### P1 — kỳ vọng chuẩn TMĐT

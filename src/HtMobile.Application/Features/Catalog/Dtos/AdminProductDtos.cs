@@ -66,5 +66,8 @@ public record VariantInput(string Sku, string? Storage, string? Color, decimal B
 /// <summary>Sửa 1 biến thể có sẵn (chỉ giá + trạng thái).</summary>
 public record VariantEdit(long Id, decimal BasePrice, decimal? CompareAtPrice, ProductStatus Status);
 
+/// <summary>1 ảnh sản phẩm (gắn ở model).</summary>
+public record ProductImageRow(long Id, string Url, int SortOrder);
+
 /// <summary>Kết quả thao tác ghi SP.</summary>
 public enum AdminProductResult { Ok, SlugExists, SkuExists, NotFound, InvalidSpecs }

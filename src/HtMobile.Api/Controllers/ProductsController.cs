@@ -12,8 +12,17 @@ namespace HtMobile.Api.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly AdminProductService _products;
+    private readonly AdminProductImageService _images;
 
-    public ProductsController(AdminProductService products) => _products = products;
+    public ProductsController(AdminProductService products, AdminProductImageService images)
+    {
+        _products = products;
+        _images = images;
+    }
+
+    private static readonly HashSet<string> AllowedImageTypes = new(StringComparer.OrdinalIgnoreCase)
+    { "image/jpeg", "image/png", "image/webp", "image/gif" };
+    private const long MaxImageBytes = 5 * 1024 * 1024;   // 5MB
 
     public record ProductCreateRequest(ProductInput Product, VariantInput Variant);
     public record ProductUpdateRequest(ProductInput Product, List<VariantEdit> Variants);
@@ -75,5 +84,42 @@ public class ProductsController : ControllerBase
     {
         var (result, productId) = await _products.ToggleVariantAsync(variantId, ct);
         return result == AdminProductResult.NotFound ? NotFound() : Ok(new { productId });
+    }
+
+    // ===== Ảnh sản phẩm (gắn ở model) =====
+
+    [HttpGet("{id:long}/images")]
+    public async Task<ActionResult<IReadOnlyList<ProductImageRow>>> Images(long id, CancellationToken ct)
+        => Ok(await _images.ListAsync(id, ct));
+
+    [HttpPost("{id:long}/images")]
+    [RequestSizeLimit(MaxImageBytes + 1024)]
+    public async Task<IActionResult> UploadImage(long id, IFormFile? file, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest(new { field = "file", message = "Chưa chọn tệp ảnh." });
+        if (file.Length > MaxImageBytes)
+            return BadRequest(new { field = "file", message = "Ảnh vượt quá 5MB." });
+        if (!AllowedImageTypes.Contains(file.ContentType))
+            return BadRequest(new { field = "file", message = "Chỉ chấp nhận ảnh JPEG/PNG/WebP/GIF." });
+
+        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        await using var stream = file.OpenReadStream();
+        var (result, row) = await _images.AddAsync(id, stream, file.FileName, baseUrl, ct);
+        return result == AdminProductResult.NotFound ? NotFound() : Ok(row);
+    }
+
+    [HttpDelete("images/{imageId:long}")]
+    public async Task<IActionResult> DeleteImage(long imageId, CancellationToken ct)
+    {
+        var result = await _images.DeleteAsync(imageId, ct);
+        return result == AdminProductResult.NotFound ? NotFound() : NoContent();
+    }
+
+    [HttpPut("{id:long}/images/order")]
+    public async Task<IActionResult> ReorderImages(long id, [FromBody] long[] orderedIds, CancellationToken ct)
+    {
+        var result = await _images.ReorderAsync(id, orderedIds ?? Array.Empty<long>(), ct);
+        return result == AdminProductResult.NotFound ? NotFound() : NoContent();
     }
 }

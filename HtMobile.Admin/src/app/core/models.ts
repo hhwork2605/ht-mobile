@@ -69,4 +69,6 @@ export interface VariantEdit {
   status: ProductStatus;
 }
 
+export interface ProductImageRow { id: number; url: string; sortOrder: number; }
+
 export interface AuthUser { email: string; fullName: string; roles: string[]; }

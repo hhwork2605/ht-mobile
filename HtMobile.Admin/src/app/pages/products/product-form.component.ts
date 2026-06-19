@@ -12,7 +12,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { ProductsService } from '../../core/products.service';
 import {
-  AdminCategoryOption, AdminVariantRow, ProductInput, ProductStatus, VariantInput,
+  AdminCategoryOption, AdminVariantRow, ProductInput, ProductStatus, VariantInput, ProductImageRow,
 } from '../../core/models';
 
 @Component({
@@ -100,6 +100,32 @@ import {
         </section>
       }
 
+      @if (!isNew) {
+        <!-- Hình ảnh sản phẩm -->
+        <section class="card">
+          <h2 class="h2">Hình ảnh</h2>
+          <p class="hint">Ảnh đầu tiên là ảnh đại diện. Sắp xếp bằng ▲▼. Chấp nhận JPEG/PNG/WebP/GIF ≤ 5MB.</p>
+          <div class="imgs">
+            @for (img of images(); track img.id; let i = $index) {
+              <div class="imgcell">
+                <img [src]="img.url" alt="" />
+                @if (i === 0) { <span class="badge">Đại diện</span> }
+                <div class="imgbar">
+                  <button type="button" class="ib" [disabled]="i === 0" (click)="moveImage(i, -1)" title="Lên">▲</button>
+                  <button type="button" class="ib" [disabled]="i === images().length - 1" (click)="moveImage(i, 1)" title="Xuống">▼</button>
+                  <button type="button" class="ib del" (click)="removeImage(img)" title="Xoá">✕</button>
+                </div>
+              </div>
+            }
+            <label class="uploader" [class.busy]="uploading()">
+              <input type="file" accept="image/*" (change)="onFile($event)" hidden [disabled]="uploading()" />
+              <i class="pi" [class.pi-upload]="!uploading()" [class.pi-spin]="uploading()" [class.pi-spinner]="uploading()"></i>
+              <span>{{ uploading() ? 'Đang tải…' : 'Thêm ảnh' }}</span>
+            </label>
+          </div>
+        </section>
+      }
+
       <div class="actions">
         <p-button [label]="isNew ? 'Tạo sản phẩm' : 'Lưu thay đổi'" icon="pi pi-check" [loading]="saving()" (onClick)="save()" />
         <p-button label="Quay lại" severity="secondary" [outlined]="true" routerLink="/products" />
@@ -125,14 +151,27 @@ import {
     .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; }
     .hint2 { font-size: 11.5px; color: var(--ht-ink4); margin-top: 5px; }
     .hint2 code { background: var(--ht-line); border-radius: 4px; padding: 1px 5px; }
+    .imgs { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+    .imgcell { position: relative; border: 1px solid var(--ht-line); border-radius: 10px; overflow: hidden; aspect-ratio: 1; background: var(--ht-bg2, #f5f5f7); }
+    .imgcell img { width: 100%; height: 100%; object-fit: contain; }
+    .imgcell .badge { position: absolute; left: 6px; top: 6px; background: var(--ht-brand, #0066CC); color: #fff; font-size: 10.5px; font-weight: 600; border-radius: 5px; padding: 1px 6px; }
+    .imgbar { position: absolute; right: 6px; bottom: 6px; display: flex; gap: 4px; }
+    .ib { width: 26px; height: 26px; border: 0; border-radius: 6px; background: rgba(0,0,0,.6); color: #fff; cursor: pointer; font-size: 12px; line-height: 1; }
+    .ib:disabled { opacity: .35; cursor: default; }
+    .ib.del { background: rgba(220,38,38,.85); }
+    .uploader { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; aspect-ratio: 1; border: 1.5px dashed var(--ht-line); border-radius: 10px; cursor: pointer; color: var(--ht-ink5); font-size: 12.5px; }
+    .uploader:hover { border-color: var(--ht-brand, #0066CC); color: var(--ht-brand, #0066CC); }
+    .uploader.busy { opacity: .6; cursor: default; }
   `],
 })
 export class ProductFormComponent implements OnInit {
   isNew = true;
   id = 0;
   saving = signal(false);
+  uploading = signal(false);
   categories: AdminCategoryOption[] = [];
   variants = signal<AdminVariantRow[]>([]);
+  images = signal<ProductImageRow[]>([]);
 
   product: ProductInput = { name: '', slug: '', categoryId: 0, brand: 'Apple', tagline: '', description: '', specs: '' };
   variant: VariantInput = { sku: '', storage: '', color: '', basePrice: 0, compareAtPrice: null, status: ProductStatus.Active };
@@ -166,6 +205,38 @@ export class ProductFormComponent implements OnInit {
       this.categories = dto.categories;
       this.variants.set(dto.variants);
     });
+    this.loadImages();
+  }
+
+  loadImages(): void {
+    this.api.images(this.id).subscribe((x) => this.images.set(x));
+  }
+
+  onFile(ev: Event): void {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.uploading.set(true);
+    this.api.uploadImage(this.id, file).subscribe({
+      next: () => { this.uploading.set(false); input.value = ''; this.toast.add({ severity: 'success', summary: 'Đã tải ảnh' }); this.loadImages(); },
+      error: (e) => { this.uploading.set(false); input.value = ''; this.fail(e, false); },
+    });
+  }
+
+  removeImage(img: ProductImageRow): void {
+    this.api.deleteImage(img.id).subscribe({
+      next: () => { this.toast.add({ severity: 'success', summary: 'Đã xoá ảnh' }); this.loadImages(); },
+      error: (e) => this.fail(e, false),
+    });
+  }
+
+  moveImage(i: number, dir: number): void {
+    const arr = [...this.images()];
+    const j = i + dir;
+    if (j < 0 || j >= arr.length) return;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+    this.images.set(arr);
+    this.api.reorderImages(this.id, arr.map((x) => x.id)).subscribe({ error: (e) => this.fail(e, false) });
   }
 
   label(v: AdminVariantRow): string { return [v.storage, v.color].filter(Boolean).join(' · '); }

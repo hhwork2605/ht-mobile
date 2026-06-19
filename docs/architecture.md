@@ -21,8 +21,8 @@
 ## Trách nhiệm từng lớp
 
 - **Domain** — entity (SPEC §7), enum, value object, domain event, business invariant thuần. Không EF, không attribute hạ tầng.
-- **Application** — điều phối nghiệp vụ (service / Command / Query), DTO, mapping, validation. **Khai báo interface** cho mọi thứ bên ngoài (`IApplicationDbContext`, `ICacheService`, `ISearchService`, `IPricingService`, `IEmailSender`, `ICurrentUser`). Chỉ ref Domain.
-- **Infrastructure** — hiện thực interface của Application: `AppDbContext` (EF/Npgsql), `RedisCacheService`, `PostgresSearchService`, Identity, tích hợp Payment/TradeIn/Shipping. Chứa migrations + seed.
+- **Application** — điều phối nghiệp vụ (service / Command / Query), DTO, mapping, validation. **Khai báo interface** cho mọi thứ bên ngoài (`IApplicationDbContext`, `ICacheService`, `ISearchService`, `IPricingService`, `IEmailSender`, `ICurrentUser`, `IFileStorage`). Chỉ ref Domain.
+- **Infrastructure** — hiện thực interface của Application: `AppDbContext` (EF/Npgsql), `RedisCacheService`, `PostgresSearchService`, `LocalFileStorage` (ảnh — xem [ADR 0006](decisions/0006-luu-tru-file-anh.md)), Identity, tích hợp Payment/TradeIn/Shipping. Chứa migrations + seed.
 - **Web** — HTTP/UI: controller (Areas Storefront/Admin + Api), Razor view, ViewComponent, TagHelper, routing slug, middleware. Là *composition root*: `Program.cs` gọi `AddApplication()` + `AddInfrastructure()`.
 
 ## Vì sao đảo phụ thuộc (DIP)

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   AdminProductListDto, AdminProductEditDto, AdminCategoryOption,
-  ProductInput, VariantInput, VariantEdit,
+  ProductInput, VariantInput, VariantEdit, ProductImageRow,
 } from './models';
 
 @Injectable({ providedIn: 'root' })
@@ -41,5 +41,24 @@ export class ProductsService {
 
   toggleVariant(variantId: number): Observable<{ productId: number }> {
     return this.http.post<{ productId: number }>(`${this.base}/variants/${variantId}/toggle`, {});
+  }
+
+  // ===== Ảnh sản phẩm =====
+  images(id: number): Observable<ProductImageRow[]> {
+    return this.http.get<ProductImageRow[]>(`${this.base}/${id}/images`);
+  }
+
+  uploadImage(id: number, file: File): Observable<ProductImageRow> {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.http.post<ProductImageRow>(`${this.base}/${id}/images`, fd);
+  }
+
+  deleteImage(imageId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/images/${imageId}`);
+  }
+
+  reorderImages(id: number, orderedIds: number[]): Observable<void> {
+    return this.http.put<void>(`${this.base}/${id}/images/order`, orderedIds);
   }
 }

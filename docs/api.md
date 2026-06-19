@@ -80,6 +80,18 @@ Hợp đồng đáng chú ý của Admin API (`POST/PUT /api/products`): `Produc
 (ghi vào `Product.SpecsJson`) — theo contract `ProductSpecs` (xem [data-model.md](data-model.md) §Products);
 JSON sai → `400 { field: "specs" }`.
 
+**Ảnh sản phẩm** (gắn ở model = Product cha; `[Authorize] Admin`):
+```
+GET    /api/products/{id}/images            # [{ id, url, sortOrder }] (sắp theo SortOrder)
+POST   /api/products/{id}/images            # multipart 'file' → 200 { id, url, sortOrder } (append cuối)
+DELETE /api/products/images/{imageId}       # 204; xoá cả file vật lý
+PUT    /api/products/{id}/images/order      # body: [imageId…] → 204 (đặt lại SortOrder theo thứ tự)
+```
+File lưu qua `IFileStorage` (Infrastructure: `LocalFileStorage` → `{ContentRoot}/wwwroot/uploads/products`,
+API phục vụ qua `UseStaticFiles`). `ProductImage.Url` lưu **URL tuyệt đối** (ghép `scheme://host` của API lúc upload)
+để storefront ở host khác dùng trực tiếp. Validate: JPEG/PNG/WebP/GIF, ≤ 5MB → sai = `400 { field: "file" }`.
+Ảnh đầu (SortOrder nhỏ nhất) = thumbnail (storefront PDP đọc `ProductImages` theo modelId).
+
 ## Pricing
 ```
 GET  /api/variants/{id}/price

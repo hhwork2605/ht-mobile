@@ -2,6 +2,7 @@ using System.Text;
 using HtMobile.Api.Auth;
 using HtMobile.Application;
 using HtMobile.Infrastructure;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,10 +42,16 @@ builder.Services.AddCors(o => o.AddPolicy("HtAdmin", p =>
 
 var app = builder.Build();
 
+// Phục vụ ảnh upload (ProductImage…) từ {ContentRoot}/wwwroot — khớp đường dẫn LocalFileStorage.
+// Dùng PhysicalFileProvider tường minh (wwwroot có thể chưa tồn tại lúc host khởi tạo → WebRootFileProvider null).
+var webRoot = Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+Directory.CreateDirectory(Path.Combine(webRoot, "uploads", "products"));
+
 if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(new StaticFileOptions { FileProvider = new PhysicalFileProvider(webRoot) });
 app.UseCors("HtAdmin");
 app.UseAuthentication();
 app.UseAuthorization();

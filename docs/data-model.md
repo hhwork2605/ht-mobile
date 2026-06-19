@@ -91,8 +91,8 @@ UNIQUE `(ProductId, AttributeId)` — mỗi sản phẩm 1 giá trị/loại thu
 | Cột | Kiểu | Ràng buộc | Ý nghĩa |
 |---|---|---|---|
 | `ProductId` | `long` | FK → `Products.Id` (cascade theo convention) | Sản phẩm chứa ảnh (gallery gắn ở model cha). |
-| `Url` | `string` | `varchar(500)`, NOT NULL | Đường dẫn ảnh. |
-| `SortOrder` | `int` | | Thứ tự hiển thị trong gallery. |
+| `Url` | `string` | `varchar(500)`, NOT NULL | URL ảnh (Admin upload qua `IFileStorage` → URL tuyệt đối tới host API; xem [api.md](api.md) Admin §Ảnh sản phẩm). |
+| `SortOrder` | `int` | | Thứ tự gallery; nhỏ nhất = thumbnail. Admin `PUT /api/products/{id}/images/order` ghi lại. |
 
 ### `ProductVideos` — video sản phẩm *(không audit)*
 

@@ -7,10 +7,12 @@ using HtMobile.Infrastructure.Persistence;
 using HtMobile.Infrastructure.Persistence.Interceptors;
 using HtMobile.Infrastructure.Persistence.Seed;
 using HtMobile.Infrastructure.Search;
+using HtMobile.Infrastructure.Storage;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace HtMobile.Infrastructure;
 
@@ -66,6 +68,14 @@ public static class DependencyInjection
         services.AddScoped<ISearchService, PostgresSearchService>();
         services.AddScoped<IEmailSender, NullEmailSender>();
         services.AddSingleton<IPasswordHasher, IdentityPasswordHasher>();
+
+        // Lưu file ảnh xuống {ContentRoot}/wwwroot/uploads (phục vụ qua UseStaticFiles ở API).
+        // Đăng ký ở đây (dùng chung) để Web cũng phân giải được AdminProductImageService (ValidateOnBuild).
+        services.AddSingleton<IFileStorage>(sp =>
+        {
+            var env = sp.GetRequiredService<IHostEnvironment>();
+            return new LocalFileStorage(Path.Combine(env.ContentRootPath, "wwwroot"));
+        });
 
         services.AddScoped<DbInitializer>();
 
